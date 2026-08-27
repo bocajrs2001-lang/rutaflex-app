@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RUTAFLEX - El camino inteligente</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Tesseract.js (La IA que lee imágenes) -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-container">
+  
+  <!-- ============================================ -->
+  <!-- PANTALLA DE LOGIN (CON LOGO OFICIAL)         -->
+  <!-- ============================================ -->
+  <div id="authScreen" class="min-h-screen flex flex-col justify-center items-center text-center p-8">
+    <div class="logo-container mb-8">
+      <div class="logo-circle flex items-center justify-center mb-6">
+        <svg width="160" height="160" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="256" cy="256" r="240" fill="#5BA9E0"/>
+          <path d="M 340 170 H 185 C 155 170 155 230 185 230 H 327 C 357 230 357 290 327 290 H 172" fill="none" stroke="#8FE8FF" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="340" cy="170" r="32" fill="#5BA9E0" stroke="#8FE8FF" stroke-width="28"/>
+          <circle cx="172" cy="290" r="32" fill="#5BA9E0" stroke="#8FE8FF" stroke-width="28"/>
+        </svg>
+      </div>
+      <h1 class="text-5xl font-black text-accent tracking-wider mb-2" style="letter-spacing: 0.08em;">RUTAFLEX</h1>
+      <p class="text-white text-lg font-light opacity-90">El camino inteligente</p>
+    </div>
+
+    <div class="w-12 h-1 bg-white/20 rounded-full mb-8"></div>
+
+    <div class="flex w-full max-w-sm mb-6 bg-white/5 rounded-2xl p-1">
+      <button id="tabLogin" class="flex-1 py-2 px-4 rounded-xl font-bold text-accent bg-white/10 transition-all">Iniciar Sesión</button>
+      <button id="tabRegistro" class="flex-1 py-2 px-4 rounded-xl font-bold text-white/60 hover:text-white transition-all">Crear Cuenta</button>
+    </div>
+
+    <form id="formLogin" class="space-y-4 w-full max-w-sm">
+      <input type="email" id="loginEmail" placeholder="Email" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-accent focus:bg-white/15 transition-all text-left" required>
+      <input type="password" id="loginPassword" placeholder="Contraseña" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-accent focus:bg-white/15 transition-all text-left" required>
+      <button type="submit" class="w-full bg-accent text-[#0A2342] font-black py-3.5 rounded-xl hover:bg-white hover:scale-[1.02] transition-all shadow-lg">ENTRAR</button>
+    </form>
+
+    <form id="formRegistro" class="space-y-4 w-full max-w-sm hidden">
+      <input type="text" id="regNombre" placeholder="Nombre completo" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-accent focus:bg-white/15 transition-all text-left" required>
+      <input type="email" id="regEmail" placeholder="Email" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-accent focus:bg-white/15 transition-all text-left" required>
+      <input type="password" id="regPassword" placeholder="Contraseña (mín. 6 caracteres)" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-accent focus:bg-white/15 transition-all text-left" required minlength="6">
+      <button type="submit" class="w-full bg-[#10b981] text-white font-black py-3.5 rounded-xl hover:bg-[#059669] hover:scale-[1.02] transition-all shadow-lg">CREAR CUENTA GRATIS</button>
+    </form>
+    
+    <p id="authMessage" class="text-center text-sm mt-4 font-bold text-red-300"></p>
+    <p class="text-white/40 text-xs mt-8">rutaflex.com.ar</p>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- PANTALLA PRINCIPAL DE LA APP                 -->
+  <!-- ============================================ -->
+  <div id="appScreen" class="hidden">
+    <header class="p-4 flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <div class="w-10 h-10 rounded-full overflow-hidden">
+          <svg width="40" height="40" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="256" cy="256" r="240" fill="#5BA9E0"/>
+            <path d="M 340 170 H 185 C 155 170 155 230 185 230 H 327 C 357 230 357 290 327 290 H 172" fill="none" stroke="#8FE8FF" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="340" cy="170" r="32" fill="#5BA9E0" stroke="#8FE8FF" stroke-width="28"/>
+            <circle cx="172" cy="290" r="32" fill="#5BA9E0" stroke="#8FE8FF" stroke-width="28"/>
+          </svg>
+        </div>
+        <h1 class="text-xl font-black text-accent">RUTAFLEX</h1>
+      </div>
+      <div class="text-right">
+        <div id="userName" class="text-sm font-bold text-white">¡Hola!</div>
+        <button id="btnLogout" class="text-xs text-white/70 hover:text-white underline transition-all">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <div class="p-6 bg-gradient-to-b from-slate-50 to-white">
+      <div class="text-center mb-6">
+        <span class="inline-block bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full mb-2">✨ 7 DÍAS GRATIS</span>
+        <h2 class="font-black text-xl text-[#0A2342]">Activa tu cuenta</h2>
+        <p class="text-xs text-gray-500 mt-1">🔒 Sistema anti-trucho activado</p>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <a href="https://mpago.la/2GBap39" target="_blank" class="block p-4 rounded-xl text-center font-bold text-white shadow-md hover:-translate-y-1 transition-transform" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+          <div class="text-2xl mb-1">⚡</div><div class="text-xs opacity-90">SEMANAL</div><div class="text-lg font-black">$4.990</div>
+        </a>
+        <a href="https://mpago.la/15dUJdh" target="_blank" class="block p-4 rounded-xl text-center font-bold text-white shadow-md hover:-translate-y-1 transition-transform relative" style="background: linear-gradient(135deg, #1e40af 0%, #0A2342 100%);">
+          <div class="absolute -top-2 -right-2 bg-yellow-400 text-[#0A2342] text-[10px] font-black px-2 py-1 rounded-full shadow-sm">POPULAR</div>
+          <div class="text-2xl mb-1">🚀</div><div class="text-xs opacity-90">MENSUAL</div><div class="text-lg font-black">$15.000</div>
+        </a>
+      </div>
+      <div class="flex gap-2 mt-4">
+        <input id="promo" placeholder="Código: ALBERTO90" class="flex-1 border border-gray-300 p-2 rounded-xl text-sm focus:outline-none focus:border-[#5BA4D9]">
+        <button id="btnPromo" class="bg-[#0A2342] text-white px-4 rounded-xl text-sm font-bold hover:bg-[#123A6B] transition-all">Aplicar</button>
+      </div>
+      <p id="promoMessage" class="text-xs text-center mt-2 font-bold"></p>
+    </div>
+
+    <div class="p-4 border-t border-gray-100">
+      <button id="btnCargar" class="w-full bg-[#10b981] text-white font-black py-4 rounded-2xl text-xl shadow-lg hover:bg-[#059669] transition-all">+ CARGAR DESTINOS</button>
+      <h3 class="font-bold text-[#0A2342] mt-6 mb-3">Agregar destinos con IA</h3>
+      <div class="grid grid-cols-2 gap-3">
+        <label class="bg-slate-50 border-2 border-dashed border-slate-300 p-4 rounded-xl cursor-pointer text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all">
+          <div class="text-2xl mb-1">📷</div>
+          <div>Imagen / Foto</div>
+          <input type="file" id="fileImg" accept="image/*" hidden>
+        </label>
+        <label class="bg-slate-50 border-2 border-dashed border-slate-300 p-4 rounded-xl cursor-pointer text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all">
+          <div class="text-2xl mb-1">📄</div>
+          <div>PDF (Próximamente)</div>
+          <input type="file" id="filePdf" accept=".pdf" hidden disabled>
+        </label>
+        <button onclick="abrirCamara()" class="bg-slate-50 border-2 border-dashed border-slate-300 p-4 rounded-xl text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all">
+          <div class="text-2xl mb-1">📸</div>
+          <div>Cámara</div>
+        </button>
+        <button onclick="alert('QR Scanner en desarrollo')" class="bg-slate-50 border-2 border-dashed border-slate-300 p-4 rounded-xl text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all">
+          <div class="text-2xl mb-1">🔳</div>
+          <div>Escanear QR</div>
+        </button>
+      </div>
+      <video id="camara" autoplay class="hidden w-full mt-3 rounded-xl border-2 border-[#5BA4D9] shadow-lg"></video>
+    </div>
+
+    <div class="p-4 border-t border-gray-100">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="font-black text-lg text-[#0A2342]">Tus destinos (<span id="count">0</span>)</h3>
+        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold">📍 Ordenados</span>
+      </div>
+      <ul id="lista" class="space-y-2 text-sm"></ul>
+      <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg hover:bg-[#123A6B] transition-all">🗺️ COMENZAR VIAJE</button>
+      <p class="text-center text-xs mt-2 text-gray-500">Se abrirá en Google Maps (de a 10)</p>
+    </div>
+
+    <div id="stats" class="p-6 m-4 rounded-2xl hidden bg-gradient-to-br from-blue-50 to-indigo-50 border border-[#5BA4D9]/30">
+      <h3 class="font-black text-[#0A2342] text-xl mb-4">¡Ruta completada! 🏆</h3>
+      <div class="grid grid-cols-3 gap-2">
+        <div class="text-center p-3 bg-white rounded-xl shadow-sm">
+          <div class="text-2xl mb-1">⏱️</div>
+          <div class="text-[10px] text-gray-500 uppercase font-bold">Horas</div>
+          <div class="font-black text-xl text-[#0A2342]"><span id="statHoras">0</span></div>
+        </div>
+        <div class="text-center p-3 bg-white rounded-xl shadow-sm">
+          <div class="text-2xl mb-1">🛣️</div>
+          <div class="text-[10px] text-gray-500 uppercase font-bold">KM</div>
+          <div class="font-black text-xl text-[#0A2342]"><span id="statKm">0</span></div>
+        </div>
+        <div class="text-center p-3 bg-white rounded-xl shadow-sm">
+          <div class="text-2xl mb-1">📦</div>
+          <div class="text-[10px] text-gray-500 uppercase font-bold">Entregas</div>
+          <div class="font-black text-xl text-[#0A2342]"><span id="statEntregas">0</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
