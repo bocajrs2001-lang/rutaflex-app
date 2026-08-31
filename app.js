@@ -59,7 +59,7 @@ document.getElementById('formLogin').addEventListener('submit', async (e) => {
 function mostrarApp(nombre) {
   document.getElementById('authScreen').classList.add('hidden');
   document.getElementById('appScreen').classList.remove('hidden');
-  document.getElementById('userName').innerText = `¡Hola, ${nombre}! `;
+  document.getElementById('userName').innerText = `¡Hola, ${nombre}! 👋`;
   cargarDestinos();
 }
 
@@ -102,26 +102,55 @@ document.getElementById('fileImg').addEventListener('change', async (e) => {
   const btn = document.getElementById('btnCargar');
   const textoOriginal = btn.innerText;
   
-  btn.innerText = " La IA está leyendo la imagen...";
+  btn.innerText = "🤖 La IA está leyendo la imagen...";
   btn.disabled = true;
   btn.classList.add('opacity-75', 'cursor-not-allowed');
 
   try {
-    const { data: { text } } = await Tesseract.recognize(file, 'spa', { logger: m => console.log(m) });
+    console.log('📸 Iniciando OCR con archivo:', file.name, file.type, file.size);
+    
+    // Verificar que Tesseract esté cargado
+    if (typeof Tesseract === 'undefined') {
+      throw new Error('Tesseract.js no está cargado. Recargá la página.');
+    }
+    
+    console.log('✅ Tesseract.js detectado, versión:', Tesseract.version);
+    
+    const { data: { text } } = await Tesseract.recognize(file, 'spa', { 
+      logger: m => console.log('📊 Progreso OCR:', m)
+    });
+    
+    console.log('📝 Texto detectado:', text);
     
     const lineas = text.split('\n')
       .map(linea => linea.trim())
       .filter(linea => linea.length > 3);
 
+    console.log('📋 Líneas filtradas:', lineas.length);
+
     if (lineas.length === 0) {
-      alert("No se detectó texto claro. Intentá con una foto más nítida.");
+      alert("⚠️ No se detectó texto claro en la imagen.\n\nIntentá con:\n• Una foto más nítida\n• Mejor iluminación\n• Texto más grande");
     } else {
       destinosDetectados = lineas;
       mostrarModalEdicion();
     }
   } catch (error) {
-    console.error("Error en OCR:", error);
-    alert("Hubo un error al procesar la imagen.");
+    console.error('❌ Error detallado en OCR:', error);
+    console.error('Stack trace:', error.stack);
+    
+    let mensajeError = 'Hubo un error al procesar la imagen.\n\n';
+    
+    if (error.message.includes('no está cargado')) {
+      mensajeError += 'Tesseract.js no se cargó correctamente.\nSolución: Recargá la página con Ctrl+Shift+R';
+    } else if (error.message.includes('NetworkError')) {
+      mensajeError += 'Error de red al descargar el modelo de IA.\nSolución: Verificá tu conexión a internet';
+    } else if (error.message.includes('memory')) {
+      mensajeError += 'La imagen es muy grande.\nSolución: Usá una imagen más pequeña (menos de 5MB)';
+    } else {
+      mensajeError += `Error: ${error.message}\n\nRevisá la consola (F12) para más detalles.`;
+    }
+    
+    alert(mensajeError);
   } finally {
     btn.innerText = textoOriginal;
     btn.disabled = false;
@@ -207,7 +236,7 @@ function renderLista() {
     setTimeout(() => {
       lista.innerHTML += `
         <li class="flex gap-2 border-b py-2 items-center">
-          <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"></span>
+          <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">🏠</span>
           <div class="flex-1">
             <b>${dir.direccion}</b><br>
             <span class="text-xs text-green-600">${dir.distancia} km • ~${dir.tiempo} min</span>
@@ -238,16 +267,13 @@ document.getElementById('btnViaje').addEventListener('click', () => {
     return;
   }
   
-  // Origen fijo
   const origin = "General Rodriguez, Buenos Aires, Argentina";
   
-  // Si hay solo 1 dirección, no usar waypoints
   if (tramo.length === 1) {
     const destination = tramo[0].direccion;
     const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&travelmode=driving`;
     window.open(url, "_blank");
   } else {
-    // Múltiples direcciones: usar waypoints
     const destination = tramo[tramo.length - 1].direccion;
     const waypointsArray = tramo.slice(0, -1).map(d => encodeURIComponent(d.direccion));
     const waypoints = waypointsArray.join('|');
