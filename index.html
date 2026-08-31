@@ -4,9 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RUTAFLEX - El camino inteligente</title>
-<!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
-<!-- Tesseract.js (La IA que lee imágenes) -->
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -14,9 +12,7 @@
 
 <div class="app-container">
   
-  <!-- ============================================ -->
-  <!-- PANTALLA DE LOGIN (CON LOGO OFICIAL)         -->
-  <!-- ============================================ -->
+  <!-- PANTALLA DE LOGIN -->
   <div id="authScreen" class="min-h-screen flex flex-col justify-center items-center text-center p-8">
     <div class="logo-container mb-8">
       <div class="logo-circle flex items-center justify-center mb-6">
@@ -30,34 +26,27 @@
       <h1 class="text-5xl font-black text-accent tracking-wider mb-2" style="letter-spacing: 0.08em;">RUTAFLEX</h1>
       <p class="text-white text-lg font-light opacity-90">El camino inteligente</p>
     </div>
-
     <div class="w-12 h-1 bg-white/20 rounded-full mb-8"></div>
-
     <div class="flex w-full max-w-sm mb-6 bg-white/5 rounded-2xl p-1">
       <button id="tabLogin" class="flex-1 py-2 px-4 rounded-xl font-bold text-accent bg-white/10 transition-all">Iniciar Sesión</button>
       <button id="tabRegistro" class="flex-1 py-2 px-4 rounded-xl font-bold text-white/60 hover:text-white transition-all">Crear Cuenta</button>
     </div>
-
     <form id="formLogin" class="space-y-4 w-full max-w-sm">
       <input type="email" id="loginEmail" placeholder="Email" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-accent focus:bg-white/15 transition-all text-left" required>
       <input type="password" id="loginPassword" placeholder="Contraseña" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-accent focus:bg-white/15 transition-all text-left" required>
       <button type="submit" class="w-full bg-accent text-[#0A2342] font-black py-3.5 rounded-xl hover:bg-white hover:scale-[1.02] transition-all shadow-lg">ENTRAR</button>
     </form>
-
     <form id="formRegistro" class="space-y-4 w-full max-w-sm hidden">
       <input type="text" id="regNombre" placeholder="Nombre completo" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-accent focus:bg-white/15 transition-all text-left" required>
       <input type="email" id="regEmail" placeholder="Email" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-accent focus:bg-white/15 transition-all text-left" required>
       <input type="password" id="regPassword" placeholder="Contraseña (mín. 6 caracteres)" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-accent focus:bg-white/15 transition-all text-left" required minlength="6">
       <button type="submit" class="w-full bg-[#10b981] text-white font-black py-3.5 rounded-xl hover:bg-[#059669] hover:scale-[1.02] transition-all shadow-lg">CREAR CUENTA GRATIS</button>
     </form>
-    
     <p id="authMessage" class="text-center text-sm mt-4 font-bold text-red-300"></p>
     <p class="text-white/40 text-xs mt-8">rutaflex.com.ar</p>
   </div>
 
-  <!-- ============================================ -->
-  <!-- PANTALLA PRINCIPAL DE LA APP                 -->
-  <!-- ============================================ -->
+  <!-- PANTALLA PRINCIPAL -->
   <div id="appScreen" class="hidden">
     <header class="p-4 flex justify-between items-center">
       <div class="flex items-center gap-2">
@@ -81,7 +70,7 @@
       <div class="text-center mb-6">
         <span class="inline-block bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full mb-2">✨ 7 DÍAS GRATIS</span>
         <h2 class="font-black text-xl text-[#0A2342]">Activa tu cuenta</h2>
-        <p class="text-xs text-gray-500 mt-1">🔒 Sistema anti-trucho activado</p>
+        <p class="text-xs text-gray-500 mt-1"> Sistema anti-trucho activado</p>
       </div>
       <div class="grid grid-cols-2 gap-3">
         <a href="https://mpago.la/2GBap39" target="_blank" class="block p-4 rounded-xl text-center font-bold text-white shadow-md hover:-translate-y-1 transition-transform" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
@@ -104,22 +93,18 @@
       <h3 class="font-bold text-[#0A2342] mt-6 mb-3">Agregar destinos con IA</h3>
       <div class="grid grid-cols-2 gap-3">
         <label class="bg-slate-50 border-2 border-dashed border-slate-300 p-4 rounded-xl cursor-pointer text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all">
-          <div class="text-2xl mb-1">📷</div>
-          <div>Imagen / Foto</div>
+          <div class="text-2xl mb-1">📷</div><div>Imagen / Foto</div>
           <input type="file" id="fileImg" accept="image/*" hidden>
         </label>
-        <label class="bg-slate-50 border-2 border-dashed border-slate-300 p-4 rounded-xl cursor-pointer text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all">
-          <div class="text-2xl mb-1">📄</div>
-          <div>PDF (Próximamente)</div>
+        <label class="bg-slate-50 border-2 border-dashed border-slate-300 p-4 rounded-xl cursor-pointer text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all opacity-50">
+          <div class="text-2xl mb-1">📄</div><div>PDF (Próximamente)</div>
           <input type="file" id="filePdf" accept=".pdf" hidden disabled>
         </label>
         <button onclick="abrirCamara()" class="bg-slate-50 border-2 border-dashed border-slate-300 p-4 rounded-xl text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all">
-          <div class="text-2xl mb-1">📸</div>
-          <div>Cámara</div>
+          <div class="text-2xl mb-1">📸</div><div>Cámara</div>
         </button>
         <button onclick="alert('QR Scanner en desarrollo')" class="bg-slate-50 border-2 border-dashed border-slate-300 p-4 rounded-xl text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all">
-          <div class="text-2xl mb-1">🔳</div>
-          <div>Escanear QR</div>
+          <div class="text-2xl mb-1">🔳</div><div>Escanear QR</div>
         </button>
       </div>
       <video id="camara" autoplay class="hidden w-full mt-3 rounded-xl border-2 border-[#5BA4D9] shadow-lg"></video>
@@ -139,23 +124,46 @@
       <h3 class="font-black text-[#0A2342] text-xl mb-4">¡Ruta completada! 🏆</h3>
       <div class="grid grid-cols-3 gap-2">
         <div class="text-center p-3 bg-white rounded-xl shadow-sm">
-          <div class="text-2xl mb-1">⏱️</div>
-          <div class="text-[10px] text-gray-500 uppercase font-bold">Horas</div>
+          <div class="text-2xl mb-1">⏱️</div><div class="text-[10px] text-gray-500 uppercase font-bold">Horas</div>
           <div class="font-black text-xl text-[#0A2342]"><span id="statHoras">0</span></div>
         </div>
         <div class="text-center p-3 bg-white rounded-xl shadow-sm">
-          <div class="text-2xl mb-1">🛣️</div>
-          <div class="text-[10px] text-gray-500 uppercase font-bold">KM</div>
+          <div class="text-2xl mb-1">🛣️</div><div class="text-[10px] text-gray-500 uppercase font-bold">KM</div>
           <div class="font-black text-xl text-[#0A2342]"><span id="statKm">0</span></div>
         </div>
         <div class="text-center p-3 bg-white rounded-xl shadow-sm">
-          <div class="text-2xl mb-1">📦</div>
-          <div class="text-[10px] text-gray-500 uppercase font-bold">Entregas</div>
+          <div class="text-2xl mb-1">📦</div><div class="text-[10px] text-gray-500 uppercase font-bold">Entregas</div>
           <div class="font-black text-xl text-[#0A2342]"><span id="statEntregas">0</span></div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- ============================================ -->
+  <!-- MODAL DE EDICIÓN DE IA (ESTE FALTABA)      -->
+  <!-- ============================================ -->
+  <div id="modalEdicion" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl w-full max-w-md max-h-[85vh] flex flex-col shadow-2xl">
+      <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-[#0A2342] to-[#123A6B] rounded-t-2xl">
+        <h3 class="text-white font-black text-lg flex items-center gap-2">🤖 Revisar direcciones</h3>
+        <button id="btnCerrarModal" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>
+      </div>
+      
+      <div class="p-2 text-center bg-blue-50 border-b border-blue-100">
+        <p class="text-xs text-blue-800 font-medium">Editá, borrá o agregá líneas antes de guardar.</p>
+      </div>
+
+      <div class="p-4 overflow-y-auto flex-1 space-y-2" id="contenedorInputs">
+        <!-- Los inputs se generan aquí con JS -->
+      </div>
+
+      <div class="p-4 border-t border-gray-100 flex gap-2 bg-gray-50 rounded-b-2xl">
+        <button id="btnCancelarEdicion" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-300 transition-all">Cancelar</button>
+        <button id="btnGuardarEdicion" class="flex-1 bg-[#10b981] text-white font-bold py-3 rounded-xl hover:bg-[#059669] transition-all shadow-lg">✅ Guardar Todo</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 <script src="app.js"></script>
 </body>
