@@ -4,6 +4,33 @@ let destinosDetectados = [];
 let inicioViaje = null;
 let tramoActual = 0;
 
+// ==========================================
+// 🔔 SISTEMA DE NOTIFICACIONES ELEGANTES
+// ==========================================
+function mostrarNotificacion(mensaje, tipo = 'info') {
+  const contenedor = document.getElementById('notificaciones');
+  const notificacion = document.createElement('div');
+  
+  // Colores según el tipo de mensaje
+  let colores = 'bg-blue-600 text-white';
+  if (tipo === 'exito') colores = 'bg-green-600 text-white';
+  if (tipo === 'error') colores = 'bg-red-600 text-white';
+  if (tipo === 'advertencia') colores = 'bg-yellow-400 text-black';
+
+  notificacion.className = `${colores} px-4 py-3 rounded-xl shadow-2xl font-bold text-sm text-center toast-anim pointer-events-auto border border-white/10`;
+  notificacion.innerText = mensaje;
+  
+  contenedor.appendChild(notificacion);
+  
+  // Desaparece solo después de 3.5 segundos
+  setTimeout(() => {
+    notificacion.style.opacity = '0';
+    notificacion.style.transform = 'translate(-50%, -20px)';
+    notificacion.style.transition = 'all 0.5s ease';
+    setTimeout(() => notificacion.remove(), 500);
+  }, 3500);
+}
+
 // --- AUTENTICACIÓN ---
 document.getElementById('tabLogin').addEventListener('click', () => {
   document.getElementById('formLogin').classList.remove('hidden');
@@ -33,16 +60,18 @@ document.getElementById('formRegistro').addEventListener('submit', async (e) => 
   msg.className = "text-center text-sm mt-4 font-bold text-blue-300";
 
   try {
-    const res = await fetch('/api/registro', { 
-      method: 'POST', 
-      headers: { 'Content-Type': 'application/json' }, 
-      credentials: 'include', 
-      body: JSON.stringify({ nombre, email, password }) 
-    });
+    const res = await fetch('/api/registro', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ nombre, email, password }) });
     const data = await res.json();
-    if (res.ok) mostrarApp(data.usuario.nombre);
-    else { msg.innerText = data.error; msg.className = "text-center text-sm mt-4 font-bold text-red-300"; }
-  } catch (err) { msg.innerText = "Error de conexión."; }
+    if (res.ok) {
+      mostrarNotificacion("✅ ¡Cuenta creada con éxito!", "exito");
+      setTimeout(() => mostrarApp(data.usuario.nombre), 1000);
+    } else { 
+      msg.innerText = data.error; 
+      msg.className = "text-center text-sm mt-4 font-bold text-red-300"; 
+    }
+  } catch (err) { 
+    mostrarNotificacion(" Error de conexión con el servidor.", "error"); 
+  }
 });
 
 document.getElementById('formLogin').addEventListener('submit', async (e) => {
@@ -54,42 +83,48 @@ document.getElementById('formLogin').addEventListener('submit', async (e) => {
   msg.className = "text-center text-sm mt-4 font-bold text-blue-300";
 
   try {
-    const res = await fetch('/api/login', { 
-      method: 'POST', 
-      headers: { 'Content-Type': 'application/json' }, 
-      credentials: 'include', 
-      body: JSON.stringify({ email, password }) 
-    });
+    const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ email, password }) });
     const data = await res.json();
-    if (res.ok) mostrarApp(data.usuario.nombre);
-    else { msg.innerText = data.error; msg.className = "text-center text-sm mt-4 font-bold text-red-300"; }
-  } catch (err) { msg.innerText = "Error de conexión."; }
+    if (res.ok) {
+      mostrarNotificacion(`👋 ¡Bienvenido de nuevo, ${data.usuario.nombre}!`, "exito");
+      setTimeout(() => mostrarApp(data.usuario.nombre), 1000);
+    } else { 
+      msg.innerText = data.error; 
+      msg.className = "text-center text-sm mt-4 font-bold text-red-300"; 
+    }
+  } catch (err) { 
+    mostrarNotificacion(" Error de conexión con el servidor.", "error"); 
+  }
 });
 
 function mostrarApp(nombre) {
   document.getElementById('authScreen').classList.add('hidden');
   document.getElementById('appScreen').classList.remove('hidden');
-  document.getElementById('userName').innerText = `¡Hola, ${nombre}! 👋`;
+  document.getElementById('userName').innerText = `¡Hola, ${nombre}! `;
   cargarDestinos();
 }
 
 document.getElementById('btnLogout').addEventListener('click', async () => {
   await fetch('/api/logout', { method: 'POST', credentials: 'include' });
-  location.reload();
+  mostrarNotificacion("👋 Sesión cerrada correctamente.", "info");
+  setTimeout(() => location.reload(), 1000);
 });
 
 document.getElementById('btnPromo').addEventListener('click', async () => {
   const codigo = document.getElementById('promo').value;
+  if (!codigo) return mostrarNotificacion("⚠️ Escribí un código primero.", "advertencia");
+  
   const msg = document.getElementById('promoMessage');
-  const res = await fetch('/api/validar-promo', { 
-    method: 'POST', 
-    headers: { 'Content-Type': 'application/json' }, 
-    credentials: 'include', 
-    body: JSON.stringify({ codigo }) 
-  });
+  const res = await fetch('/api/validar-promo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ codigo }) });
   const data = await res.json();
-  if (data.valido) { msg.innerText = data.mensaje; msg.className = "text-xs text-center mt-2 font-bold text-green-600"; }
-  else { msg.innerText = data.mensaje; msg.className = "text-xs text-center mt-2 font-bold text-red-600"; }
+  
+  if (data.valido) { 
+    mostrarNotificacion("🎉 " + data.mensaje, "exito"); 
+    msg.className = "hidden"; 
+  } else { 
+    mostrarNotificacion("❌ " + data.mensaje, "error"); 
+    msg.className = "hidden"; 
+  }
 });
 
 window.addEventListener('load', async () => {
@@ -100,7 +135,7 @@ window.addEventListener('load', async () => {
   } catch (err) { console.log('No hay sesión activa'); }
 });
 
-// --- 🤖 IA CON EDICIÓN (OCR REAL + REVISIÓN) ---
+// ---  IA CON EDICIÓN (OCR REAL + REVISIÓN) ---
 
 async function cargarDestinos() {
   try {
@@ -117,54 +152,27 @@ document.getElementById('fileImg').addEventListener('change', async (e) => {
   const btn = document.getElementById('btnCargar');
   const textoOriginal = btn.innerText;
   
-  btn.innerText = "🤖 La IA está leyendo la imagen...";
+  btn.innerText = " La IA está leyendo...";
   btn.disabled = true;
   btn.classList.add('opacity-75', 'cursor-not-allowed');
 
   try {
-    console.log('📸 Iniciando OCR con archivo:', file.name, file.type, file.size);
-    
     if (typeof Tesseract === 'undefined') {
-      throw new Error('Tesseract.js no está cargado. Recargá la página.');
+      throw new Error('Tesseract.js no está cargado.');
     }
     
-    console.log('✅ Tesseract.js detectado, versión:', Tesseract.version);
-    
-    const { data: { text } } = await Tesseract.recognize(file, 'spa', { 
-      logger: m => console.log('📊 Progreso OCR:', m)
-    });
-    
-    console.log('📝 Texto detectado:', text);
-    
-    const lineas = text.split('\n')
-      .map(linea => linea.trim())
-      .filter(linea => linea.length > 3);
-
-    console.log('📋 Líneas filtradas:', lineas.length);
+    const { data: { text } } = await Tesseract.recognize(file, 'spa', { logger: m => console.log(m) });
+    const lineas = text.split('\n').map(linea => linea.trim()).filter(linea => linea.length > 3);
 
     if (lineas.length === 0) {
-      alert("⚠️ No se detectó texto claro en la imagen.\n\nIntentá con:\n• Una foto más nítida\n• Mejor iluminación\n• Texto más grande");
+      mostrarNotificacion("⚠️ No se detectó texto claro. Usá una foto más nítida.", "advertencia");
     } else {
       destinosDetectados = lineas;
       mostrarModalEdicion();
     }
   } catch (error) {
-    console.error('❌ Error detallado en OCR:', error);
-    console.error('Stack trace:', error.stack);
-    
-    let mensajeError = 'Hubo un error al procesar la imagen.\n\n';
-    
-    if (error.message.includes('no está cargado')) {
-      mensajeError += 'Tesseract.js no se cargó correctamente.\nSolución: Recargá la página con Ctrl+Shift+R';
-    } else if (error.message.includes('NetworkError')) {
-      mensajeError += 'Error de red al descargar el modelo de IA.\nSolución: Verificá tu conexión a internet';
-    } else if (error.message.includes('memory')) {
-      mensajeError += 'La imagen es muy grande.\nSolución: Usá una imagen más pequeña (menos de 5MB)';
-    } else {
-      mensajeError += `Error: ${error.message}\n\nRevisá la consola (F12) para más detalles.`;
-    }
-    
-    alert(mensajeError);
+    console.error('Error en OCR:', error);
+    mostrarNotificacion(" Error al procesar la imagen. Revisá tu conexión.", "error");
   } finally {
     btn.innerText = textoOriginal;
     btn.disabled = false;
@@ -173,7 +181,6 @@ document.getElementById('fileImg').addEventListener('change', async (e) => {
   }
 });
 
-//  Funciones del Modal de Edición
 function mostrarModalEdicion() {
   const contenedor = document.getElementById('contenedorInputs');
   contenedor.innerHTML = '';
@@ -186,12 +193,11 @@ function mostrarModalEdicion() {
         <div class="flex gap-2 items-center bg-gray-50 p-2 rounded-lg border border-gray-200">
           <span class="text-gray-400 font-bold text-sm w-6">${index + 1}.</span>
           <input type="text" value="${dir.replace(/"/g, '&quot;')}" data-index="${index}" class="input-direccion flex-1 bg-transparent border-none p-1 text-sm text-gray-800 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#5BA4D9] rounded">
-          <button onclick="eliminarLinea(${index})" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-all" title="Borrar línea">🗑️</button>
+          <button onclick="eliminarLinea(${index})" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-all">🗑️</button>
         </div>
       `;
     });
   }
-  
   document.getElementById('modalEdicion').classList.remove('hidden');
 }
 
@@ -205,7 +211,7 @@ document.getElementById('btnGuardarEdicion').addEventListener('click', async () 
   const finales = Array.from(inputs).map(i => i.value.trim()).filter(v => v.length > 0);
 
   if (finales.length === 0) {
-    alert("No hay direcciones válidas para guardar.");
+    mostrarNotificacion("️ No hay direcciones válidas para guardar.", "advertencia");
     return;
   }
 
@@ -214,26 +220,18 @@ document.getElementById('btnGuardarEdicion').addEventListener('click', async () 
   btn.disabled = true;
 
   for (const direccion of finales) {
-    await fetch('/api/destinos', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ direccion })
-    });
+    await fetch('/api/destinos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ direccion }) });
   }
 
   btn.innerText = "✅ Guardar Todo";
   btn.disabled = false;
   document.getElementById('modalEdicion').classList.add('hidden');
+  mostrarNotificacion("📍 Direcciones guardadas correctamente.", "exito");
   await cargarDestinos();
 });
 
-document.getElementById('btnCancelarEdicion').addEventListener('click', () => {
-  document.getElementById('modalEdicion').classList.add('hidden');
-});
-document.getElementById('btnCerrarModal').addEventListener('click', () => {
-  document.getElementById('modalEdicion').classList.add('hidden');
-});
+document.getElementById('btnCancelarEdicion').addEventListener('click', () => document.getElementById('modalEdicion').classList.add('hidden'));
+document.getElementById('btnCerrarModal').addEventListener('click', () => document.getElementById('modalEdicion').classList.add('hidden'));
 
 // --- LISTA DE DESTINOS ---
 function renderLista() {
@@ -267,6 +265,7 @@ function renderLista() {
 
 window.borrarDestino = async (id) => {
   await fetch(`/api/destinos/${id}`, { method: 'DELETE', credentials: 'include' });
+  mostrarNotificacion("🗑️ Destino eliminado.", "info");
   await cargarDestinos();
 };
 
@@ -274,22 +273,16 @@ window.borrarDestino = async (id) => {
 // 🗺️ FUNCIÓN PARA LIMPIAR DIRECCIONES
 // ==========================================
 function limpiarDireccion(direccion) {
-  // Eliminar números al inicio (001., 002., etc.)
   let limpia = direccion.replace(/^\d+\.\s*/, '');
-  // Eliminar [GR] o códigos similares entre corchetes
   limpia = limpia.replace(/\[GR\]\s*/i, '');
-  // Eliminar "General Rodríguez" si ya está repetido
   limpia = limpia.replace(/General\s+Rodríguez\s*,?\s*/gi, '');
-  // Eliminar espacios extras al inicio y final
   limpia = limpia.trim();
-  // Agregar "General Rodríguez, Buenos Aires" si no lo tiene
   if (!/General\s+Rodríguez/i.test(limpia)) {
     limpia += ', General Rodríguez, Buenos Aires';
   }
   return limpia;
 }
 
-// --- 🗺️ BOTÓN COMENZAR VIAJE (CORREGIDO) ---
 document.getElementById('btnViaje').addEventListener('click', () => {
   const tramo = destinos.slice(tramoActual, tramoActual + 10);
   if (tramo.length === 0) {
@@ -300,34 +293,26 @@ document.getElementById('btnViaje').addEventListener('click', () => {
     return;
   }
   
-  // Origen fijo
   const origin = "General Rodriguez, Buenos Aires, Argentina";
-  
-  // LIMPIAR todas las direcciones
   const direccionesLimpias = tramo.map(d => limpiarDireccion(d.direccion));
   
-  // Si hay solo 1 dirección, no usar waypoints
+  let url = '';
   if (direccionesLimpias.length === 1) {
-    const destination = direccionesLimpias[0];
-    const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&travelmode=driving`;
-    console.log('🗺️ URL de Google Maps (1 destino):', url);
-    window.open(url, "_blank");
+    url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(direccionesLimpias[0])}&travelmode=driving`;
   } else {
-    // Múltiples direcciones: usar waypoints
     const destination = direccionesLimpias[direccionesLimpias.length - 1];
-    const waypointsArray = direccionesLimpias.slice(0, -1).map(d => encodeURIComponent(d));
-    const waypoints = waypointsArray.join('|');
-    const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&waypoints=${waypoints}&travelmode=driving`;
-    console.log('🗺️ URL de Google Maps (múltiples):', url);
-    console.log(' Destinos limpios:', direccionesLimpias);
-    window.open(url, "_blank");
+    const waypoints = direccionesLimpias.slice(0, -1).map(d => encodeURIComponent(d)).join('|');
+    url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&waypoints=${waypoints}&travelmode=driving`;
   }
+  
+  mostrarNotificacion("🗺️ Abriendo Google Maps...", "info");
+  window.open(url, "_blank");
   
   tramoActual += 10;
   const siguiente = tramoActual + 10;
   document.getElementById('btnViaje').innerText = tramoActual < destinos.length
     ? `SIGUIENTE TRAMO (${tramoActual + 1} a ${Math.min(siguiente, destinos.length)})`
-    : "VER ESTADISTICAS FINALES";
+    : "🏆 VER ESTADISTICAS FINALES";
 });
 
 async function abrirCamara() {
@@ -336,5 +321,7 @@ async function abrirCamara() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
     video.srcObject = stream;
-  } catch (err) { alert("No se pudo acceder a la cámara."); }
+  } catch (err) { 
+    mostrarNotificacion("📷 No se pudo acceder a la cámara.", "error"); 
+  }
 }
