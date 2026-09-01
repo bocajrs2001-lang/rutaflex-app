@@ -5,39 +5,31 @@ const session = require('express-session');
 const path = require('path');
 const mongoose = require('mongoose');
 
-// Importamos las funciones de la base de datos
 const { 
   registrarUsuario, 
   loginUsuario, 
   obtenerDestinosDeUsuario, 
   agregarDestino, 
   borrarDestino, 
-  borrarDestinosDeUsuario 
+  borrarDestinosDeUsuario,
+  actualizarContrasena
 } = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ==========================================
-// 1. CONEXIÓN A MONGODB
-// ==========================================
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ Conectado a MongoDB Atlas (La Nube)'))
   .catch(err => console.error('❌ Error conectando a MongoDB:', err));
 
-// ==========================================
-// 2. CONFIGURACIÓN DE MIDDLEWARES
-// ==========================================
 app.use(cors({ 
   origin: ['http://127.0.0.1:5500', 'http://localhost:5500', 'http://localhost:3000', 'https://rutaflex-app.onrender.com'],
   credentials: true 
 }));
 app.use(express.json());
 
-// Servir archivos estáticos
 app.use(express.static(path.join(__dirname)));
 
-// Configuración de sesiones
 app.use(session({
   secret: 'rutaflex_secret_super_seguro_2026',
   resave: false,
@@ -49,9 +41,6 @@ app.use(session({
   }
 }));
 
-// ==========================================
-// 3. MIDDLEWARE DE SEGURIDAD
-// ==========================================
 function usuarioLogueado(req, res, next) {
   if (req.session && req.session.userId) {
     return next();
@@ -59,19 +48,13 @@ function usuarioLogueado(req, res, next) {
   res.status(401).json({ error: 'Debes iniciar sesión' });
 }
 
-// ==========================================
-// 4. RUTAS DE LA API
-// ==========================================
-
-// REGISTRO CON VALIDACIÓN DE CONTRASEÑA SEGURA
+// REGISTRO
 app.post('/api/registro', async (req, res) => {
   try {
     const { nombre, email, password } = req.body;
     if (!nombre || !email || !password) {
       return res.status(400).json({ error: 'Completa todos los campos' });
     }
-    
-    // 🔒 VALIDACIÓN DE CONTRASEÑA SEGURA
     if (password.length < 8) {
       return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
     }
@@ -84,7 +67,6 @@ app.post('/api/registro', async (req, res) => {
     if (!/[!@#$%^&*]/.test(password)) {
       return res.status(400).json({ error: 'La contraseña debe tener al menos 1 carácter especial (!@#$%^&*)' });
     }
-    
     const usuario = await registrarUsuario(nombre, email, password);
     req.session.userId = usuario.id;
     req.session.nombre = usuario.nombre;
@@ -104,6 +86,32 @@ app.post('/api/login', async (req, res) => {
     res.json({ ok: true, mensaje: '¡Bienvenido!', usuario });
   } catch (err) {
     res.status(401).json({ error: err.message });
+  }
+});
+
+// RECUPERAR CONTRASEÑA
+app.post('/api/recuperar-contrasena', async (req, res) => {
+  try {
+    const { email, nuevaPassword } = req.body;
+    if (!email || !nuevaPassword) {
+      return res.status(400).json({ error: 'Completa todos los campos' });
+    }
+    if (nuevaPassword.length < 8) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
+    }
+    if (!/[A-Z]/.test(nuevaPassword)) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 1 letra mayúscula' });
+    }
+    if (!/[0-9]/.test(nuevaPassword)) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 1 número' });
+    }
+    if (!/[!@#$%^&*]/.test(nuevaPassword)) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 1 carácter especial (!@#$%^&*)' });
+    }
+    const resultado = await actualizarContrasena(email, nuevaPassword);
+    res.json({ ok: true, mensaje: resultado.mensaje });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 });
 
@@ -173,9 +181,6 @@ app.delete('/api/destinos', usuarioLogueado, async (req, res) => {
   }
 });
 
-// ==========================================
-// 5. RUTA PRINCIPAL Y ARRANQUE
-// ==========================================
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
