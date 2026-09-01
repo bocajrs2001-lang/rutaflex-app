@@ -1,97 +1,68 @@
-const fs = require('fs');
-const path = require('path');
+const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const dbPath = path.join(__dirname, 'users.json');
-const destinosPath = path.join(__dirname, 'destinos.json');
+// Esquema de Usuarios (Cómo se guardan los usuarios en la nube)
+const userSchema = new mongoose.Schema({
+  nombre: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  fecha_registro: { type: Date, default: Date.now },
+  cuenta_activa: { type: Number, default: 0 }
+});
 
-// --- USUARIOS ---
-function leerUsers() {
-  if (!fs.existsSync(dbPath)) {
-    fs.writeFileSync(dbPath, JSON.stringify([]));
-  }
-  return JSON.parse(fs.readFileSync(dbPath, 'utf-8'));
-}
+const User = mongoose.model('User', userSchema);
 
-function guardarUsers(data) {
-  fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
-}
+// Esquema de Destinos (Cómo se guardan las direcciones en la nube)
+const destinoSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
+  direccion: { type: String, required: true },
+  distancia: { type: String, default: '0.0' },
+  tiempo: { type: Number, default: 0 },
+  completado: { type: Boolean, default: false },
+  fecha_creacion: { type: Date, default: Date.now }
+});
 
+const Destino = mongoose.model('Destino', destinoSchema);
+
+// --- FUNCIONES DE USUARIOS ---
 async function registrarUsuario(nombre, email, password) {
-  const users = leerUsers();
-  const existe = users.find(u => u.email === email);
+  const existe = await User.findOne({ email });
   if (existe) throw new Error('Ese email ya está registrado');
 
   const passwordEncriptada = await bcrypt.hash(password, 10);
-  const nuevoUsuario = {
-    id: Date.now(),
-    nombre,
-    email,
-    password: passwordEncriptada,
-    fecha_registro: new Date().toISOString(),
-    cuenta_activa: 0
-  };
-  users.push(nuevoUsuario);
-  guardarUsers(users);
-  return { id: nuevoUsuario.id, nombre: nuevoUsuario.nombre, email: nuevoUsuario.email };
+  const nuevoUsuario = new User({ nombre, email, password: passwordEncriptada });
+  await nuevoUsuario.save();
+  
+  return { id: nuevoUsuario._id, nombre: nuevoUsuario.nombre, email: nuevoUsuario.email };
 }
 
 async function loginUsuario(email, password) {
-  const users = leerUsers();
-  const user = users.find(u => u.email === email);
+  const user = await User.findOne({ email });
   if (!user) throw new Error('Email o contraseña incorrectos');
+  
   const esValida = await bcrypt.compare(password, user.password);
   if (!esValida) throw new Error('Email o contraseña incorrectos');
-  return { id: user.id, nombre: user.nombre, email: user.email };
+  
+  return { id: user._id, nombre: user.nombre, email: user.email };
 }
 
-// --- DESTINOS (NUEVO) ---
-function leerDestinos() {
-  if (!fs.existsSync(destinosPath)) {
-    fs.writeFileSync(destinosPath, JSON.stringify([]));
-  }
-  return JSON.parse(fs.readFileSync(destinosPath, 'utf-8'));
+// --- FUNCIONES DE DESTINOS ---
+async function obtenerDestinosDeUsuario(userId) {
+  return await Destino.find({ userId: userId.toString() }).sort({ fecha_creacion: 1 });
 }
 
-function guardarDestinos(data) {
-  fs.writeFileSync(destinosPath, JSON.stringify(data, null, 2));
-}
-
-// Obtener solo los destinos de UN usuario
-function obtenerDestinosDeUsuario(userId) {
-  const destinos = leerDestinos();
-  return destinos.filter(d => d.userId === userId);
-}
-
-// Agregar un destino nuevo
-function agregarDestino(userId, direccion) {
-  const destinos = leerDestinos();
-  const nuevoDestino = {
-    id: Date.now() + Math.random(),
-    userId: userId,
-    direccion: direccion,
-    distancia: (0.8 + destinos.length * 0.6).toFixed(1),
-    tiempo: 5 + destinos.length * 2,
-    completado: false,
-    fecha_creacion: new Date().toISOString()
-  };
-  destinos.push(nuevoDestino);
-  guardarDestinos(destinos);
+async function agregarDestino(userId, direccion) {
+  const nuevoDestino = new Destino({ userId: userId.toString(), direccion });
+  await nuevoDestino.save();
   return nuevoDestino;
 }
 
-// Borrar un destino
-function borrarDestino(destinoId, userId) {
-  let destinos = leerDestinos();
-  destinos = destinos.filter(d => !(d.id === destinoId && d.userId === userId));
-  guardarDestinos(destinos);
+async function borrarDestino(destinoId, userId) {
+  await Destino.deleteOne({ _id: destinoId, userId: userId.toString() });
 }
 
-// Borrar TODOS los destinos de un usuario (útil para empezar de cero)
-function borrarDestinosDeUsuario(userId) {
-  let destinos = leerDestinos();
-  destinos = destinos.filter(d => d.userId !== userId);
-  guardarDestinos(destinos);
+async function borrarDestinosDeUsuario(userId) {
+  await Destino.deleteMany({ userId: userId.toString() });
 }
 
 module.exports = {
