@@ -2,12 +2,11 @@ let destinos = [];
 let destinosDetectados = [];
 let inicioViaje = null;
 let tramoActual = 0;
-let emailRecuperacion = ""; // Variable temporal para guardar el email durante la recuperación
+let emailRecuperacion = ""; 
 
 function mostrarNotificacion(mensaje, tipo = 'info') {
   const contenedor = document.getElementById('notificaciones');
   const notificacion = document.createElement('div');
-  
   let colores = 'bg-blue-600 text-white';
   if (tipo === 'exito') colores = 'bg-green-600 text-white';
   if (tipo === 'error') colores = 'bg-red-600 text-white';
@@ -15,9 +14,7 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
 
   notificacion.className = `${colores} px-4 py-3 rounded-xl shadow-2xl font-bold text-sm text-center toast-anim pointer-events-auto border border-white/10`;
   notificacion.innerText = mensaje;
-  
   contenedor.appendChild(notificacion);
-  
   setTimeout(() => {
     notificacion.style.opacity = '0';
     notificacion.style.transform = 'translate(-50%, -20px)';
@@ -26,13 +23,9 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
   }, 3500);
 }
 
-// Cargar email guardado al iniciar
 window.addEventListener('load', async () => {
   const emailGuardado = localStorage.getItem('rutaflex_email');
-  if (emailGuardado) {
-    document.getElementById('loginEmail').value = emailGuardado;
-  }
-  
+  if (emailGuardado) document.getElementById('loginEmail').value = emailGuardado;
   try {
     const res = await fetch('/api/yo', { credentials: 'include' });
     const data = await res.json();
@@ -40,7 +33,7 @@ window.addEventListener('load', async () => {
   } catch (err) { console.log('No hay sesión activa'); }
 });
 
-// --- NAVEGACIÓN ENTRE PANTALLAS ---
+// --- NAVEGACIÓN ---
 document.getElementById('tabLogin').addEventListener('click', () => {
   ocultarTodasLasPantallasExcepto('authScreen');
   document.getElementById('formLogin').classList.remove('hidden');
@@ -67,124 +60,67 @@ document.getElementById('btnOlvideContrasena').addEventListener('click', () => {
   document.getElementById('recoverMsg1').innerText = '';
 });
 
-document.getElementById('btnVolverLogin1').addEventListener('click', () => {
-  ocultarTodasLasPantallasExcepto('authScreen');
-});
-
-document.getElementById('btnReenviarCodigo').addEventListener('click', async () => {
-  await enviarCodigoRecuperacion();
-});
+document.getElementById('btnVolverLogin1').addEventListener('click', () => ocultarTodasLasPantallasExcepto('authScreen'));
+document.getElementById('btnReenviarCodigo').addEventListener('click', enviarCodigoRecuperacion);
 
 function ocultarTodasLasPantallasExcepto(id) {
-  ['authScreen', 'recoverStep1', 'recoverStep2', 'recoverStep3', 'appScreen'].forEach(screen => {
-    document.getElementById(screen).classList.add('hidden');
-  });
+  ['authScreen', 'recoverStep1', 'recoverStep2', 'recoverStep3', 'appScreen'].forEach(s => document.getElementById(s).classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
 }
 
-// --- LÓGICA DE RECUPERACIÓN PASO 1: ENVIAR EMAIL ---
+// --- RECUPERACIÓN ---
 async function enviarCodigoRecuperacion() {
   const email = document.getElementById('recoverEmailInput').value;
   const msg = document.getElementById('recoverMsg1');
-  
-  if (!email) {
-    msg.innerText = "Ingresá tu email";
-    msg.className = "text-center text-sm mt-4 font-bold text-red-300";
-    return;
-  }
-
-  msg.innerText = "Enviando código...";
-  msg.className = "text-center text-sm mt-4 font-bold text-blue-300";
-
+  if (!email) { msg.innerText = "Ingresá tu email"; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; return; }
+  msg.innerText = "Enviando..."; msg.className = "text-blue-300 font-bold text-sm mt-4 text-center";
   try {
-    const res = await fetch('/api/enviar-codigo-recuperacion', { 
-      method: 'POST', 
-      headers: { 'Content-Type': 'application/json' }, 
-      body: JSON.stringify({ email }) 
-    });
+    const res = await fetch('/api/enviar-codigo-recuperacion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
     const data = await res.json();
-    
     if (res.ok) {
-      emailRecuperacion = email; // Guardamos el email para los siguientes pasos
-      mostrarNotificacion("📧 Código enviado a tu email", "exito");
+      emailRecuperacion = email;
+      mostrarNotificacion("📧 Código enviado", "exito");
       ocultarTodasLasPantallasExcepto('recoverStep2');
       document.getElementById('recoverMsg2').innerText = '';
-    } else {
-      msg.innerText = data.error;
-      msg.className = "text-center text-sm mt-4 font-bold text-red-300";
-    }
-  } catch (err) {
-    mostrarNotificacion("❌ Error de conexión", "error");
-  }
+    } else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; }
+  } catch (err) { mostrarNotificacion("❌ Error de conexión", "error"); }
 }
+document.getElementById('formRecoverEmail').addEventListener('submit', async (e) => { e.preventDefault(); await enviarCodigoRecuperacion(); });
 
-document.getElementById('formRecoverEmail').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  await enviarCodigoRecuperacion();
-});
-
-// --- LÓGICA DE RECUPERACIÓN PASO 2: VERIFICAR CÓDIGO ---
 document.getElementById('formRecoverCode').addEventListener('submit', async (e) => {
   e.preventDefault();
   const codigo = document.getElementById('recoverCodeInput').value;
   const msg = document.getElementById('recoverMsg2');
-  
-  msg.innerText = "Verificando...";
-  msg.className = "text-center text-sm mt-4 font-bold text-blue-300";
-
+  msg.innerText = "Verificando..."; msg.className = "text-blue-300 font-bold text-sm mt-4 text-center";
   try {
-    const res = await fetch('/api/verificar-codigo', { 
-      method: 'POST', 
-      headers: { 'Content-Type': 'application/json' }, 
-      body: JSON.stringify({ email: emailRecuperacion, codigo }) 
-    });
+    const res = await fetch('/api/verificar-codigo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailRecuperacion, codigo }) });
     const data = await res.json();
-    
     if (res.ok) {
       mostrarNotificacion("✅ Código correcto", "exito");
       ocultarTodasLasPantallasExcepto('recoverStep3');
       document.getElementById('recoverMsg3').innerText = '';
-    } else {
-      msg.innerText = data.error;
-      msg.className = "text-center text-sm mt-4 font-bold text-red-300";
-    }
-  } catch (err) {
-    mostrarNotificacion("❌ Error de conexión", "error");
-  }
+    } else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; }
+  } catch (err) { mostrarNotificacion("❌ Error", "error"); }
 });
 
-// --- LÓGICA DE RECUPERACIÓN PASO 3: CAMBIAR CONTRASEÑA ---
 document.getElementById('formNewPassword').addEventListener('submit', async (e) => {
   e.preventDefault();
   const nuevaPassword = document.getElementById('newPasswordInput').value;
   const msg = document.getElementById('recoverMsg3');
-  
-  msg.innerText = "Guardando nueva contraseña...";
-  msg.className = "text-center text-sm mt-4 font-bold text-blue-300";
-
+  msg.innerText = "Guardando..."; msg.className = "text-blue-300 font-bold text-sm mt-4 text-center";
   try {
-    const res = await fetch('/api/cambiar-contrasena-final', { 
-      method: 'POST', 
-      headers: { 'Content-Type': 'application/json' }, 
-      body: JSON.stringify({ email: emailRecuperacion, nuevaPassword }) 
-    });
+    const res = await fetch('/api/cambiar-contrasena-final', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailRecuperacion, nuevaPassword }) });
     const data = await res.json();
-    
     if (res.ok) {
-      mostrarNotificacion(" ¡Contraseña cambiada!", "exito");
+      mostrarNotificacion("¡Contraseña cambiada!", "exito");
       setTimeout(() => {
         ocultarTodasLasPantallasExcepto('authScreen');
         document.getElementById('loginEmail').value = emailRecuperacion;
         document.getElementById('loginPassword').value = '';
-        emailRecuperacion = ""; // Limpiamos la variable
+        emailRecuperacion = "";
       }, 2000);
-    } else {
-      msg.innerText = data.error;
-      msg.className = "text-center text-sm mt-4 font-bold text-red-300";
-    }
-  } catch (err) {
-    mostrarNotificacion("❌ Error de conexión", "error");
-  }
+    } else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; }
+  } catch (err) { mostrarNotificacion("❌ Error", "error"); }
 });
 
 // --- AUTENTICACIÓN NORMAL ---
@@ -194,23 +130,16 @@ document.getElementById('formRegistro').addEventListener('submit', async (e) => 
   const email = document.getElementById('regEmail').value;
   const password = document.getElementById('regPassword').value;
   const msg = document.getElementById('authMessage');
-  msg.innerText = "Creando cuenta...";
-  msg.className = "text-center text-sm mt-4 font-bold text-blue-300";
-
+  msg.innerText = "Creando cuenta..."; msg.className = "text-blue-300 font-bold text-sm mt-4 text-center";
   try {
     const res = await fetch('/api/registro', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ nombre, email, password }) });
     const data = await res.json();
     if (res.ok) {
       localStorage.setItem('rutaflex_email', email);
-      mostrarNotificacion("✅ ¡Cuenta creada con éxito!", "exito");
+      mostrarNotificacion("✅ ¡Cuenta creada!", "exito");
       setTimeout(() => mostrarApp(data.usuario.nombre), 1000);
-    } else { 
-      msg.innerText = data.error; 
-      msg.className = "text-center text-sm mt-4 font-bold text-red-300"; 
-    }
-  } catch (err) { 
-    mostrarNotificacion("❌ Error de conexión con el servidor.", "error"); 
-  }
+    } else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; }
+  } catch (err) { mostrarNotificacion("❌ Error de conexión", "error"); }
 });
 
 document.getElementById('formLogin').addEventListener('submit', async (e) => {
@@ -218,23 +147,16 @@ document.getElementById('formLogin').addEventListener('submit', async (e) => {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
   const msg = document.getElementById('authMessage');
-  msg.innerText = "Ingresando...";
-  msg.className = "text-center text-sm mt-4 font-bold text-blue-300";
-
+  msg.innerText = "Ingresando..."; msg.className = "text-blue-300 font-bold text-sm mt-4 text-center";
   try {
     const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ email, password }) });
     const data = await res.json();
     if (res.ok) {
       localStorage.setItem('rutaflex_email', email);
-      mostrarNotificacion(`👋 ¡Bienvenido de nuevo, ${data.usuario.nombre}!`, "exito");
+      mostrarNotificacion(`👋 ¡Bienvenido, ${data.usuario.nombre}!`, "exito");
       setTimeout(() => mostrarApp(data.usuario.nombre), 1000);
-    } else { 
-      msg.innerText = data.error; 
-      msg.className = "text-center text-sm mt-4 font-bold text-red-300"; 
-    }
-  } catch (err) { 
-    mostrarNotificacion("❌ Error de conexión con el servidor.", "error"); 
-  }
+    } else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; }
+  } catch (err) { mostrarNotificacion("❌ Error de conexión", "error"); }
 });
 
 function mostrarApp(nombre) {
@@ -245,102 +167,92 @@ function mostrarApp(nombre) {
 
 document.getElementById('btnLogout').addEventListener('click', async () => {
   await fetch('/api/logout', { method: 'POST', credentials: 'include' });
-  mostrarNotificacion("👋 Sesión cerrada correctamente.", "info");
+  mostrarNotificacion("👋 Sesión cerrada.", "info");
   setTimeout(() => location.reload(), 1000);
+});
+
+// --- NUEVA LÓGICA: CANCELAR SUSCRIPCIÓN ---
+document.getElementById('btnCancelarSub').addEventListener('click', async () => {
+  if (!confirm("¿Estás seguro que querés cancelar tu suscripción? Perderás el acceso a las funciones premium.")) return;
+  
+  mostrarNotificacion("Procesando cancelación...", "info");
+  try {
+    const res = await fetch('/api/cancelar-suscripcion', { method: 'POST', credentials: 'include' });
+    const data = await res.json();
+    if (res.ok) {
+      mostrarNotificacion("😢 Suscripción cancelada. ¡Gracias por usar RUTAFLEX!", "advertencia");
+      // Opcional: Cerrar sesión automáticamente después de cancelar
+      setTimeout(async () => {
+        await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+        location.reload();
+      }, 3000);
+    } else {
+      mostrarNotificacion("❌ Error al cancelar: " + data.error, "error");
+    }
+  } catch (err) {
+    mostrarNotificacion(" Error de conexión", "error");
+  }
 });
 
 document.getElementById('btnPromo').addEventListener('click', async () => {
   const codigo = document.getElementById('promo').value;
-  if (!codigo) return mostrarNotificacion("⚠️ Escribí un código primero.", "advertencia");
-  
+  if (!codigo) return mostrarNotificacion("⚠️ Escribí un código.", "advertencia");
   const msg = document.getElementById('promoMessage');
   const res = await fetch('/api/validar-promo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ codigo }) });
   const data = await res.json();
-  
-  if (data.valido) { 
-    mostrarNotificacion(" " + data.mensaje, "exito"); 
-    msg.className = "hidden"; 
-  } else { 
-    mostrarNotificacion("❌ " + data.mensaje, "error"); 
-    msg.className = "hidden"; 
-  }
+  if (data.valido) { mostrarNotificacion(" " + data.mensaje, "exito"); msg.className = "hidden"; } 
+  else { mostrarNotificacion("❌ " + data.mensaje, "error"); msg.className = "hidden"; }
 });
 
-// --- FUNCIONES DE LA APP (DESTINOS, IA, ETC) ---
+// --- FUNCIONES DE LA APP ---
 async function cargarDestinos() {
   try {
     const res = await fetch('/api/destinos', { credentials: 'include' });
     destinos = await res.json();
     renderLista();
-  } catch (err) { console.error('Error al cargar destinos:', err); }
+  } catch (err) { console.error('Error cargando destinos:', err); }
 }
 
 document.getElementById('fileImg').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
-
   const btn = document.getElementById('btnCargar');
   const textoOriginal = btn.innerText;
-  
-  btn.innerText = "🤖 La IA está leyendo...";
-  btn.disabled = true;
-  btn.classList.add('opacity-75', 'cursor-not-allowed');
-
+  btn.innerText = " La IA está leyendo..."; btn.disabled = true; btn.classList.add('opacity-75', 'cursor-not-allowed');
   try {
     if (typeof Tesseract === 'undefined') throw new Error('Tesseract.js no cargó.');
     const { data: { text } } = await Tesseract.recognize(file, 'spa', { logger: m => console.log(m) });
     const lineas = text.split('\n').map(l => l.trim()).filter(l => l.length > 3);
-
-    if (lineas.length === 0) {
-      mostrarNotificacion("⚠️ No se detectó texto claro.", "advertencia");
-    } else {
-      destinosDetectados = lineas;
-      mostrarModalEdicion();
-    }
-  } catch (error) {
-    console.error(error);
-    mostrarNotificacion("❌ Error al procesar imagen.", "error");
-  } finally {
-    btn.innerText = textoOriginal;
-    btn.disabled = false;
-    btn.classList.remove('opacity-75', 'cursor-not-allowed');
-    e.target.value = ''; 
-  }
+    if (lineas.length === 0) mostrarNotificacion("⚠️ No se detectó texto claro.", "advertencia");
+    else { destinosDetectados = lineas; mostrarModalEdicion(); }
+  } catch (error) { console.error(error); mostrarNotificacion("❌ Error al procesar imagen.", "error"); } 
+  finally { btn.innerText = textoOriginal; btn.disabled = false; btn.classList.remove('opacity-75', 'cursor-not-allowed'); e.target.value = ''; }
 });
 
 function mostrarModalEdicion() {
   const contenedor = document.getElementById('contenedorInputs');
   contenedor.innerHTML = '';
-  if (destinosDetectados.length === 0) {
-    contenedor.innerHTML = '<p class="text-center text-gray-500 py-4">Sin direcciones.</p>';
-  } else {
+  if (destinosDetectados.length === 0) contenedor.innerHTML = '<p class="text-center text-gray-500 py-4">Sin direcciones.</p>';
+  else {
     destinosDetectados.forEach((dir, index) => {
-      contenedor.innerHTML += `
-        <div class="flex gap-2 items-center bg-gray-50 p-2 rounded-lg border border-gray-200">
-          <span class="text-gray-400 font-bold text-sm w-6">${index + 1}.</span>
-          <input type="text" value="${dir.replace(/"/g, '&quot;')}" class="input-direccion flex-1 bg-transparent border-none p-1 text-sm text-gray-800 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#5BA4D9] rounded">
-          <button onclick="eliminarLinea(${index})" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-all">️</button>
-        </div>`;
+      contenedor.innerHTML += `<div class="flex gap-2 items-center bg-gray-50 p-2 rounded-lg border border-gray-200">
+        <span class="text-gray-400 font-bold text-sm w-6">${index + 1}.</span>
+        <input type="text" value="${dir.replace(/"/g, '&quot;')}" class="input-direccion flex-1 bg-transparent border-none p-1 text-sm text-gray-800 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#5BA4D9] rounded">
+        <button onclick="eliminarLinea(${index})" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-all">🗑️</button></div>`;
     });
   }
   document.getElementById('modalEdicion').classList.remove('hidden');
 }
 
-window.eliminarLinea = (index) => {
-  destinosDetectados.splice(index, 1);
-  mostrarModalEdicion();
-};
+window.eliminarLinea = (index) => { destinosDetectados.splice(index, 1); mostrarModalEdicion(); };
 
 document.getElementById('btnGuardarEdicion').addEventListener('click', async () => {
   const inputs = document.querySelectorAll('.input-direccion');
   const finales = Array.from(inputs).map(i => i.value.trim()).filter(v => v.length > 0);
   if (finales.length === 0) return mostrarNotificacion("⚠️ Sin direcciones válidas.", "advertencia");
-
   const btn = document.getElementById('btnGuardarEdicion');
   btn.innerText = "Guardando..."; btn.disabled = true;
-
   for (const d of finales) await fetch('/api/destinos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ direccion: d }) });
-
   btn.innerText = "✅ Guardar Todo"; btn.disabled = false;
   document.getElementById('modalEdicion').classList.add('hidden');
   mostrarNotificacion("📍 Direcciones guardadas.", "exito");
@@ -361,15 +273,10 @@ function renderLista() {
   }
   destinos.forEach((dir, i) => {
     setTimeout(() => {
-      lista.innerHTML += `
-        <li class="flex gap-2 border-b py-2 items-center">
-          <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">🏠</span>
-          <div class="flex-1">
-            <b>${dir.direccion}</b><br>
-            <span class="text-xs text-green-600">${dir.distancia} km • ~${dir.tiempo} min</span>
-          </div>
-          <button onclick="borrarDestino(${dir.id})" class="text-red-500 text-xs px-2 hover:bg-red-50 rounded">🗑️</button>
-        </li>`;
+      lista.innerHTML += `<li class="flex gap-2 border-b py-2 items-center">
+        <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">🏠</span>
+        <div class="flex-1"><b>${dir.direccion}</b><br><span class="text-xs text-green-600">${dir.distancia} km • ~${dir.tiempo} min</span></div>
+        <button onclick="borrarDestino(${dir.id})" class="text-red-500 text-xs px-2 hover:bg-red-50 rounded">🗑️</button></li>`;
     }, i * 80);
   });
   document.getElementById('count').innerText = destinos.length;
@@ -398,10 +305,8 @@ document.getElementById('btnViaje').addEventListener('click', () => {
     document.getElementById('statEntregas').innerText = tramoActual;
     return;
   }
-  
   const origin = "General Rodriguez, Buenos Aires, Argentina";
   const direccionesLimpias = tramo.map(d => limpiarDireccion(d.direccion));
-  
   let url = '';
   if (direccionesLimpias.length === 1) {
     url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(direccionesLimpias[0])}&travelmode=driving`;
@@ -410,15 +315,13 @@ document.getElementById('btnViaje').addEventListener('click', () => {
     const waypoints = direccionesLimpias.slice(0, -1).map(d => encodeURIComponent(d)).join('|');
     url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&waypoints=${waypoints}&travelmode=driving`;
   }
-  
   mostrarNotificacion("🗺️ Abriendo Google Maps...", "info");
   window.open(url, "_blank");
-  
   tramoActual += 10;
   const siguiente = tramoActual + 10;
   document.getElementById('btnViaje').innerText = tramoActual < destinos.length
     ? `SIGUIENTE TRAMO (${tramoActual + 1} a ${Math.min(siguiente, destinos.length)})`
-    : "🏆 VER ESTADISTICAS FINALES";
+    : " VER ESTADISTICAS FINALES";
 });
 
 async function abrirCamara() {
@@ -427,5 +330,5 @@ async function abrirCamara() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
     video.srcObject = stream;
-  } catch (err) { mostrarNotificacion(" No se pudo acceder a la cámara.", "error"); }
+  } catch (err) { mostrarNotificacion("📷 No se pudo acceder a la cámara.", "error"); }
 }
