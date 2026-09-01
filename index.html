@@ -39,7 +39,8 @@
     <form id="formRegistro" class="space-y-4 w-full max-w-sm hidden">
       <input type="text" id="regNombre" placeholder="Nombre completo" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-accent focus:bg-white/15 transition-all text-left" required>
       <input type="email" id="regEmail" placeholder="Email" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-accent focus:bg-white/15 transition-all text-left" required>
-      <input type="password" id="regPassword" placeholder="Contraseña (mín. 6 caracteres)" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-accent focus:bg-white/15 transition-all text-left" required minlength="6">
+      <input type="password" id="regPassword" placeholder="Contraseña segura" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-accent focus:bg-white/15 transition-all text-left" required minlength="8">
+      <p class="text-xs text-white/50 mt-1 text-left">Mín. 8 caracteres, 1 mayúscula, 1 número y 1 símbolo (!@#$%^&*)</p>
       <button type="submit" class="w-full bg-[#10b981] text-white font-black py-3.5 rounded-xl hover:bg-[#059669] hover:scale-[1.02] transition-all shadow-lg">CREAR CUENTA GRATIS</button>
     </form>
     <p id="authMessage" class="text-center text-sm mt-4 font-bold text-red-300"></p>
@@ -70,7 +71,7 @@
       <div class="text-center mb-6">
         <span class="inline-block bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full mb-2">✨ 7 DÍAS GRATIS</span>
         <h2 class="font-black text-xl text-[#0A2342]">Activa tu cuenta</h2>
-        <p class="text-xs text-gray-500 mt-1"> Sistema anti-trucho activado</p>
+        <p class="text-xs text-gray-500 mt-1">🔒 Sistema anti-trucho activado</p>
       </div>
       <div class="grid grid-cols-2 gap-3">
         <a href="https://mpago.la/2GBap39" target="_blank" class="block p-4 rounded-xl text-center font-bold text-white shadow-md hover:-translate-y-1 transition-transform" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
@@ -116,7 +117,7 @@
         <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold">📍 Ordenados</span>
       </div>
       <ul id="lista" class="space-y-2 text-sm"></ul>
-      <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg hover:bg-[#123A6B] transition-all">🗺️ COMENZAR VIAJE</button>
+      <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg hover:bg-[#123A6B] transition-all">️ COMENZAR VIAJE</button>
       <p class="text-center text-xs mt-2 text-gray-500">Se abrirá en Google Maps (de a 10)</p>
     </div>
 
@@ -128,7 +129,7 @@
           <div class="font-black text-xl text-[#0A2342]"><span id="statHoras">0</span></div>
         </div>
         <div class="text-center p-3 bg-white rounded-xl shadow-sm">
-          <div class="text-2xl mb-1">🛣️</div><div class="text-[10px] text-gray-500 uppercase font-bold">KM</div>
+          <div class="text-2xl mb-1">️</div><div class="text-[10px] text-gray-500 uppercase font-bold">KM</div>
           <div class="font-black text-xl text-[#0A2342]"><span id="statKm">0</span></div>
         </div>
         <div class="text-center p-3 bg-white rounded-xl shadow-sm">
@@ -139,9 +140,7 @@
     </div>
   </div>
 
-  <!-- ============================================ -->
-  <!-- MODAL DE EDICIÓN DE IA (ESTE FALTABA)      -->
-  <!-- ============================================ -->
+  <!-- MODAL DE EDICIÓN DE IA -->
   <div id="modalEdicion" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
     <div class="bg-white rounded-2xl w-full max-w-md max-h-[85vh] flex flex-col shadow-2xl">
       <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-[#0A2342] to-[#123A6B] rounded-t-2xl">
