@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-// Esquema de Usuarios (Cómo se guardan los usuarios en la nube)
 const userSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -12,7 +11,6 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-// Esquema de Destinos (Cómo se guardan las direcciones en la nube)
 const destinoSchema = new mongoose.Schema({
   userId: { type: String, required: true },
   direccion: { type: String, required: true },
@@ -24,7 +22,6 @@ const destinoSchema = new mongoose.Schema({
 
 const Destino = mongoose.model('Destino', destinoSchema);
 
-// --- FUNCIONES DE USUARIOS ---
 async function registrarUsuario(nombre, email, password) {
   const existe = await User.findOne({ email });
   if (existe) throw new Error('Ese email ya está registrado');
@@ -46,7 +43,17 @@ async function loginUsuario(email, password) {
   return { id: user._id, nombre: user.nombre, email: user.email };
 }
 
-// --- FUNCIONES DE DESTINOS ---
+async function actualizarContrasena(email, nuevaPassword) {
+  const user = await User.findOne({ email });
+  if (!user) throw new Error('No existe una cuenta con ese email');
+  
+  const passwordEncriptada = await bcrypt.hash(nuevaPassword, 10);
+  user.password = passwordEncriptada;
+  await user.save();
+  
+  return { mensaje: 'Contraseña actualizada correctamente' };
+}
+
 async function obtenerDestinosDeUsuario(userId) {
   return await Destino.find({ userId: userId.toString() }).sort({ fecha_creacion: 1 });
 }
@@ -68,6 +75,7 @@ async function borrarDestinosDeUsuario(userId) {
 module.exports = {
   registrarUsuario,
   loginUsuario,
+  actualizarContrasena,
   obtenerDestinosDeUsuario,
   agregarDestino,
   borrarDestino,
