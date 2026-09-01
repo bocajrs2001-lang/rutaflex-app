@@ -20,7 +20,7 @@ body {
   width: 100%;
   max-width: 480px;
   margin: 0 auto;
-  background: #ffffff;
+  background: linear-gradient(135deg, #0A2342 0%, #123A6B 100%);
   min-height: 100vh;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
 }
@@ -35,6 +35,10 @@ body {
 }
 
 /* Logo */
+.logo-container {
+  text-align: center;
+}
+
 .logo-circle {
   background: linear-gradient(135deg, #5BA9E0 0%, #8FE8FF 100%);
   border-radius: 50%;
@@ -48,9 +52,31 @@ body {
 }
 
 /* Formularios */
+input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
 input:focus {
   outline: none;
+  border-color: #5BA9E0;
+  background: rgba(255, 255, 255, 0.15);
   box-shadow: 0 0 0 3px rgba(91, 169, 224, 0.3);
+}
+
+/* Botones */
+button {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  transform: scale(1.02);
 }
 
 /* Animaciones */
@@ -68,4 +94,9 @@ input:focus {
   .app-container {
     max-width: 100%;
   }
+}
+
+/* Ocultar elementos */
+.hidden {
+  display: none !important;
 }
