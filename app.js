@@ -2,6 +2,7 @@ let destinos = [];
 let destinosDetectados = [];
 let inicioViaje = null;
 let tramoActual = 0;
+let emailRecuperacion = ""; // Variable temporal para guardar el email durante la recuperación
 
 function mostrarNotificacion(mensaje, tipo = 'info') {
   const contenedor = document.getElementById('notificaciones');
@@ -39,9 +40,9 @@ window.addEventListener('load', async () => {
   } catch (err) { console.log('No hay sesión activa'); }
 });
 
+// --- NAVEGACIÓN ENTRE PANTALLAS ---
 document.getElementById('tabLogin').addEventListener('click', () => {
-  document.getElementById('authScreen').classList.remove('hidden');
-  document.getElementById('recoverScreen').classList.add('hidden');
+  ocultarTodasLasPantallasExcepto('authScreen');
   document.getElementById('formLogin').classList.remove('hidden');
   document.getElementById('formRegistro').classList.add('hidden');
   document.getElementById('tabLogin').classList.add('text-accent', 'bg-white/10');
@@ -51,8 +52,7 @@ document.getElementById('tabLogin').addEventListener('click', () => {
 });
 
 document.getElementById('tabRegistro').addEventListener('click', () => {
-  document.getElementById('authScreen').classList.remove('hidden');
-  document.getElementById('recoverScreen').classList.add('hidden');
+  ocultarTodasLasPantallasExcepto('authScreen');
   document.getElementById('formRegistro').classList.remove('hidden');
   document.getElementById('formLogin').classList.add('hidden');
   document.getElementById('tabRegistro').classList.add('text-accent', 'bg-white/10');
@@ -62,16 +62,132 @@ document.getElementById('tabRegistro').addEventListener('click', () => {
 });
 
 document.getElementById('btnOlvideContrasena').addEventListener('click', () => {
-  document.getElementById('authScreen').classList.add('hidden');
-  document.getElementById('recoverScreen').classList.remove('hidden');
-  document.getElementById('recoverMessage').innerText = '';
+  ocultarTodasLasPantallasExcepto('recoverStep1');
+  document.getElementById('recoverEmailInput').value = document.getElementById('loginEmail').value || '';
+  document.getElementById('recoverMsg1').innerText = '';
 });
 
-document.getElementById('btnVolverLogin').addEventListener('click', () => {
-  document.getElementById('recoverScreen').classList.add('hidden');
-  document.getElementById('authScreen').classList.remove('hidden');
+document.getElementById('btnVolverLogin1').addEventListener('click', () => {
+  ocultarTodasLasPantallasExcepto('authScreen');
 });
 
+document.getElementById('btnReenviarCodigo').addEventListener('click', async () => {
+  await enviarCodigoRecuperacion();
+});
+
+function ocultarTodasLasPantallasExcepto(id) {
+  ['authScreen', 'recoverStep1', 'recoverStep2', 'recoverStep3', 'appScreen'].forEach(screen => {
+    document.getElementById(screen).classList.add('hidden');
+  });
+  document.getElementById(id).classList.remove('hidden');
+}
+
+// --- LÓGICA DE RECUPERACIÓN PASO 1: ENVIAR EMAIL ---
+async function enviarCodigoRecuperacion() {
+  const email = document.getElementById('recoverEmailInput').value;
+  const msg = document.getElementById('recoverMsg1');
+  
+  if (!email) {
+    msg.innerText = "Ingresá tu email";
+    msg.className = "text-center text-sm mt-4 font-bold text-red-300";
+    return;
+  }
+
+  msg.innerText = "Enviando código...";
+  msg.className = "text-center text-sm mt-4 font-bold text-blue-300";
+
+  try {
+    const res = await fetch('/api/enviar-codigo-recuperacion', { 
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json' }, 
+      body: JSON.stringify({ email }) 
+    });
+    const data = await res.json();
+    
+    if (res.ok) {
+      emailRecuperacion = email; // Guardamos el email para los siguientes pasos
+      mostrarNotificacion("📧 Código enviado a tu email", "exito");
+      ocultarTodasLasPantallasExcepto('recoverStep2');
+      document.getElementById('recoverMsg2').innerText = '';
+    } else {
+      msg.innerText = data.error;
+      msg.className = "text-center text-sm mt-4 font-bold text-red-300";
+    }
+  } catch (err) {
+    mostrarNotificacion("❌ Error de conexión", "error");
+  }
+}
+
+document.getElementById('formRecoverEmail').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  await enviarCodigoRecuperacion();
+});
+
+// --- LÓGICA DE RECUPERACIÓN PASO 2: VERIFICAR CÓDIGO ---
+document.getElementById('formRecoverCode').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const codigo = document.getElementById('recoverCodeInput').value;
+  const msg = document.getElementById('recoverMsg2');
+  
+  msg.innerText = "Verificando...";
+  msg.className = "text-center text-sm mt-4 font-bold text-blue-300";
+
+  try {
+    const res = await fetch('/api/verificar-codigo', { 
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json' }, 
+      body: JSON.stringify({ email: emailRecuperacion, codigo }) 
+    });
+    const data = await res.json();
+    
+    if (res.ok) {
+      mostrarNotificacion("✅ Código correcto", "exito");
+      ocultarTodasLasPantallasExcepto('recoverStep3');
+      document.getElementById('recoverMsg3').innerText = '';
+    } else {
+      msg.innerText = data.error;
+      msg.className = "text-center text-sm mt-4 font-bold text-red-300";
+    }
+  } catch (err) {
+    mostrarNotificacion("❌ Error de conexión", "error");
+  }
+});
+
+// --- LÓGICA DE RECUPERACIÓN PASO 3: CAMBIAR CONTRASEÑA ---
+document.getElementById('formNewPassword').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const nuevaPassword = document.getElementById('newPasswordInput').value;
+  const msg = document.getElementById('recoverMsg3');
+  
+  msg.innerText = "Guardando nueva contraseña...";
+  msg.className = "text-center text-sm mt-4 font-bold text-blue-300";
+
+  try {
+    const res = await fetch('/api/cambiar-contrasena-final', { 
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json' }, 
+      body: JSON.stringify({ email: emailRecuperacion, nuevaPassword }) 
+    });
+    const data = await res.json();
+    
+    if (res.ok) {
+      mostrarNotificacion(" ¡Contraseña cambiada!", "exito");
+      setTimeout(() => {
+        ocultarTodasLasPantallasExcepto('authScreen');
+        document.getElementById('loginEmail').value = emailRecuperacion;
+        document.getElementById('loginPassword').value = '';
+        emailRecuperacion = ""; // Limpiamos la variable
+      }, 2000);
+    } else {
+      msg.innerText = data.error;
+      msg.className = "text-center text-sm mt-4 font-bold text-red-300";
+    }
+  } catch (err) {
+    mostrarNotificacion("❌ Error de conexión", "error");
+  }
+});
+
+// --- AUTENTICACIÓN NORMAL ---
 document.getElementById('formRegistro').addEventListener('submit', async (e) => {
   e.preventDefault();
   const nombre = document.getElementById('regNombre').value;
@@ -121,39 +237,9 @@ document.getElementById('formLogin').addEventListener('submit', async (e) => {
   }
 });
 
-document.getElementById('formRecuperar').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = document.getElementById('recoverEmail').value;
-  const nuevaPassword = document.getElementById('recoverPassword').value;
-  const msg = document.getElementById('recoverMessage');
-  msg.innerText = "Actualizando contraseña...";
-  msg.className = "text-center text-sm mt-4 font-bold text-blue-300";
-
-  try {
-    const res = await fetch('/api/recuperar-contrasena', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ email, nuevaPassword }) });
-    const data = await res.json();
-    if (res.ok) {
-      mostrarNotificacion("✅ " + data.mensaje, "exito");
-      setTimeout(() => {
-        document.getElementById('recoverScreen').classList.add('hidden');
-        document.getElementById('authScreen').classList.remove('hidden');
-        document.getElementById('loginEmail').value = email;
-        document.getElementById('loginPassword').value = '';
-      }, 2000);
-    } else { 
-      msg.innerText = data.error; 
-      msg.className = "text-center text-sm mt-4 font-bold text-red-300"; 
-    }
-  } catch (err) { 
-    mostrarNotificacion("❌ Error de conexión con el servidor.", "error"); 
-  }
-});
-
 function mostrarApp(nombre) {
-  document.getElementById('authScreen').classList.add('hidden');
-  document.getElementById('recoverScreen').classList.add('hidden');
-  document.getElementById('appScreen').classList.remove('hidden');
-  document.getElementById('userName').innerText = `¡Hola, ${nombre}! `;
+  ocultarTodasLasPantallasExcepto('appScreen');
+  document.getElementById('userName').innerText = `¡Hola, ${nombre}! 👋`;
   cargarDestinos();
 }
 
@@ -165,14 +251,14 @@ document.getElementById('btnLogout').addEventListener('click', async () => {
 
 document.getElementById('btnPromo').addEventListener('click', async () => {
   const codigo = document.getElementById('promo').value;
-  if (!codigo) return mostrarNotificacion("️ Escribí un código primero.", "advertencia");
+  if (!codigo) return mostrarNotificacion("⚠️ Escribí un código primero.", "advertencia");
   
   const msg = document.getElementById('promoMessage');
   const res = await fetch('/api/validar-promo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ codigo }) });
   const data = await res.json();
   
   if (data.valido) { 
-    mostrarNotificacion("🎉 " + data.mensaje, "exito"); 
+    mostrarNotificacion(" " + data.mensaje, "exito"); 
     msg.className = "hidden"; 
   } else { 
     mostrarNotificacion("❌ " + data.mensaje, "error"); 
@@ -180,6 +266,7 @@ document.getElementById('btnPromo').addEventListener('click', async () => {
   }
 });
 
+// --- FUNCIONES DE LA APP (DESTINOS, IA, ETC) ---
 async function cargarDestinos() {
   try {
     const res = await fetch('/api/destinos', { credentials: 'include' });
@@ -200,22 +287,19 @@ document.getElementById('fileImg').addEventListener('change', async (e) => {
   btn.classList.add('opacity-75', 'cursor-not-allowed');
 
   try {
-    if (typeof Tesseract === 'undefined') {
-      throw new Error('Tesseract.js no está cargado.');
-    }
-    
+    if (typeof Tesseract === 'undefined') throw new Error('Tesseract.js no cargó.');
     const { data: { text } } = await Tesseract.recognize(file, 'spa', { logger: m => console.log(m) });
-    const lineas = text.split('\n').map(linea => linea.trim()).filter(linea => linea.length > 3);
+    const lineas = text.split('\n').map(l => l.trim()).filter(l => l.length > 3);
 
     if (lineas.length === 0) {
-      mostrarNotificacion("⚠️ No se detectó texto claro. Usá una foto más nítida.", "advertencia");
+      mostrarNotificacion("⚠️ No se detectó texto claro.", "advertencia");
     } else {
       destinosDetectados = lineas;
       mostrarModalEdicion();
     }
   } catch (error) {
-    console.error('Error en OCR:', error);
-    mostrarNotificacion("❌ Error al procesar la imagen. Revisá tu conexión.", "error");
+    console.error(error);
+    mostrarNotificacion("❌ Error al procesar imagen.", "error");
   } finally {
     btn.innerText = textoOriginal;
     btn.disabled = false;
@@ -227,18 +311,16 @@ document.getElementById('fileImg').addEventListener('change', async (e) => {
 function mostrarModalEdicion() {
   const contenedor = document.getElementById('contenedorInputs');
   contenedor.innerHTML = '';
-  
   if (destinosDetectados.length === 0) {
-    contenedor.innerHTML = '<p class="text-center text-gray-500 py-4">No hay direcciones para editar.</p>';
+    contenedor.innerHTML = '<p class="text-center text-gray-500 py-4">Sin direcciones.</p>';
   } else {
     destinosDetectados.forEach((dir, index) => {
       contenedor.innerHTML += `
         <div class="flex gap-2 items-center bg-gray-50 p-2 rounded-lg border border-gray-200">
           <span class="text-gray-400 font-bold text-sm w-6">${index + 1}.</span>
-          <input type="text" value="${dir.replace(/"/g, '&quot;')}" data-index="${index}" class="input-direccion flex-1 bg-transparent border-none p-1 text-sm text-gray-800 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#5BA4D9] rounded">
-          <button onclick="eliminarLinea(${index})" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-all">🗑️</button>
-        </div>
-      `;
+          <input type="text" value="${dir.replace(/"/g, '&quot;')}" class="input-direccion flex-1 bg-transparent border-none p-1 text-sm text-gray-800 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#5BA4D9] rounded">
+          <button onclick="eliminarLinea(${index})" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-all">️</button>
+        </div>`;
     });
   }
   document.getElementById('modalEdicion').classList.remove('hidden');
@@ -252,24 +334,16 @@ window.eliminarLinea = (index) => {
 document.getElementById('btnGuardarEdicion').addEventListener('click', async () => {
   const inputs = document.querySelectorAll('.input-direccion');
   const finales = Array.from(inputs).map(i => i.value.trim()).filter(v => v.length > 0);
-
-  if (finales.length === 0) {
-    mostrarNotificacion("⚠️ No hay direcciones válidas para guardar.", "advertencia");
-    return;
-  }
+  if (finales.length === 0) return mostrarNotificacion("⚠️ Sin direcciones válidas.", "advertencia");
 
   const btn = document.getElementById('btnGuardarEdicion');
-  btn.innerText = "Guardando...";
-  btn.disabled = true;
+  btn.innerText = "Guardando..."; btn.disabled = true;
 
-  for (const direccion of finales) {
-    await fetch('/api/destinos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ direccion }) });
-  }
+  for (const d of finales) await fetch('/api/destinos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ direccion: d }) });
 
-  btn.innerText = "✅ Guardar Todo";
-  btn.disabled = false;
+  btn.innerText = "✅ Guardar Todo"; btn.disabled = false;
   document.getElementById('modalEdicion').classList.add('hidden');
-  mostrarNotificacion("📍 Direcciones guardadas correctamente.", "exito");
+  mostrarNotificacion("📍 Direcciones guardadas.", "exito");
   await cargarDestinos();
 });
 
@@ -280,12 +354,11 @@ function renderLista() {
   const lista = document.getElementById('lista');
   lista.innerHTML = "";
   if (destinos.length === 0) {
-    lista.innerHTML = '<li class="text-center text-gray-400 py-4">No hay destinos. Cargá una foto para empezar.</li>';
+    lista.innerHTML = '<li class="text-center text-gray-400 py-4">No hay destinos. Cargá una foto.</li>';
     document.getElementById('btnViaje').classList.add('hidden');
     document.getElementById('count').innerText = 0;
     return;
   }
-  
   destinos.forEach((dir, i) => {
     setTimeout(() => {
       lista.innerHTML += `
@@ -295,11 +368,10 @@ function renderLista() {
             <b>${dir.direccion}</b><br>
             <span class="text-xs text-green-600">${dir.distancia} km • ~${dir.tiempo} min</span>
           </div>
-          <button onclick="borrarDestino(${dir.id})" class="text-red-500 text-xs px-2 hover:bg-red-50 rounded">️</button>
+          <button onclick="borrarDestino(${dir.id})" class="text-red-500 text-xs px-2 hover:bg-red-50 rounded">🗑️</button>
         </li>`;
     }, i * 80);
   });
-  
   document.getElementById('count').innerText = destinos.length;
   document.getElementById('btnViaje').classList.remove('hidden');
   inicioViaje = inicioViaje || new Date();
@@ -312,13 +384,8 @@ window.borrarDestino = async (id) => {
 };
 
 function limpiarDireccion(direccion) {
-  let limpia = direccion.replace(/^\d+\.\s*/, '');
-  limpia = limpia.replace(/\[GR\]\s*/i, '');
-  limpia = limpia.replace(/General\s+Rodríguez\s*,?\s*/gi, '');
-  limpia = limpia.trim();
-  if (!/General\s+Rodríguez/i.test(limpia)) {
-    limpia += ', General Rodríguez, Buenos Aires';
-  }
+  let limpia = direccion.replace(/^\d+\.\s*/, '').replace(/\[GR\]\s*/i, '').replace(/General\s+Rodríguez\s*,?\s*/gi, '').trim();
+  if (!/General\s+Rodríguez/i.test(limpia)) limpia += ', General Rodríguez, Buenos Aires';
   return limpia;
 }
 
@@ -360,7 +427,5 @@ async function abrirCamara() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
     video.srcObject = stream;
-  } catch (err) { 
-    mostrarNotificacion("📷 No se pudo acceder a la cámara.", "error"); 
-  }
+  } catch (err) { mostrarNotificacion(" No se pudo acceder a la cámara.", "error"); }
 }
