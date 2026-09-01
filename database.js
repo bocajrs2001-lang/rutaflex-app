@@ -24,34 +24,32 @@ const Destino = mongoose.model('Destino', destinoSchema);
 
 async function registrarUsuario(nombre, email, password) {
   const existe = await User.findOne({ email });
-  if (existe) throw new Error('Ese email ya está registrado');
-
-  const passwordEncriptada = await bcrypt.hash(password, 10);
-  const nuevoUsuario = new User({ nombre, email, password: passwordEncriptada });
-  await nuevoUsuario.save();
-  
-  return { id: nuevoUsuario._id, nombre: nuevoUsuario.nombre, email: nuevoUsuario.email };
+  if (existe) throw new Error('Email ya registrado');
+  const passHash = await bcrypt.hash(password, 10);
+  const u = new User({ nombre, email, password: passHash });
+  await u.save();
+  return { id: u._id, nombre: u.nombre, email: u.email };
 }
 
 async function loginUsuario(email, password) {
   const user = await User.findOne({ email });
   if (!user) throw new Error('Email o contraseña incorrectos');
-  
-  const esValida = await bcrypt.compare(password, user.password);
-  if (!esValida) throw new Error('Email o contraseña incorrectos');
-  
+  const ok = await bcrypt.compare(password, user.password);
+  if (!ok) throw new Error('Email o contraseña incorrectos');
   return { id: user._id, nombre: user.nombre, email: user.email };
+}
+
+// NUEVA FUNCIÓN PARA RECUPERACIÓN
+async function buscarUsuarioPorEmail(email) {
+  return await User.findOne({ email });
 }
 
 async function actualizarContrasena(email, nuevaPassword) {
   const user = await User.findOne({ email });
-  if (!user) throw new Error('No existe una cuenta con ese email');
-  
-  const passwordEncriptada = await bcrypt.hash(nuevaPassword, 10);
-  user.password = passwordEncriptada;
+  if (!user) throw new Error('Usuario no encontrado');
+  user.password = await bcrypt.hash(nuevaPassword, 10);
   await user.save();
-  
-  return { mensaje: 'Contraseña actualizada correctamente' };
+  return { mensaje: 'Contraseña actualizada' };
 }
 
 async function obtenerDestinosDeUsuario(userId) {
@@ -59,13 +57,13 @@ async function obtenerDestinosDeUsuario(userId) {
 }
 
 async function agregarDestino(userId, direccion) {
-  const nuevoDestino = new Destino({ userId: userId.toString(), direccion });
-  await nuevoDestino.save();
-  return nuevoDestino;
+  const d = new Destino({ userId: userId.toString(), direccion });
+  await d.save();
+  return d;
 }
 
-async function borrarDestino(destinoId, userId) {
-  await Destino.deleteOne({ _id: destinoId, userId: userId.toString() });
+async function borrarDestino(id, userId) {
+  await Destino.deleteOne({ _id: id, userId: userId.toString() });
 }
 
 async function borrarDestinosDeUsuario(userId) {
@@ -75,6 +73,7 @@ async function borrarDestinosDeUsuario(userId) {
 module.exports = {
   registrarUsuario,
   loginUsuario,
+  buscarUsuarioPorEmail, // Exportamos la nueva función
   actualizarContrasena,
   obtenerDestinosDeUsuario,
   agregarDestino,
