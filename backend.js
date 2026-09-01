@@ -19,11 +19,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ==========================================
-// 1. CONEXIÓN A MONGODB (USUARIO CORRECTO: Rutaflex2026)
+// 1. CONEXIÓN A MONGODB
 // ==========================================
-const MONGODB_URI = 'mongodb+srv://Rutaflex2026:Katty2026@rutaflexcluster.zx8uthr.mongodb.net/?appName=RutaflexCluster';
-
-mongoose.connect(MONGODB_URI)
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ Conectado a MongoDB Atlas (La Nube)'))
   .catch(err => console.error('❌ Error conectando a MongoDB:', err));
 
@@ -36,7 +34,7 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Servir archivos estáticos (HTML, CSS, JS del frontend)
+// Servir archivos estáticos
 app.use(express.static(path.join(__dirname)));
 
 // Configuración de sesiones
@@ -65,12 +63,27 @@ function usuarioLogueado(req, res, next) {
 // 4. RUTAS DE LA API
 // ==========================================
 
-// REGISTRO
+// REGISTRO CON VALIDACIÓN DE CONTRASEÑA SEGURA
 app.post('/api/registro', async (req, res) => {
   try {
     const { nombre, email, password } = req.body;
-    if (!nombre || !email || !password) return res.status(400).json({ error: 'Completa todos los campos' });
-    if (password.length < 6) return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+    if (!nombre || !email || !password) {
+      return res.status(400).json({ error: 'Completa todos los campos' });
+    }
+    
+    // 🔒 VALIDACIÓN DE CONTRASEÑA SEGURA
+    if (password.length < 8) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
+    }
+    if (!/[A-Z]/.test(password)) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 1 letra mayúscula' });
+    }
+    if (!/[0-9]/.test(password)) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 1 número' });
+    }
+    if (!/[!@#$%^&*]/.test(password)) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 1 carácter especial (!@#$%^&*)' });
+    }
     
     const usuario = await registrarUsuario(nombre, email, password);
     req.session.userId = usuario.id;
