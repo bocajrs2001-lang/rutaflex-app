@@ -3,18 +3,40 @@ const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
 const path = require('path');
-const { registrarUsuario, loginUsuario, obtenerDestinosDeUsuario, agregarDestino, borrarDestino, borrarDestinosDeUsuario } = require('./database');
+const mongoose = require('mongoose');
+
+// Importamos las funciones de la base de datos
+const { 
+  registrarUsuario, 
+  loginUsuario, 
+  obtenerDestinosDeUsuario, 
+  agregarDestino, 
+  borrarDestino, 
+  borrarDestinosDeUsuario 
+} = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ==========================================
+// 1. CONEXIÓN A MONGODB (USUARIO CORRECTO: Rutaflex2026)
+// ==========================================
+const MONGODB_URI = 'mongodb+srv://Rutaflex2026:Katty2026@rutaflexcluster.zx8uthr.mongodb.net/?appName=RutaflexCluster';
+
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('✅ Conectado a MongoDB Atlas (La Nube)'))
+  .catch(err => console.error('❌ Error conectando a MongoDB:', err));
+
+// ==========================================
+// 2. CONFIGURACIÓN DE MIDDLEWARES
+// ==========================================
 app.use(cors({ 
-  origin: ['http://127.0.0.1:5500', 'http://localhost:5500', 'http://localhost:3000'],
+  origin: ['http://127.0.0.1:5500', 'http://localhost:5500', 'http://localhost:3000', 'https://rutaflex-app.onrender.com'],
   credentials: true 
 }));
 app.use(express.json());
 
-// 🆕 NUEVA LÍNEA: Servir archivos estáticos (HTML, CSS, JS)
+// Servir archivos estáticos (HTML, CSS, JS del frontend)
 app.use(express.static(path.join(__dirname)));
 
 // Configuración de sesiones
@@ -25,11 +47,13 @@ app.use(session({
   cookie: { 
     maxAge: 7 * 24 * 60 * 60 * 1000,
     sameSite: 'lax',
-    secure: false
+    secure: false 
   }
 }));
 
-// Middleware: verifica si el usuario está logueado
+// ==========================================
+// 3. MIDDLEWARE DE SEGURIDAD
+// ==========================================
 function usuarioLogueado(req, res, next) {
   if (req.session && req.session.userId) {
     return next();
@@ -37,16 +61,17 @@ function usuarioLogueado(req, res, next) {
   res.status(401).json({ error: 'Debes iniciar sesión' });
 }
 
-// 📝 REGISTRO
+// ==========================================
+// 4. RUTAS DE LA API
+// ==========================================
+
+// REGISTRO
 app.post('/api/registro', async (req, res) => {
   try {
     const { nombre, email, password } = req.body;
-    if (!nombre || !email || !password) {
-      return res.status(400).json({ error: 'Completa todos los campos' });
-    }
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
-    }
+    if (!nombre || !email || !password) return res.status(400).json({ error: 'Completa todos los campos' });
+    if (password.length < 6) return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+    
     const usuario = await registrarUsuario(nombre, email, password);
     req.session.userId = usuario.id;
     req.session.nombre = usuario.nombre;
@@ -56,7 +81,7 @@ app.post('/api/registro', async (req, res) => {
   }
 });
 
-// 🔐 LOGIN
+// LOGIN
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -69,7 +94,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// 👤 VER QUIÉN ESTÁ LOGUEADO
+// VER QUIÉN ESTÁ LOGUEADO
 app.get('/api/yo', (req, res) => {
   if (req.session && req.session.userId) {
     res.json({ ok: true, nombre: req.session.nombre });
@@ -78,53 +103,70 @@ app.get('/api/yo', (req, res) => {
   }
 });
 
-// 🚪 CERRAR SESIÓN
+// CERRAR SESIÓN
 app.post('/api/logout', (req, res) => {
   req.session.destroy();
   res.json({ ok: true });
 });
 
-// 🎁 CÓDIGO PROMO
+// CÓDIGO PROMO
 app.post('/api/validar-promo', usuarioLogueado, (req, res) => {
   const { codigo } = req.body;
-  if (codigo === 'ALBERTO90') {
-    return res.json({ valido: true, mensaje: '¡7 días GRATIS activados!' });
+  if (codigo === 'ALBERTO90' || codigo === 'RUTAFLEX') {
+    return res.json({ valido: true, mensaje: '¡Código aplicado con éxito!' });
   }
   res.status(400).json({ valido: false, mensaje: 'Código inválido.' });
 });
 
-// 🆕 NUEVA RUTA: Cuando entres a localhost:3000, te muestra el index.html
-// 📍 OBTENER destinos del usuario logueado
-app.get('/api/destinos', usuarioLogueado, (req, res) => {
-  const destinos = obtenerDestinosDeUsuario(req.session.userId);
-  res.json(destinos);
+// OBTENER destinos
+app.get('/api/destinos', usuarioLogueado, async (req, res) => {
+  try {
+    const destinos = await obtenerDestinosDeUsuario(req.session.userId);
+    res.json(destinos);
+  } catch (err) {
+    res.status(500).json({ error: 'Error al obtener destinos' });
+  }
 });
 
-// ➕ AGREGAR un destino nuevo
-app.post('/api/destinos', usuarioLogueado, (req, res) => {
-  const { direccion } = req.body;
-  if (!direccion) return res.status(400).json({ error: 'Falta la dirección' });
-  const nuevo = agregarDestino(req.session.userId, direccion);
-  res.json(nuevo);
+// AGREGAR destino
+app.post('/api/destinos', usuarioLogueado, async (req, res) => {
+  try {
+    const { direccion } = req.body;
+    if (!direccion) return res.status(400).json({ error: 'Falta la dirección' });
+    const nuevo = await agregarDestino(req.session.userId, direccion);
+    res.json(nuevo);
+  } catch (err) {
+    res.status(500).json({ error: 'Error al agregar destino' });
+  }
 });
 
-// 🗑️ BORRAR un destino
-app.delete('/api/destinos/:id', usuarioLogueado, (req, res) => {
-  const destinoId = parseFloat(req.params.id);
-  borrarDestino(destinoId, req.session.userId);
-  res.json({ ok: true });
+// BORRAR un destino
+app.delete('/api/destinos/:id', usuarioLogueado, async (req, res) => {
+  try {
+    await borrarDestino(req.params.id, req.session.userId);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Error al borrar destino' });
+  }
 });
 
-// 🧹 BORRAR TODOS los destinos (para empezar de cero)
-app.delete('/api/destinos', usuarioLogueado, (req, res) => {
-  borrarDestinosDeUsuario(req.session.userId);
-  res.json({ ok: true });
+// BORRAR TODOS los destinos
+app.delete('/api/destinos', usuarioLogueado, async (req, res) => {
+  try {
+    await borrarDestinosDeUsuario(req.session.userId);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Error al borrar todos los destinos' });
+  }
 });
+
+// ==========================================
+// 5. RUTA PRINCIPAL Y ARRANQUE
+// ==========================================
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(PORT, () => {
   console.log(`✅ Backend RUTA FLEX corriendo en http://localhost:${PORT}`);
-  console.log(`🌐 Abre tu navegador en: http://localhost:${PORT}`);
 });
