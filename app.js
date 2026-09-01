@@ -33,7 +33,12 @@ document.getElementById('formRegistro').addEventListener('submit', async (e) => 
   msg.className = "text-center text-sm mt-4 font-bold text-blue-300";
 
   try {
-    const res = await fetch('/api/registro', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ nombre, email, password }) });
+    const res = await fetch('/api/registro', { 
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json' }, 
+      credentials: 'include', 
+      body: JSON.stringify({ nombre, email, password }) 
+    });
     const data = await res.json();
     if (res.ok) mostrarApp(data.usuario.nombre);
     else { msg.innerText = data.error; msg.className = "text-center text-sm mt-4 font-bold text-red-300"; }
@@ -49,7 +54,12 @@ document.getElementById('formLogin').addEventListener('submit', async (e) => {
   msg.className = "text-center text-sm mt-4 font-bold text-blue-300";
 
   try {
-    const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ email, password }) });
+    const res = await fetch('/api/login', { 
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json' }, 
+      credentials: 'include', 
+      body: JSON.stringify({ email, password }) 
+    });
     const data = await res.json();
     if (res.ok) mostrarApp(data.usuario.nombre);
     else { msg.innerText = data.error; msg.className = "text-center text-sm mt-4 font-bold text-red-300"; }
@@ -71,7 +81,12 @@ document.getElementById('btnLogout').addEventListener('click', async () => {
 document.getElementById('btnPromo').addEventListener('click', async () => {
   const codigo = document.getElementById('promo').value;
   const msg = document.getElementById('promoMessage');
-  const res = await fetch('/api/validar-promo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ codigo }) });
+  const res = await fetch('/api/validar-promo', { 
+    method: 'POST', 
+    headers: { 'Content-Type': 'application/json' }, 
+    credentials: 'include', 
+    body: JSON.stringify({ codigo }) 
+  });
   const data = await res.json();
   if (data.valido) { msg.innerText = data.mensaje; msg.className = "text-xs text-center mt-2 font-bold text-green-600"; }
   else { msg.innerText = data.mensaje; msg.className = "text-xs text-center mt-2 font-bold text-red-600"; }
@@ -109,7 +124,6 @@ document.getElementById('fileImg').addEventListener('change', async (e) => {
   try {
     console.log('📸 Iniciando OCR con archivo:', file.name, file.type, file.size);
     
-    // Verificar que Tesseract esté cargado
     if (typeof Tesseract === 'undefined') {
       throw new Error('Tesseract.js no está cargado. Recargá la página.');
     }
@@ -159,7 +173,7 @@ document.getElementById('fileImg').addEventListener('change', async (e) => {
   }
 });
 
-// 🆕 Funciones del Modal de Edición
+//  Funciones del Modal de Edición
 function mostrarModalEdicion() {
   const contenedor = document.getElementById('contenedorInputs');
   contenedor.innerHTML = '';
@@ -256,6 +270,25 @@ window.borrarDestino = async (id) => {
   await cargarDestinos();
 };
 
+// ==========================================
+// 🗺️ FUNCIÓN PARA LIMPIAR DIRECCIONES
+// ==========================================
+function limpiarDireccion(direccion) {
+  // Eliminar números al inicio (001., 002., etc.)
+  let limpia = direccion.replace(/^\d+\.\s*/, '');
+  // Eliminar [GR] o códigos similares entre corchetes
+  limpia = limpia.replace(/\[GR\]\s*/i, '');
+  // Eliminar "General Rodríguez" si ya está repetido
+  limpia = limpia.replace(/General\s+Rodríguez\s*,?\s*/gi, '');
+  // Eliminar espacios extras al inicio y final
+  limpia = limpia.trim();
+  // Agregar "General Rodríguez, Buenos Aires" si no lo tiene
+  if (!/General\s+Rodríguez/i.test(limpia)) {
+    limpia += ', General Rodríguez, Buenos Aires';
+  }
+  return limpia;
+}
+
 // --- 🗺️ BOTÓN COMENZAR VIAJE (CORREGIDO) ---
 document.getElementById('btnViaje').addEventListener('click', () => {
   const tramo = destinos.slice(tramoActual, tramoActual + 10);
@@ -267,17 +300,26 @@ document.getElementById('btnViaje').addEventListener('click', () => {
     return;
   }
   
+  // Origen fijo
   const origin = "General Rodriguez, Buenos Aires, Argentina";
   
-  if (tramo.length === 1) {
-    const destination = tramo[0].direccion;
+  // LIMPIAR todas las direcciones
+  const direccionesLimpias = tramo.map(d => limpiarDireccion(d.direccion));
+  
+  // Si hay solo 1 dirección, no usar waypoints
+  if (direccionesLimpias.length === 1) {
+    const destination = direccionesLimpias[0];
     const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&travelmode=driving`;
+    console.log('🗺️ URL de Google Maps (1 destino):', url);
     window.open(url, "_blank");
   } else {
-    const destination = tramo[tramo.length - 1].direccion;
-    const waypointsArray = tramo.slice(0, -1).map(d => encodeURIComponent(d.direccion));
+    // Múltiples direcciones: usar waypoints
+    const destination = direccionesLimpias[direccionesLimpias.length - 1];
+    const waypointsArray = direccionesLimpias.slice(0, -1).map(d => encodeURIComponent(d));
     const waypoints = waypointsArray.join('|');
     const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&waypoints=${waypoints}&travelmode=driving`;
+    console.log('🗺️ URL de Google Maps (múltiples):', url);
+    console.log(' Destinos limpios:', direccionesLimpias);
     window.open(url, "_blank");
   }
   
