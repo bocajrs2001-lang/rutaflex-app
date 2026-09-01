@@ -1,17 +1,12 @@
-// Variables globales
 let destinos = [];
 let destinosDetectados = [];
 let inicioViaje = null;
 let tramoActual = 0;
 
-// ==========================================
-// 🔔 SISTEMA DE NOTIFICACIONES ELEGANTES
-// ==========================================
 function mostrarNotificacion(mensaje, tipo = 'info') {
   const contenedor = document.getElementById('notificaciones');
   const notificacion = document.createElement('div');
   
-  // Colores según el tipo de mensaje
   let colores = 'bg-blue-600 text-white';
   if (tipo === 'exito') colores = 'bg-green-600 text-white';
   if (tipo === 'error') colores = 'bg-red-600 text-white';
@@ -22,7 +17,6 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
   
   contenedor.appendChild(notificacion);
   
-  // Desaparece solo después de 3.5 segundos
   setTimeout(() => {
     notificacion.style.opacity = '0';
     notificacion.style.transform = 'translate(-50%, -20px)';
@@ -31,8 +25,23 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
   }, 3500);
 }
 
-// --- AUTENTICACIÓN ---
+// Cargar email guardado al iniciar
+window.addEventListener('load', async () => {
+  const emailGuardado = localStorage.getItem('rutaflex_email');
+  if (emailGuardado) {
+    document.getElementById('loginEmail').value = emailGuardado;
+  }
+  
+  try {
+    const res = await fetch('/api/yo', { credentials: 'include' });
+    const data = await res.json();
+    if (data.ok) mostrarApp(data.nombre);
+  } catch (err) { console.log('No hay sesión activa'); }
+});
+
 document.getElementById('tabLogin').addEventListener('click', () => {
+  document.getElementById('authScreen').classList.remove('hidden');
+  document.getElementById('recoverScreen').classList.add('hidden');
   document.getElementById('formLogin').classList.remove('hidden');
   document.getElementById('formRegistro').classList.add('hidden');
   document.getElementById('tabLogin').classList.add('text-accent', 'bg-white/10');
@@ -42,12 +51,25 @@ document.getElementById('tabLogin').addEventListener('click', () => {
 });
 
 document.getElementById('tabRegistro').addEventListener('click', () => {
+  document.getElementById('authScreen').classList.remove('hidden');
+  document.getElementById('recoverScreen').classList.add('hidden');
   document.getElementById('formRegistro').classList.remove('hidden');
   document.getElementById('formLogin').classList.add('hidden');
   document.getElementById('tabRegistro').classList.add('text-accent', 'bg-white/10');
   document.getElementById('tabLogin').classList.remove('text-accent', 'bg-white/10');
   document.getElementById('tabLogin').classList.add('text-white/60');
   document.getElementById('authMessage').innerText = '';
+});
+
+document.getElementById('btnOlvideContrasena').addEventListener('click', () => {
+  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('recoverScreen').classList.remove('hidden');
+  document.getElementById('recoverMessage').innerText = '';
+});
+
+document.getElementById('btnVolverLogin').addEventListener('click', () => {
+  document.getElementById('recoverScreen').classList.add('hidden');
+  document.getElementById('authScreen').classList.remove('hidden');
 });
 
 document.getElementById('formRegistro').addEventListener('submit', async (e) => {
@@ -63,6 +85,7 @@ document.getElementById('formRegistro').addEventListener('submit', async (e) => 
     const res = await fetch('/api/registro', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ nombre, email, password }) });
     const data = await res.json();
     if (res.ok) {
+      localStorage.setItem('rutaflex_email', email);
       mostrarNotificacion("✅ ¡Cuenta creada con éxito!", "exito");
       setTimeout(() => mostrarApp(data.usuario.nombre), 1000);
     } else { 
@@ -70,7 +93,7 @@ document.getElementById('formRegistro').addEventListener('submit', async (e) => 
       msg.className = "text-center text-sm mt-4 font-bold text-red-300"; 
     }
   } catch (err) { 
-    mostrarNotificacion(" Error de conexión con el servidor.", "error"); 
+    mostrarNotificacion("❌ Error de conexión con el servidor.", "error"); 
   }
 });
 
@@ -86,6 +109,7 @@ document.getElementById('formLogin').addEventListener('submit', async (e) => {
     const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ email, password }) });
     const data = await res.json();
     if (res.ok) {
+      localStorage.setItem('rutaflex_email', email);
       mostrarNotificacion(`👋 ¡Bienvenido de nuevo, ${data.usuario.nombre}!`, "exito");
       setTimeout(() => mostrarApp(data.usuario.nombre), 1000);
     } else { 
@@ -93,12 +117,41 @@ document.getElementById('formLogin').addEventListener('submit', async (e) => {
       msg.className = "text-center text-sm mt-4 font-bold text-red-300"; 
     }
   } catch (err) { 
-    mostrarNotificacion(" Error de conexión con el servidor.", "error"); 
+    mostrarNotificacion("❌ Error de conexión con el servidor.", "error"); 
+  }
+});
+
+document.getElementById('formRecuperar').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('recoverEmail').value;
+  const nuevaPassword = document.getElementById('recoverPassword').value;
+  const msg = document.getElementById('recoverMessage');
+  msg.innerText = "Actualizando contraseña...";
+  msg.className = "text-center text-sm mt-4 font-bold text-blue-300";
+
+  try {
+    const res = await fetch('/api/recuperar-contrasena', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ email, nuevaPassword }) });
+    const data = await res.json();
+    if (res.ok) {
+      mostrarNotificacion("✅ " + data.mensaje, "exito");
+      setTimeout(() => {
+        document.getElementById('recoverScreen').classList.add('hidden');
+        document.getElementById('authScreen').classList.remove('hidden');
+        document.getElementById('loginEmail').value = email;
+        document.getElementById('loginPassword').value = '';
+      }, 2000);
+    } else { 
+      msg.innerText = data.error; 
+      msg.className = "text-center text-sm mt-4 font-bold text-red-300"; 
+    }
+  } catch (err) { 
+    mostrarNotificacion("❌ Error de conexión con el servidor.", "error"); 
   }
 });
 
 function mostrarApp(nombre) {
   document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('recoverScreen').classList.add('hidden');
   document.getElementById('appScreen').classList.remove('hidden');
   document.getElementById('userName').innerText = `¡Hola, ${nombre}! `;
   cargarDestinos();
@@ -112,7 +165,7 @@ document.getElementById('btnLogout').addEventListener('click', async () => {
 
 document.getElementById('btnPromo').addEventListener('click', async () => {
   const codigo = document.getElementById('promo').value;
-  if (!codigo) return mostrarNotificacion("⚠️ Escribí un código primero.", "advertencia");
+  if (!codigo) return mostrarNotificacion("️ Escribí un código primero.", "advertencia");
   
   const msg = document.getElementById('promoMessage');
   const res = await fetch('/api/validar-promo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ codigo }) });
@@ -126,16 +179,6 @@ document.getElementById('btnPromo').addEventListener('click', async () => {
     msg.className = "hidden"; 
   }
 });
-
-window.addEventListener('load', async () => {
-  try {
-    const res = await fetch('/api/yo', { credentials: 'include' });
-    const data = await res.json();
-    if (data.ok) mostrarApp(data.nombre);
-  } catch (err) { console.log('No hay sesión activa'); }
-});
-
-// ---  IA CON EDICIÓN (OCR REAL + REVISIÓN) ---
 
 async function cargarDestinos() {
   try {
@@ -152,7 +195,7 @@ document.getElementById('fileImg').addEventListener('change', async (e) => {
   const btn = document.getElementById('btnCargar');
   const textoOriginal = btn.innerText;
   
-  btn.innerText = " La IA está leyendo...";
+  btn.innerText = "🤖 La IA está leyendo...";
   btn.disabled = true;
   btn.classList.add('opacity-75', 'cursor-not-allowed');
 
@@ -172,7 +215,7 @@ document.getElementById('fileImg').addEventListener('change', async (e) => {
     }
   } catch (error) {
     console.error('Error en OCR:', error);
-    mostrarNotificacion(" Error al procesar la imagen. Revisá tu conexión.", "error");
+    mostrarNotificacion("❌ Error al procesar la imagen. Revisá tu conexión.", "error");
   } finally {
     btn.innerText = textoOriginal;
     btn.disabled = false;
@@ -211,7 +254,7 @@ document.getElementById('btnGuardarEdicion').addEventListener('click', async () 
   const finales = Array.from(inputs).map(i => i.value.trim()).filter(v => v.length > 0);
 
   if (finales.length === 0) {
-    mostrarNotificacion("️ No hay direcciones válidas para guardar.", "advertencia");
+    mostrarNotificacion("⚠️ No hay direcciones válidas para guardar.", "advertencia");
     return;
   }
 
@@ -233,7 +276,6 @@ document.getElementById('btnGuardarEdicion').addEventListener('click', async () 
 document.getElementById('btnCancelarEdicion').addEventListener('click', () => document.getElementById('modalEdicion').classList.add('hidden'));
 document.getElementById('btnCerrarModal').addEventListener('click', () => document.getElementById('modalEdicion').classList.add('hidden'));
 
-// --- LISTA DE DESTINOS ---
 function renderLista() {
   const lista = document.getElementById('lista');
   lista.innerHTML = "";
@@ -253,7 +295,7 @@ function renderLista() {
             <b>${dir.direccion}</b><br>
             <span class="text-xs text-green-600">${dir.distancia} km • ~${dir.tiempo} min</span>
           </div>
-          <button onclick="borrarDestino(${dir.id})" class="text-red-500 text-xs px-2 hover:bg-red-50 rounded">🗑️</button>
+          <button onclick="borrarDestino(${dir.id})" class="text-red-500 text-xs px-2 hover:bg-red-50 rounded">️</button>
         </li>`;
     }, i * 80);
   });
@@ -269,9 +311,6 @@ window.borrarDestino = async (id) => {
   await cargarDestinos();
 };
 
-// ==========================================
-// 🗺️ FUNCIÓN PARA LIMPIAR DIRECCIONES
-// ==========================================
 function limpiarDireccion(direccion) {
   let limpia = direccion.replace(/^\d+\.\s*/, '');
   limpia = limpia.replace(/\[GR\]\s*/i, '');
