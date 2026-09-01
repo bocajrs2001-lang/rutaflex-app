@@ -114,10 +114,10 @@
     <div class="p-4 border-t border-gray-100">
       <div class="flex justify-between items-center mb-3">
         <h3 class="font-black text-lg text-[#0A2342]">Tus destinos (<span id="count">0</span>)</h3>
-        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold">📍 Ordenados</span>
+        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold"> Ordenados</span>
       </div>
       <ul id="lista" class="space-y-2 text-sm"></ul>
-      <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg hover:bg-[#123A6B] transition-all">️ COMENZAR VIAJE</button>
+      <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg hover:bg-[#123A6B] transition-all">🗺️ COMENZAR VIAJE</button>
       <p class="text-center text-xs mt-2 text-gray-500">Se abrirá en Google Maps (de a 10)</p>
     </div>
 
@@ -129,7 +129,7 @@
           <div class="font-black text-xl text-[#0A2342]"><span id="statHoras">0</span></div>
         </div>
         <div class="text-center p-3 bg-white rounded-xl shadow-sm">
-          <div class="text-2xl mb-1">️</div><div class="text-[10px] text-gray-500 uppercase font-bold">KM</div>
+          <div class="text-2xl mb-1">🛣️</div><div class="text-[10px] text-gray-500 uppercase font-bold">KM</div>
           <div class="font-black text-xl text-[#0A2342]"><span id="statKm">0</span></div>
         </div>
         <div class="text-center p-3 bg-white rounded-xl shadow-sm">
@@ -162,6 +162,9 @@
       </div>
     </div>
   </div>
+
+  <!-- CONTENEDOR DE NOTIFICACIONES ELEGANTES -->
+  <div id="notificaciones" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-[100] flex flex-col gap-2 w-11/12 max-w-sm pointer-events-none"></div>
 
 </div>
 <script src="app.js"></script>
