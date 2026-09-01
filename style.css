@@ -100,3 +100,19 @@ button:hover {
 .hidden {
   display: none !important;
 }
+
+/* =========================================
+   ARREGLO DE CONTRASTE PARA BOTONES DE IA
+   ========================================= */
+/* Forzamos que los textos dentro de los botones blancos/grises sean oscuros */
+.bg-slate-50 div, 
+.bg-slate-50 span {
+  color: #0A2342 !important; 
+  font-weight: bold;
+}
+
+/* Asegurar que los iconos también se vean bien si tienen color */
+.bg-slate-50 svg, 
+.bg-slate-50 i {
+  color: #0A2342 !important;
+}
