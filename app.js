@@ -28,7 +28,7 @@ window.addEventListener('load', async () => {
   } catch (err) { console.log('No hay sesión activa'); }
 });
 
-// --- NAVEGACIÓN Y RECUPERACIÓN (Mismo código anterior) ---
+// NAVEGACIÓN Y RECUPERACIÓN
 document.getElementById('tabLogin').addEventListener('click', () => { ocultarTodasLasPantallasExcepto('authScreen'); document.getElementById('formLogin').classList.remove('hidden'); document.getElementById('formRegistro').classList.add('hidden'); document.getElementById('tabLogin').classList.add('text-accent', 'bg-white/10'); document.getElementById('tabRegistro').classList.remove('text-accent', 'bg-white/10'); document.getElementById('tabRegistro').classList.add('text-white/60'); document.getElementById('authMessage').innerText = ''; });
 document.getElementById('tabRegistro').addEventListener('click', () => { ocultarTodasLasPantallasExcepto('authScreen'); document.getElementById('formRegistro').classList.remove('hidden'); document.getElementById('formLogin').classList.add('hidden'); document.getElementById('tabRegistro').classList.add('text-accent', 'bg-white/10'); document.getElementById('tabLogin').classList.remove('text-accent', 'bg-white/10'); document.getElementById('tabLogin').classList.add('text-white/60'); document.getElementById('authMessage').innerText = ''; });
 document.getElementById('btnOlvideContrasena').addEventListener('click', () => { ocultarTodasLasPantallasExcepto('recoverStep1'); document.getElementById('recoverEmailInput').value = document.getElementById('loginEmail').value || ''; document.getElementById('recoverMsg1').innerText = ''; });
@@ -41,14 +41,14 @@ document.getElementById('formRecoverEmail').addEventListener('submit', async (e)
 document.getElementById('formRecoverCode').addEventListener('submit', async (e) => { e.preventDefault(); const codigo = document.getElementById('recoverCodeInput').value; const msg = document.getElementById('recoverMsg2'); msg.innerText = "Verificando..."; msg.className = "text-blue-300 font-bold text-sm mt-4 text-center"; try { const res = await fetch('/api/verificar-codigo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailRecuperacion, codigo }) }); const data = await res.json(); if (res.ok) { mostrarNotificacion("✅ Código correcto", "exito"); ocultarTodasLasPantallasExcepto('recoverStep3'); document.getElementById('recoverMsg3').innerText = ''; } else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; } } catch (err) { mostrarNotificacion("❌ Error", "error"); } });
 document.getElementById('formNewPassword').addEventListener('submit', async (e) => { e.preventDefault(); const nuevaPassword = document.getElementById('newPasswordInput').value; const msg = document.getElementById('recoverMsg3'); msg.innerText = "Guardando..."; msg.className = "text-blue-300 font-bold text-sm mt-4 text-center"; try { const res = await fetch('/api/cambiar-contrasena-final', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailRecuperacion, nuevaPassword }) }); const data = await res.json(); if (res.ok) { mostrarNotificacion("¡Contraseña cambiada!", "exito"); setTimeout(() => { ocultarTodasLasPantallasExcepto('authScreen'); document.getElementById('loginEmail').value = emailRecuperacion; document.getElementById('loginPassword').value = ''; emailRecuperacion = ""; }, 2000); } else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; } } catch (err) { mostrarNotificacion("❌ Error", "error"); } });
 
-// --- AUTENTICACIÓN ---
+// AUTENTICACIÓN
 document.getElementById('formRegistro').addEventListener('submit', async (e) => { e.preventDefault(); const nombre = document.getElementById('regNombre').value; const email = document.getElementById('regEmail').value; const password = document.getElementById('regPassword').value; const msg = document.getElementById('authMessage'); msg.innerText = "Creando cuenta..."; msg.className = "text-blue-300 font-bold text-sm mt-4 text-center"; try { const res = await fetch('/api/registro', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ nombre, email, password }) }); const data = await res.json(); if (res.ok) { localStorage.setItem('rutaflex_email', email); mostrarNotificacion("✅ ¡Cuenta creada!", "exito"); setTimeout(() => mostrarApp(data.usuario.nombre, data.usuario.fecha_vencimiento), 1000); } else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; } } catch (err) { mostrarNotificacion("❌ Error de conexión", "error"); } });
-document.getElementById('formLogin').addEventListener('submit', async (e) => { e.preventDefault(); const email = document.getElementById('loginEmail').value; const password = document.getElementById('loginPassword').value; const msg = document.getElementById('authMessage'); msg.innerText = "Ingresando..."; msg.className = "text-blue-300 font-bold text-sm mt-4 text-center"; try { const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ email, password }) }); const data = await res.json(); if (res.ok) { localStorage.setItem('rutaflex_email', email); mostrarNotificacion(`👋 ¡Bienvenido, ${data.usuario.nombre}!`, "exito"); setTimeout(() => mostrarApp(data.usuario.nombre, data.usuario.fecha_vencimiento), 1000); } else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; } } catch (err) { mostrarNotificacion("❌ Error de conexión", "error"); } });
+document.getElementById('formLogin').addEventListener('submit', async (e) => { e.preventDefault(); const email = document.getElementById('loginEmail').value; const password = document.getElementById('loginPassword').value; const msg = document.getElementById('authMessage'); msg.innerText = "Ingresando..."; msg.className = "text-blue-300 font-bold text-sm mt-4 text-center"; try { const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ email, password }) }); const data = await res.json(); if (res.ok) { localStorage.setItem('rutaflex_email', email); mostrarNotificacion(`👋 ¡Bienvenido, ${data.usuario.nombre}!`, "exito"); setTimeout(() => mostrarApp(data.usuario.nombre, data.usuario.fecha_vencimiento), 1000); } else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; } } catch (err) { mostrarNotificacion(" Error de conexión", "error"); } });
 
-// FUNCIÓN PRINCIPAL DE LA APP CON CONTADOR Y ALERTAS
+// LÓGICA PRINCIPAL DE LA APP
 function mostrarApp(nombre, fechaVencimiento) {
   ocultarTodasLasPantallasExcepto('appScreen');
-  document.getElementById('userName').innerText = `¡Hola, ${nombre}! 👋`;
+  document.getElementById('userName').innerText = `¡Hola, ${nombre}! `;
   
   const contadorEl = document.getElementById('contadorDias');
   const bannerVencido = document.getElementById('bannerVencido');
@@ -61,7 +61,6 @@ function mostrarApp(nombre, fechaVencimiento) {
   const diffTime = venc - hoy;
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
 
-  // RESET VISUAL
   bannerVencido.classList.add('hidden');
   alertaProximo.classList.add('hidden');
   seccionDestinos.style.opacity = "1";
@@ -71,7 +70,6 @@ function mostrarApp(nombre, fechaVencimiento) {
   estaVencido = false;
 
   if (!fechaVencimiento || diffDays <= 0) {
-    // CASO 1: VENCIDO
     estaVencido = true;
     contadorEl.innerText = "⚠️ VENCIDO";
     contadorEl.className = "text-xs font-bold mt-1 px-2 py-0.5 rounded-full inline-block bg-red-600 text-white";
@@ -84,17 +82,16 @@ function mostrarApp(nombre, fechaVencimiento) {
     
     document.getElementById('lista').innerHTML = '<li class="text-center text-red-500 py-4 font-bold">Renová tu plan para ver y usar tus destinos.</li>';
     document.getElementById('count').innerText = "-";
+    document.getElementById('btnViaje').classList.add('hidden'); // Ocultar botón de viaje si está vencido
     mostrarNotificacion("Tu plan está vencido. Renová abajo 👇", "advertencia");
 
   } else if (diffDays <= 1) {
-    // CASO 2: VENCE EN MENOS DE 24HS (ALERTA AMARILLA)
     contadorEl.innerText = `⏳ Vence en ${diffDays} día${diffDays !== 1 ? 's' : ''}`;
     contadorEl.className = "text-xs font-bold mt-1 px-2 py-0.5 rounded-full inline-block bg-yellow-500 text-[#0A2342] animate-pulse";
     alertaProximo.classList.remove('hidden');
-    cargarDestinos(); // Aún puede usarlo hoy
+    cargarDestinos();
 
   } else {
-    // CASO 3: ACTIVO NORMAL
     contadorEl.innerText = `✅ Activo (${diffDays} días)`;
     contadorEl.className = "text-xs font-bold mt-1 px-2 py-0.5 rounded-full inline-block bg-green-500 text-white";
     cargarDestinos();
@@ -103,7 +100,6 @@ function mostrarApp(nombre, fechaVencimiento) {
 
 document.getElementById('btnLogout').addEventListener('click', async () => { await fetch('/api/logout', { method: 'POST', credentials: 'include' }); mostrarNotificacion("👋 Sesión cerrada.", "info"); setTimeout(() => location.reload(), 1000); });
 
-// SIMULACIÓN DE PAGO (Para probar sin MP real)
 window.simularPago = async (plan) => {
   mostrarNotificacion("Procesando pago...", "info");
   try {
@@ -129,21 +125,21 @@ document.getElementById('btnCancelarSub').addEventListener('click', async () => 
 
 document.getElementById('btnPromo').addEventListener('click', async () => { const codigo = document.getElementById('promo').value; if (!codigo) return mostrarNotificacion("⚠️ Escribí un código.", "advertencia"); const msg = document.getElementById('promoMessage'); const res = await fetch('/api/validar-promo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ codigo }) }); const data = await res.json(); if (data.valido) { mostrarNotificacion(" " + data.mensaje, "exito"); msg.className = "hidden"; } else { mostrarNotificacion("❌ " + data.mensaje, "error"); msg.className = "hidden"; } });
 
-// --- FUNCIONES DE LA APP (Bloqueadas si está vencido) ---
+// FUNCIONES DE LA APP
 async function cargarDestinos() { if (estaVencido) return; try { const res = await fetch('/api/destinos', { credentials: 'include' }); destinos = await res.json(); renderLista(); } catch (err) { console.error('Error cargando destinos:', err); } }
 
 document.getElementById('fileImg').addEventListener('change', async (e) => {
   if (estaVencido) { mostrarNotificacion("️ Plan vencido. Renová para usar IA.", "advertencia"); e.target.value = ''; return; }
   const file = e.target.files[0]; if (!file) return;
   const btn = document.getElementById('btnCargar'); const textoOriginal = btn.innerText;
-  btn.innerText = " La IA está leyendo..."; btn.disabled = true; btn.classList.add('opacity-75', 'cursor-not-allowed');
+  btn.innerText = "🤖 La IA está leyendo..."; btn.disabled = true; btn.classList.add('opacity-75', 'cursor-not-allowed');
   try {
     if (typeof Tesseract === 'undefined') throw new Error('Tesseract.js no cargó.');
     const { data: { text } } = await Tesseract.recognize(file, 'spa', { logger: m => console.log(m) });
     const lineas = text.split('\n').map(l => l.trim()).filter(l => l.length > 3);
-    if (lineas.length === 0) mostrarNotificacion("️ No se detectó texto claro.", "advertencia");
+    if (lineas.length === 0) mostrarNotificacion("⚠️ No se detectó texto claro.", "advertencia");
     else { destinosDetectados = lineas; mostrarModalEdicion(); }
-  } catch (error) { console.error(error); mostrarNotificacion(" Error al procesar imagen.", "error"); } 
+  } catch (error) { console.error(error); mostrarNotificacion("❌ Error al procesar imagen.", "error"); } 
   finally { btn.innerText = textoOriginal; btn.disabled = false; btn.classList.remove('opacity-75', 'cursor-not-allowed'); e.target.value = ''; }
 });
 
@@ -163,8 +159,8 @@ document.getElementById('btnGuardarEdicion').addEventListener('click', async () 
 document.getElementById('btnCancelarEdicion').addEventListener('click', () => document.getElementById('modalEdicion').classList.add('hidden'));
 document.getElementById('btnCerrarModal').addEventListener('click', () => document.getElementById('modalEdicion').classList.add('hidden'));
 
-function renderLista() { const lista = document.getElementById('lista'); lista.innerHTML = ""; if (destinos.length === 0) { lista.innerHTML = '<li class="text-center text-gray-400 py-4">No hay destinos. Cargá una foto.</li>'; document.getElementById('btnViaje').classList.add('hidden'); document.getElementById('count').innerText = 0; return; } destinos.forEach((dir, i) => { setTimeout(() => { lista.innerHTML += `<li class="flex gap-2 border-b py-2 items-center"><span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">🏠</span><div class="flex-1"><b>${dir.direccion}</b><br><span class="text-xs text-green-600">${dir.distancia} km • ~${dir.tiempo} min</span></div><button onclick="borrarDestino(${dir.id})" class="text-red-500 text-xs px-2 hover:bg-red-50 rounded">🗑️</button></li>`; }, i * 80); }); document.getElementById('count').innerText = destinos.length; document.getElementById('btnViaje').classList.remove('hidden'); inicioViaje = inicioViaje || new Date(); }
-window.borrarDestino = async (id) => { if (estaVencido) return mostrarNotificacion("⚠️ Plan vencido.", "advertencia"); await fetch(`/api/destinos/${id}`, { method: 'DELETE', credentials: 'include' }); mostrarNotificacion("🗑️ Destino eliminado.", "info"); await cargarDestinos(); };
+function renderLista() { const lista = document.getElementById('lista'); lista.innerHTML = ""; if (destinos.length === 0) { lista.innerHTML = '<li class="text-center text-gray-400 py-4">No hay destinos. Cargá una foto.</li>'; document.getElementById('btnViaje').classList.add('hidden'); document.getElementById('count').innerText = 0; return; } destinos.forEach((dir, i) => { setTimeout(() => { lista.innerHTML += `<li class="flex gap-2 border-b py-2 items-center"><span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"></span><div class="flex-1"><b>${dir.direccion}</b><br><span class="text-xs text-green-600">${dir.distancia} km • ~${dir.tiempo} min</span></div><button onclick="borrarDestino(${dir.id})" class="text-red-500 text-xs px-2 hover:bg-red-50 rounded">🗑️</button></li>`; }, i * 80); }); document.getElementById('count').innerText = destinos.length; document.getElementById('btnViaje').classList.remove('hidden'); inicioViaje = inicioViaje || new Date(); }
+window.borrarDestino = async (id) => { if (estaVencido) return mostrarNotificacion("⚠️ Plan vencido.", "advertencia"); await fetch(`/api/destinos/${id}`, { method: 'DELETE', credentials: 'include' }); mostrarNotificacion("️ Destino eliminado.", "info"); await cargarDestinos(); };
 
 function limpiarDireccion(direccion) { let limpia = direccion.replace(/^\d+\.\s*/, '').replace(/\[GR\]\s*/i, '').replace(/General\s+Rodríguez\s*,?\s*/gi, '').trim(); if (!/General\s+Rodríguez/i.test(limpia)) limpia += ', General Rodríguez, Buenos Aires'; return limpia; }
 
@@ -177,14 +173,14 @@ document.getElementById('btnViaje').addEventListener('click', () => {
   let url = '';
   if (direccionesLimpias.length === 1) url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(direccionesLimpias[0])}&travelmode=driving`;
   else { const destination = direccionesLimpias[direccionesLimpias.length - 1]; const waypoints = direccionesLimpias.slice(0, -1).map(d => encodeURIComponent(d)).join('|'); url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&waypoints=${waypoints}&travelmode=driving`; }
-  mostrarNotificacion("️ Abriendo Google Maps...", "info"); window.open(url, "_blank");
+  mostrarNotificacion("🗺️ Abriendo Google Maps...", "info"); window.open(url, "_blank");
   tramoActual += 10; const siguiente = tramoActual + 10;
-  document.getElementById('btnViaje').innerText = tramoActual < destinos.length ? `SIGUIENTE TRAMO (${tramoActual + 1} a ${Math.min(siguiente, destinos.length)})` : " VER ESTADISTICAS FINALES";
+  document.getElementById('btnViaje').innerText = tramoActual < destinos.length ? `SIGUIENTE TRAMO (${tramoActual + 1} a ${Math.min(siguiente, destinos.length)})` : "🏆 VER ESTADISTICAS FINALES";
 });
 
 async function abrirCamara() {
   if (estaVencido) return mostrarNotificacion("⚠️ Plan vencido.", "advertencia");
   const video = document.getElementById('camara'); video.classList.remove('hidden');
   try { const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }); video.srcObject = stream; } 
-  catch (err) { mostrarNotificacion(" No se pudo acceder a la cámara.", "error"); }
+  catch (err) { mostrarNotificacion("📷 No se pudo acceder a la cámara.", "error"); }
 }
