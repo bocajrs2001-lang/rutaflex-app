@@ -11,11 +11,10 @@
 <body>
 <div class="app-container">
   
-  <!-- PANTALLA DE LOGIN / REGISTRO -->
+  <!-- LOGIN / REGISTRO -->
   <div id="authScreen" class="min-h-screen flex flex-col justify-center items-center text-center p-8">
      <div class="logo-container mb-8">
         <div class="logo-circle flex items-center justify-center mb-6">
-           <!-- NUEVO LOGO RUTA CON NODOS -->
            <svg width="160" height="160" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
               <circle cx="256" cy="256" r="240" fill="#5BA9E0"/>
               <path d="M 360 180 H 200 C 160 180 160 256 200 256 H 312 C 352 256 352 332 312 332 H 152" 
@@ -51,67 +50,27 @@
      <p id="authMessage" class="text-center text-sm mt-4 font-bold text-red-300"></p>
   </div>
 
-  <!-- PANTALLAS DE RECUPERACIÓN (Paso 1, 2, 3) -->
+  <!-- RECUPERACIÓN (Pasos 1, 2, 3) -->
   <div id="recoverStep1" class="hidden min-h-screen flex flex-col justify-center items-center text-center p-8">
-    <div class="logo-container mb-8">
-       <div class="logo-circle flex items-center justify-center mb-6">
-          <!-- NUEVO LOGO RUTA CON NODOS -->
-          <svg width="160" height="160" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-             <circle cx="256" cy="256" r="240" fill="#5BA9E0"/>
-             <path d="M 360 180 H 200 C 160 180 160 256 200 256 H 312 C 352 256 352 332 312 332 H 152" 
-                   fill="none" stroke="#8FE8FF" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
-             <circle cx="360" cy="180" r="24" fill="#5BA9E0" stroke="#8FE8FF" stroke-width="32"/>
-             <circle cx="152" cy="332" r="24" fill="#5BA9E0" stroke="#8FE8FF" stroke-width="32"/>
-          </svg>
-       </div>
-       <h1 class="text-4xl font-black text-accent tracking-wider mb-2">RUTAFLEX</h1>
-       <p class="text-white text-lg font-light opacity-90">Recuperar cuenta</p>
-    </div>
+    <div class="logo-container mb-8"><div class="logo-circle flex items-center justify-center mb-6"><svg width="160" height="160" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><circle cx="256" cy="256" r="240" fill="#5BA9E0"/><path d="M 360 180 H 200 C 160 180 160 256 200 256 H 312 C 352 256 352 332 312 332 H 152" fill="none" stroke="#8FE8FF" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/><circle cx="360" cy="180" r="24" fill="#5BA9E0" stroke="#8FE8FF" stroke-width="32"/><circle cx="152" cy="332" r="24" fill="#5BA9E0" stroke="#8FE8FF" stroke-width="32"/></svg></div><h1 class="text-4xl font-black text-accent tracking-wider mb-2">RUTAFLEX</h1><p class="text-white text-lg font-light opacity-90">Recuperar cuenta</p></div>
     <form id="formRecoverEmail" class="space-y-4 w-full max-w-sm"><p class="text-white/80 text-sm mb-4">Ingresá tu email para recibir un código.</p><input type="email" id="recoverEmailInput" placeholder="tu@email.com" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-accent" required><button type="submit" class="w-full bg-accent text-[#0A2342] font-black py-3.5 rounded-xl hover:bg-white transition-all shadow-lg">ENVIAR CÓDIGO</button><button type="button" id="btnVolverLogin1" class="w-full text-white/60 text-sm hover:text-white underline">Volver al inicio</button></form><p id="recoverMsg1" class="text-center text-sm mt-4 font-bold"></p>
   </div>
 
   <div id="recoverStep2" class="hidden min-h-screen flex flex-col justify-center items-center text-center p-8">
-    <div class="logo-container mb-8">
-       <div class="logo-circle flex items-center justify-center mb-6">
-          <!-- NUEVO LOGO RUTA CON NODOS -->
-          <svg width="160" height="160" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-             <circle cx="256" cy="256" r="240" fill="#5BA9E0"/>
-             <path d="M 360 180 H 200 C 160 180 160 256 200 256 H 312 C 352 256 352 332 312 332 H 152" 
-                   fill="none" stroke="#8FE8FF" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
-             <circle cx="360" cy="180" r="24" fill="#5BA9E0" stroke="#8FE8FF" stroke-width="32"/>
-             <circle cx="152" cy="332" r="24" fill="#5BA9E0" stroke="#8FE8FF" stroke-width="32"/>
-          </svg>
-       </div>
-       <h1 class="text-4xl font-black text-accent tracking-wider mb-2">RUTAFLEX</h1>
-       <p class="text-white text-lg font-light opacity-90">Verificar identidad</p>
-    </div>
+    <div class="logo-container mb-8"><div class="logo-circle flex items-center justify-center mb-6"><svg width="160" height="160" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><circle cx="256" cy="256" r="240" fill="#5BA9E0"/><path d="M 360 180 H 200 C 160 180 160 256 200 256 H 312 C 352 256 352 332 312 332 H 152" fill="none" stroke="#8FE8FF" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/><circle cx="360" cy="180" r="24" fill="#5BA9E0" stroke="#8FE8FF" stroke-width="32"/><circle cx="152" cy="332" r="24" fill="#5BA9E0" stroke="#8FE8FF" stroke-width="32"/></svg></div><h1 class="text-4xl font-black text-accent tracking-wider mb-2">RUTAFLEX</h1><p class="text-white text-lg font-light opacity-90">Verificar identidad</p></div>
     <form id="formRecoverCode" class="space-y-4 w-full max-w-sm"><p class="text-white/80 text-sm mb-4">Ingresá el código de 6 dígitos.</p><input type="text" id="recoverCodeInput" placeholder="123456" maxlength="6" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-accent text-center text-2xl font-mono tracking-widest" required><button type="submit" class="w-full bg-[#10b981] text-white font-black py-3.5 rounded-xl hover:bg-[#059669] transition-all shadow-lg">VERIFICAR</button><button type="button" id="btnReenviarCodigo" class="w-full text-accent text-sm hover:text-white underline">Reenviar código</button></form><p id="recoverMsg2" class="text-center text-sm mt-4 font-bold"></p>
   </div>
 
   <div id="recoverStep3" class="hidden min-h-screen flex flex-col justify-center items-center text-center p-8">
-    <div class="logo-container mb-8">
-       <div class="logo-circle flex items-center justify-center mb-6">
-          <!-- NUEVO LOGO RUTA CON NODOS -->
-          <svg width="160" height="160" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-             <circle cx="256" cy="256" r="240" fill="#5BA9E0"/>
-             <path d="M 360 180 H 200 C 160 180 160 256 200 256 H 312 C 352 256 352 332 312 332 H 152" 
-                   fill="none" stroke="#8FE8FF" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
-             <circle cx="360" cy="180" r="24" fill="#5BA9E0" stroke="#8FE8FF" stroke-width="32"/>
-             <circle cx="152" cy="332" r="24" fill="#5BA9E0" stroke="#8FE8FF" stroke-width="32"/>
-          </svg>
-       </div>
-       <h1 class="text-4xl font-black text-accent tracking-wider mb-2">RUTAFLEX</h1>
-       <p class="text-white text-lg font-light opacity-90">Nueva contraseña</p>
-    </div>
+    <div class="logo-container mb-8"><div class="logo-circle flex items-center justify-center mb-6"><svg width="160" height="160" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><circle cx="256" cy="256" r="240" fill="#5BA9E0"/><path d="M 360 180 H 200 C 160 180 160 256 200 256 H 312 C 352 256 352 332 312 332 H 152" fill="none" stroke="#8FE8FF" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/><circle cx="360" cy="180" r="24" fill="#5BA9E0" stroke="#8FE8FF" stroke-width="32"/><circle cx="152" cy="332" r="24" fill="#5BA9E0" stroke="#8FE8FF" stroke-width="32"/></svg></div><h1 class="text-4xl font-black text-accent tracking-wider mb-2">RUTAFLEX</h1><p class="text-white text-lg font-light opacity-90">Nueva contraseña</p></div>
     <form id="formNewPassword" class="space-y-4 w-full max-w-sm"><p class="text-white/80 text-sm mb-4">Creá una contraseña segura.</p><input type="password" id="newPasswordInput" placeholder="Nueva contraseña" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-accent" required minlength="8"><p class="text-xs text-white/50 mt-1 text-left">Mín. 8 car., 1 Mayús, 1 Núm, 1 Símbolo</p><button type="submit" class="w-full bg-[#10b981] text-white font-black py-3.5 rounded-xl hover:bg-[#059669] transition-all shadow-lg">GUARDAR CONTRASEÑA</button></form><p id="recoverMsg3" class="text-center text-sm mt-4 font-bold"></p>
   </div>
 
-  <!-- PANTALLA PRINCIPAL (APP) -->
+  <!-- APP PRINCIPAL -->
   <div id="appScreen" class="hidden">
     <header class="p-4 flex justify-between items-center">
       <div class="flex items-center gap-2">
          <div class="w-10 h-10 rounded-full overflow-hidden">
-            <!-- NUEVO LOGO RUTA CON NODOS (Versión pequeña) -->
             <svg width="40" height="40" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
                <circle cx="256" cy="256" r="240" fill="#5BA9E0"/>
                <path d="M 360 180 H 200 C 160 180 160 256 200 256 H 312 C 352 256 352 332 312 332 H 152" 
@@ -132,15 +91,8 @@
       </div>
     </header>
 
-    <!-- ALERTA DE VENCIMIENTO PRÓXIMO (24HS) -->
-    <div id="alertaProximoVencimiento" class="hidden bg-yellow-500 text-[#0A2342] p-3 text-center font-bold animate-pulse border-b-2 border-yellow-600">
-      ⚠️ ¡TU PLAN VENCE MAÑANA! Renová ahora para no perder tus rutas.
-    </div>
-
-    <!-- BANNER DE SUSCRIPCIÓN VENCIDA -->
-    <div id="bannerVencido" class="hidden bg-red-600 text-white p-4 text-center font-bold animate-pulse border-b-2 border-red-800">
-      🔒 TU PLAN ESTÁ VENCIDO. RENOVÁ PARA USAR EL SERVICIO.
-    </div>
+    <div id="alertaProximoVencimiento" class="hidden bg-yellow-500 text-[#0A2342] p-3 text-center font-bold animate-pulse border-b-2 border-yellow-600">️ ¡TU PLAN VENCE MAÑANA! Renová ahora.</div>
+    <div id="bannerVencido" class="hidden bg-red-600 text-white p-4 text-center font-bold animate-pulse border-b-2 border-red-800">🔒 TU PLAN ESTÁ VENCIDO. RENOVÁ PARA USAR EL SERVICIO.</div>
 
     <div class="p-6 bg-gradient-to-b from-slate-50 to-white">
       <div class="text-center mb-6">
@@ -149,20 +101,18 @@
         <p class="text-xs text-gray-500 mt-1">Sistema anti-trucho activado</p>
       </div>
       
-      <!-- LINKS DE PAGO CON PRECIO ACTUALIZADO Y COHETE AGREGADO -->
       <div class="grid grid-cols-2 gap-3">
         <a href="https://mpago.la/2GBap39" target="_blank" onclick="simularPago('semanal')" class="block p-4 rounded-xl text-center font-bold text-white shadow-md hover:-translate-y-1 transition-transform cursor-pointer" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
           <div class="text-2xl mb-1">⚡</div><div class="text-xs opacity-90">SEMANAL</div><div class="text-lg font-black">$4.990</div>
         </a>
         <a href="https://mpago.la/15dUJdh" target="_blank" onclick="simularPago('mensual')" class="block p-4 rounded-xl text-center font-bold text-white shadow-md hover:-translate-y-1 transition-transform relative cursor-pointer" style="background: linear-gradient(135deg, #1e40af 0%, #0A2342 100%);">
           <div class="absolute -top-2 -right-2 bg-yellow-400 text-[#0A2342] text-[10px] font-black px-2 py-1 rounded-full shadow-sm">POPULAR</div>
-          <div class="text-2xl mb-1">🚀</div>
+          <div class="text-2xl mb-1"></div>
           <div class="text-xs opacity-90">MENSUAL</div>
           <div class="text-lg font-black">$14.990</div>
         </a>
       </div>
       
-      <!-- INPUT CORREGIDO CON COLOR VISIBLE -->
       <div class="flex gap-2 mt-4">
         <input id="promo" placeholder="Código promocional" class="flex-1 border border-gray-300 p-2 rounded-xl text-sm text-[#0A2342] font-bold focus:outline-none focus:border-[#5BA4D9] placeholder-gray-400">
         <button id="btnPromo" class="bg-[#0A2342] text-white px-4 rounded-xl text-sm font-bold hover:bg-[#123A6B] transition-all">Aplicar</button>
@@ -170,11 +120,9 @@
       <p id="promoMessage" class="text-xs text-center mt-2 font-bold"></p>
     </div>
 
-    <!-- SECCIÓN DE DESTINOS (Se deshabilita si está vencido) -->
     <div id="seccionDestinos" class="p-4 border-t border-gray-100 transition-opacity duration-300">
       <button id="btnCargar" class="w-full bg-[#10b981] text-white font-black py-4 rounded-2xl text-xl shadow-lg hover:bg-[#059669] transition-all">+ CARGAR DESTINOS</button>
       <h3 class="font-bold text-[#0A2342] mt-6 mb-3">Agregar destinos con IA</h3>
-      <!-- ICONOS RESTAURADOS -->
       <div class="grid grid-cols-2 gap-3">
         <label class="bg-slate-50 border-2 border-dashed border-slate-300 p-4 rounded-xl cursor-pointer text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all">
           <div class="text-2xl mb-1">📷</div><div>Imagen / Foto</div><input type="file" id="fileImg" accept="image/*" hidden>
@@ -183,7 +131,7 @@
           <div class="text-2xl mb-1">📄</div><div>PDF (Próximamente)</div><input type="file" id="filePdf" accept=".pdf" hidden disabled>
         </label>
         <button onclick="abrirCamara()" class="bg-slate-50 border-2 border-dashed border-slate-300 p-4 rounded-xl text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all">
-          <div class="text-2xl mb-1"></div><div>Cámara</div>
+          <div class="text-2xl mb-1">📸</div><div>Cámara</div>
         </button>
         <button onclick="alert('QR Scanner en desarrollo')" class="bg-slate-50 border-2 border-dashed border-slate-300 p-4 rounded-xl text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all">
           <div class="text-2xl mb-1">🔳</div><div>Escanear QR</div>
@@ -212,10 +160,10 @@
     </div>
   </div>
 
-  <!-- MODAL DE EDICIÓN DE IA -->
+  <!-- MODAL DE EDICIÓN -->
   <div id="modalEdicion" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
     <div class="bg-white rounded-2xl w-full max-w-md max-h-[85vh] flex flex-col shadow-2xl">
-      <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-[#0A2342] to-[#123A6B] rounded-t-2xl"><h3 class="text-white font-black text-lg flex items-center gap-2">🤖 Revisar direcciones</h3><button id="btnCerrarModal" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button></div>
+      <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-[#0A2342] to-[#123A6B] rounded-t-2xl"><h3 class="text-white font-black text-lg flex items-center gap-2"> Revisar direcciones</h3><button id="btnCerrarModal" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button></div>
       <div class="p-2 text-center bg-blue-50 border-b border-blue-100"><p class="text-xs text-blue-800 font-medium">Editá, borrá o agregá líneas antes de guardar.</p></div>
       <div class="p-4 overflow-y-auto flex-1 space-y-2" id="contenedorInputs"></div>
       <div class="p-4 border-t border-gray-100 flex gap-2 bg-gray-50 rounded-b-2xl"><button id="btnCancelarEdicion" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-300 transition-all">Cancelar</button><button id="btnGuardarEdicion" class="flex-1 bg-[#10b981] text-white font-bold py-3 rounded-xl hover:bg-[#059669] transition-all shadow-lg">✅ Guardar Todo</button></div>
