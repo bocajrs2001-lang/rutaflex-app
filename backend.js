@@ -5,7 +5,7 @@ const session = require('express-session');
 const path = require('path');
 const mongoose = require('mongoose');
 const { Resend } = require('resend');
-const { MercadoPagoConfig, Preference } = require('mercadopago'); // NUEVO
+const { MercadoPagoConfig, Preference } = require('mercadopago');
 
 const { 
   registrarUsuario, loginUsuario, obtenerDestinosDeUsuario, agregarDestino, 
@@ -44,13 +44,10 @@ function suscripcionVigente(req, res, next) {
   next();
 }
 
-// ==========================================
 // 💳 CREAR PREFERENCIA DE PAGO
-// ==========================================
 app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
   try {
     const { plan } = req.body;
-    
     let precio, titulo, diasExtra;
     if (plan === 'mensual') {
       precio = 14990;
@@ -65,15 +62,13 @@ app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
     const preference = new Preference(mpClient);
     const result = await preference.create({
       body: {
-        items: [
-          {
-            id: `rutaflex_${plan}_${req.session.userId}`,
-            title: titulo,
-            quantity: 1,
-            currency_id: 'ARS',
-            unit_price: precio
-          }
-        ],
+        items: [{
+          id: `rutaflex_${plan}_${req.session.userId}`,
+          title: titulo,
+          quantity: 1,
+          currency_id: 'ARS',
+          unit_price: precio
+        }],
         payer: {
           email: req.session.user.email,
           name: req.session.nombre
@@ -89,9 +84,7 @@ app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
       }
     });
 
-    // Guardamos info temporalmente para el webhook
     req.session.pagoPendiente = { plan, diasExtra, userId: req.session.userId };
-
     res.json({ ok: true, init_point: result.init_point });
     
   } catch (err) {
@@ -100,47 +93,24 @@ app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
   }
 });
 
-// ==========================================
 // 🔔 WEBHOOK DE MERCADO PAGO
-// ==========================================
 app.post('/api/webhook-mp', async (req, res) => {
   try {
     const { type, data } = req.body;
-    
     if (type === 'payment') {
       console.log('💰 Notificación de pago recibida:', data.id);
-      
       // En producción real, aquí consultarías mp.payment.get(data.id)
       // para verificar el estado y obtener el external_reference.
-      // Por ahora, asumimos que si llega la notificación, procesamos.
-      
-      // Simulación: Buscamos en sesiones activas o usamos un mapa temporal
-      // Para simplificar esta demo, vamos a asumir que el pago fue exitoso
-      // y necesitamos encontrar el userId.
-      
-      // NOTA IMPORTANTE: En un entorno real con múltiples usuarios,
-      // necesitarías guardar la relación paymentId -> userId en DB o Redis.
-      // Como esto es una demo, usaremos una aproximación simple.
-      
-      // Aquí deberías hacer:
-      // const mpPayment = await mp.payment.get({ id: data.id });
-      // const userId = mpPayment.external_reference;
-      // await actualizarVencimiento(userId, diasExtra);
-      
       console.log('Pago procesado (simulado). En producción, verificar con MP API.');
     }
-    
     res.status(200).send('OK');
-    
   } catch (err) {
     console.error('Error webhook:', err);
     res.status(500).send('Error');
   }
 });
 
-// ==========================================
-// RUTAS EXISTENTES
-// ==========================================
+// RUTAS DE GESTIÓN Y AUTENTICACIÓN
 app.post('/api/cancelar-suscripcion', usuarioLogueado, async (req, res) => {
   try { await cancelarSuscripcionUsuario(req.session.userId); res.json({ ok: true, mensaje: 'Cancelado' }); } 
   catch (err) { res.status(500).json({ error: 'Error' }); }
@@ -180,7 +150,7 @@ app.post('/api/verificar-codigo', (req, res) => {
 app.post('/api/cambiar-contrasena-final', async (req, res) => {
   const { email, nuevaPassword } = req.body;
   if (!nuevaPassword || nuevaPassword.length < 8 || !/[A-Z]/.test(nuevaPassword) || !/[0-9]/.test(nuevaPassword) || !/[!@#$%^&*]/.test(nuevaPassword)) {
-    return res.status(400).json({ error: 'La contraseña no cumple los requisitos' });
+    return res.status(400).json({ error: 'La contraseña no cumple los requisitos de seguridad' });
   }
   await actualizarContrasena(email, nuevaPassword);
   res.json({ ok: true, mensaje: 'Contraseña actualizada' });
@@ -219,7 +189,7 @@ app.post('/api/logout', (req, res) => { req.session.destroy(); res.json({ ok: tr
 
 app.post('/api/validar-promo', usuarioLogueado, (req, res) => {
   const { codigo } = req.body;
-  if (codigo === 'RUTA94FLEX') return res.json({ valido: true, mensaje: '¡Código VIP aplicado!' });
+  if (codigo === 'RUTA94FLEX') return res.json({ valido: true, mensaje: '¡Código VIP aplicado con éxito!' });
   res.status(400).json({ valido: false, mensaje: 'Código inválido.' });
 });
 
