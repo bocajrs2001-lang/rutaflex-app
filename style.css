@@ -1,118 +1,61 @@
-/* =========================================
-   ESTILOS GENERALES DE RUTAFLEX
-   ========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+:root {
+  --primary: #5BA9E0;
+  --accent: #8FE8FF;
+  --dark: #0A2342;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background: linear-gradient(135deg, #0A2342 0%, #123A6B 100%);
-  color: #ffffff;
-  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--dark);
+  color: white;
+  margin: 0;
+  padding: 0;
   overflow-x: hidden;
 }
 
 .app-container {
-  width: 100%;
-  max-width: 480px;
-  margin: 0 auto;
-  background: linear-gradient(135deg, #0A2342 0%, #123A6B 100%);
   min-height: 100vh;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
-}
-
-/* Colores personalizados */
-.text-accent {
-  color: #5BA9E0 !important;
-}
-
-.bg-accent {
-  background-color: #5BA9E0 !important;
-}
-
-/* Logo */
-.logo-container {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
 }
 
 .logo-circle {
-  background: linear-gradient(135deg, #5BA9E0 0%, #8FE8FF 100%);
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 50%;
-  width: 160px;
-  height: 160px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;
-  box-shadow: 0 10px 30px rgba(91, 169, 224, 0.4);
+  box-shadow: 0 0 30px rgba(91, 169, 224, 0.2);
 }
 
-/* Formularios */
-input {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
+.toast-anim {
+  animation: slideDown 0.3s ease-out forwards;
 }
 
-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
-}
-
-input:focus {
-  outline: none;
-  border-color: #5BA9E0;
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 0 3px rgba(91, 169, 224, 0.3);
-}
-
-/* Botones */
-button {
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-button:hover {
-  transform: scale(1.02);
-}
-
-/* Animaciones */
 @keyframes slideDown {
-  from { transform: translate(-50%, -100%); opacity: 0; }
-  to { transform: translate(-50%, 0); opacity: 1; }
+  from { opacity: 0; transform: translate(-50%, -40px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
 }
 
-.toast-anim { 
-  animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0A2342;
+}
+::-webkit-scrollbar-thumb {
+  background: #5BA9E0;
+  border-radius: 4px;
 }
 
-/* Responsive */
-@media (max-width: 480px) {
-  .app-container {
-    max-width: 100%;
-  }
+/* Animación de pulso suave */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Ocultar elementos */
-.hidden {
-  display: none !important;
-}
-
-/* =========================================
-   ARREGLO DE CONTRASTE PARA BOTONES DE IA
-   ========================================= */
-/* Forzamos que los textos dentro de los botones blancos/grises sean oscuros */
-.bg-slate-50 div, 
-.bg-slate-50 span {
-  color: #0A2342 !important; 
-  font-weight: bold;
-}
-
-/* Asegurar que los iconos también se vean bien si tienen color */
-.bg-slate-50 svg, 
-.bg-slate-50 i {
-  color: #0A2342 !important;
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .7; }
 }
