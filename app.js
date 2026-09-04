@@ -5,6 +5,18 @@ let tramoActual = 0;
 let emailRecuperacion = ""; 
 let estaVencido = false;
 
+// FUNCIÓN PARA EL OJITO DE CONTRASEÑA
+window.togglePass = (inputId, icon) => {
+  const input = document.getElementById(inputId);
+  if (input.type === "password") {
+    input.type = "text";
+    icon.innerText = "🙈"; // Cambia a mono tapando ojos
+  } else {
+    input.type = "password";
+    icon.innerText = "️"; // Vuelve al ojo normal
+  }
+};
+
 function mostrarNotificacion(mensaje, tipo = 'info') {
   const contenedor = document.getElementById('notificaciones');
   const notificacion = document.createElement('div');
@@ -42,7 +54,7 @@ document.getElementById('formRecoverCode').addEventListener('submit', async (e) 
 document.getElementById('formNewPassword').addEventListener('submit', async (e) => { e.preventDefault(); const nuevaPassword = document.getElementById('newPasswordInput').value; const msg = document.getElementById('recoverMsg3'); msg.innerText = "Guardando..."; msg.className = "text-blue-300 font-bold text-sm mt-4 text-center"; try { const res = await fetch('/api/cambiar-contrasena-final', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailRecuperacion, nuevaPassword }) }); const data = await res.json(); if (res.ok) { mostrarNotificacion("¡Contraseña cambiada!", "exito"); setTimeout(() => { ocultarTodasLasPantallasExcepto('authScreen'); document.getElementById('loginEmail').value = emailRecuperacion; document.getElementById('loginPassword').value = ''; emailRecuperacion = ""; }, 2000); } else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; } } catch (err) { mostrarNotificacion("❌ Error", "error"); } });
 
 // AUTENTICACIÓN CON TIMEOUT
-document.getElementById('formRegistro').addEventListener('submit', async (e) => { e.preventDefault(); const nombre = document.getElementById('regNombre').value; const email = document.getElementById('regEmail').value; const password = document.getElementById('regPassword').value; const msg = document.getElementById('authMessage'); msg.innerText = "Creando cuenta..."; msg.className = "text-blue-300 font-bold text-sm mt-4 text-center"; try { const res = await fetch('/api/registro', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ nombre, email, password }) }); const data = await res.json(); if (res.ok) { localStorage.setItem('rutaflex_email', email); mostrarNotificacion("✅ ¡Cuenta creada!", "exito"); setTimeout(() => mostrarApp(data.usuario.nombre, data.usuario.fecha_vencimiento), 1000); } else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; } } catch (err) { mostrarNotificacion(" Error de conexión", "error"); } });
+document.getElementById('formRegistro').addEventListener('submit', async (e) => { e.preventDefault(); const nombre = document.getElementById('regNombre').value; const email = document.getElementById('regEmail').value; const password = document.getElementById('regPassword').value; const msg = document.getElementById('authMessage'); msg.innerText = "Creando cuenta..."; msg.className = "text-blue-300 font-bold text-sm mt-4 text-center"; try { const res = await fetch('/api/registro', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ nombre, email, password }) }); const data = await res.json(); if (res.ok) { localStorage.setItem('rutaflex_email', email); mostrarNotificacion("✅ ¡Cuenta creada!", "exito"); setTimeout(() => mostrarApp(data.usuario.nombre, data.usuario.fecha_vencimiento), 1000); } else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; } } catch (err) { mostrarNotificacion("❌ Error de conexión", "error"); } });
 
 document.getElementById('formLogin').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -93,7 +105,7 @@ document.getElementById('formLogin').addEventListener('submit', async (e) => {
 // LÓGICA PRINCIPAL DE LA APP
 function mostrarApp(nombre, fechaVencimiento) {
   ocultarTodasLasPantallasExcepto('appScreen');
-  document.getElementById('userName').innerText = `¡Hola, ${nombre}! `;
+  document.getElementById('userName').innerText = `¡Hola, ${nombre}! 👋`;
   
   const contadorEl = document.getElementById('contadorDias');
   const bannerVencido = document.getElementById('bannerVencido');
@@ -116,7 +128,7 @@ function mostrarApp(nombre, fechaVencimiento) {
 
   if (!fechaVencimiento || diffDays <= 0) {
     estaVencido = true;
-    contadorEl.innerText = "️ VENCIDO";
+    contadorEl.innerText = "⚠️ VENCIDO";
     contadorEl.className = "text-xs font-bold mt-1 px-2 py-0.5 rounded-full inline-block bg-red-600 text-white";
     bannerVencido.classList.remove('hidden');
     
@@ -128,7 +140,7 @@ function mostrarApp(nombre, fechaVencimiento) {
     document.getElementById('lista').innerHTML = '<li class="text-center text-red-500 py-4 font-bold">Renová tu plan para ver y usar tus destinos.</li>';
     document.getElementById('count').innerText = "-";
     document.getElementById('btnViaje').classList.add('hidden');
-    mostrarNotificacion("Tu plan está vencido. Renová abajo 👇", "advertencia");
+    mostrarNotificacion("Tu plan está vencido. Renová abajo ", "advertencia");
 
   } else if (diffDays <= 1) {
     contadorEl.innerText = `⏳ Vence en ${diffDays} día${diffDays !== 1 ? 's' : ''}`;
@@ -143,7 +155,7 @@ function mostrarApp(nombre, fechaVencimiento) {
   }
 }
 
-document.getElementById('btnLogout').addEventListener('click', async () => { await fetch('/api/logout', { method: 'POST', credentials: 'include' }); mostrarNotificacion(" Sesión cerrada.", "info"); setTimeout(() => location.reload(), 1000); });
+document.getElementById('btnLogout').addEventListener('click', async () => { await fetch('/api/logout', { method: 'POST', credentials: 'include' }); mostrarNotificacion("👋 Sesión cerrada.", "info"); setTimeout(() => location.reload(), 1000); });
 
 window.simularPago = async (plan) => {
   mostrarNotificacion("Generando link de pago seguro...", "info");
@@ -177,7 +189,7 @@ document.getElementById('btnCancelarSub').addEventListener('click', async () => 
   } catch (err) { mostrarNotificacion("❌ Error de conexión", "error"); }
 });
 
-document.getElementById('btnPromo').addEventListener('click', async () => { const codigo = document.getElementById('promo').value; if (!codigo) return mostrarNotificacion("⚠️ Escribí un código.", "advertencia"); const msg = document.getElementById('promoMessage'); const res = await fetch('/api/validar-promo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ codigo }) }); const data = await res.json(); if (data.valido) { mostrarNotificacion(" " + data.mensaje, "exito"); msg.className = "hidden"; } else { mostrarNotificacion("❌ " + data.mensaje, "error"); msg.className = "hidden"; } });
+document.getElementById('btnPromo').addEventListener('click', async () => { const codigo = document.getElementById('promo').value; if (!codigo) return mostrarNotificacion("⚠️ Escribí un código.", "advertencia"); const msg = document.getElementById('promoMessage'); const res = await fetch('/api/validar-promo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ codigo }) }); const data = await res.json(); if (data.valido) { mostrarNotificacion("✨ " + data.mensaje, "exito"); msg.className = "hidden"; } else { mostrarNotificacion("❌ " + data.mensaje, "error"); msg.className = "hidden"; } });
 
 // FUNCIONES DE LA APP
 async function cargarDestinos() { if (estaVencido) return; try { const res = await fetch('/api/destinos', { credentials: 'include' }); destinos = await res.json(); renderLista(); } catch (err) { console.error('Error cargando destinos:', err); } }
@@ -186,35 +198,35 @@ document.getElementById('fileImg').addEventListener('change', async (e) => {
   if (estaVencido) { mostrarNotificacion("⚠️ Plan vencido. Renová para usar IA.", "advertencia"); e.target.value = ''; return; }
   const file = e.target.files[0]; if (!file) return;
   const btn = document.getElementById('btnCargar'); const textoOriginal = btn.innerText;
-  btn.innerText = " La IA está leyendo..."; btn.disabled = true; btn.classList.add('opacity-75', 'cursor-not-allowed');
+  btn.innerText = "🤖 La IA está leyendo..."; btn.disabled = true; btn.classList.add('opacity-75', 'cursor-not-allowed');
   try {
     if (typeof Tesseract === 'undefined') throw new Error('Tesseract.js no cargó.');
     const { data: { text } } = await Tesseract.recognize(file, 'spa', { logger: m => console.log(m) });
     const lineas = text.split('\n').map(l => l.trim()).filter(l => l.length > 3);
-    if (lineas.length === 0) mostrarNotificacion("⚠️ No se detectó texto claro.", "advertencia");
+    if (lineas.length === 0) mostrarNotificacion("️ No se detectó texto claro.", "advertencia");
     else { destinosDetectados = lineas; mostrarModalEdicion(); }
   } catch (error) { console.error(error); mostrarNotificacion("❌ Error al procesar imagen.", "error"); } 
   finally { btn.innerText = textoOriginal; btn.disabled = false; btn.classList.remove('opacity-75', 'cursor-not-allowed'); e.target.value = ''; }
 });
 
-function mostrarModalEdicion() { const contenedor = document.getElementById('contenedorInputs'); contenedor.innerHTML = ''; if (destinosDetectados.length === 0) contenedor.innerHTML = '<p class="text-center text-gray-500 py-4">Sin direcciones.</p>'; else { destinosDetectados.forEach((dir, index) => { contenedor.innerHTML += `<div class="flex gap-2 items-center bg-gray-50 p-2 rounded-lg border border-gray-200"><span class="text-gray-400 font-bold text-sm w-6">${index + 1}.</span><input type="text" value="${dir.replace(/"/g, '&quot;')}" class="input-direccion flex-1 bg-transparent border-none p-1 text-sm text-gray-800 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#5BA4D9] rounded"><button onclick="eliminarLinea(${index})" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-all">️</button></div>`; }); } document.getElementById('modalEdicion').classList.remove('hidden'); }
+function mostrarModalEdicion() { const contenedor = document.getElementById('contenedorInputs'); contenedor.innerHTML = ''; if (destinosDetectados.length === 0) contenedor.innerHTML = '<p class="text-center text-gray-500 py-4">Sin direcciones.</p>'; else { destinosDetectados.forEach((dir, index) => { contenedor.innerHTML += `<div class="flex gap-2 items-center bg-gray-50 p-2 rounded-lg border border-gray-200"><span class="text-gray-400 font-bold text-sm w-6">${index + 1}.</span><input type="text" value="${dir.replace(/"/g, '&quot;')}" class="input-direccion flex-1 bg-transparent border-none p-1 text-sm text-gray-800 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#5BA4D9] rounded"><button onclick="eliminarLinea(${index})" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-all">🗑️</button></div>`; }); } document.getElementById('modalEdicion').classList.remove('hidden'); }
 window.eliminarLinea = (index) => { destinosDetectados.splice(index, 1); mostrarModalEdicion(); };
 
 document.getElementById('btnGuardarEdicion').addEventListener('click', async () => {
   if (estaVencido) return mostrarNotificacion("⚠️ Plan vencido.", "advertencia");
   const inputs = document.querySelectorAll('.input-direccion'); const finales = Array.from(inputs).map(i => i.value.trim()).filter(v => v.length > 0);
-  if (finales.length === 0) return mostrarNotificacion("⚠️ Sin direcciones válidas.", "advertencia");
+  if (finales.length === 0) return mostrarNotificacion("️ Sin direcciones válidas.", "advertencia");
   const btn = document.getElementById('btnGuardarEdicion'); btn.innerText = "Guardando..."; btn.disabled = true;
   for (const d of finales) await fetch('/api/destinos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ direccion: d }) });
   btn.innerText = "✅ Guardar Todo"; btn.disabled = false; document.getElementById('modalEdicion').classList.add('hidden');
-  mostrarNotificacion("📍 Direcciones guardadas.", "exito"); await cargarDestinos();
+  mostrarNotificacion("✨ Direcciones guardadas.", "exito"); await cargarDestinos();
 });
 
 document.getElementById('btnCancelarEdicion').addEventListener('click', () => document.getElementById('modalEdicion').classList.add('hidden'));
 document.getElementById('btnCerrarModal').addEventListener('click', () => document.getElementById('modalEdicion').classList.add('hidden'));
 
-function renderLista() { const lista = document.getElementById('lista'); lista.innerHTML = ""; if (destinos.length === 0) { lista.innerHTML = '<li class="text-center text-gray-400 py-4">No hay destinos. Cargá una foto.</li>'; document.getElementById('btnViaje').classList.add('hidden'); document.getElementById('count').innerText = 0; return; } destinos.forEach((dir, i) => { setTimeout(() => { lista.innerHTML += `<li class="flex gap-2 border-b py-2 items-center"><span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"></span><div class="flex-1"><b>${dir.direccion}</b><br><span class="text-xs text-green-600">${dir.distancia} km • ~${dir.tiempo} min</span></div><button onclick="borrarDestino(${dir.id})" class="text-red-500 text-xs px-2 hover:bg-red-50 rounded">🗑️</button></li>`; }, i * 80); }); document.getElementById('count').innerText = destinos.length; document.getElementById('btnViaje').classList.remove('hidden'); inicioViaje = inicioViaje || new Date(); }
-window.borrarDestino = async (id) => { if (estaVencido) return mostrarNotificacion("⚠️ Plan vencido.", "advertencia"); await fetch(`/api/destinos/${id}`, { method: 'DELETE', credentials: 'include' }); mostrarNotificacion("️ Destino eliminado.", "info"); await cargarDestinos(); };
+function renderLista() { const lista = document.getElementById('lista'); lista.innerHTML = ""; if (destinos.length === 0) { lista.innerHTML = '<li class="text-center text-gray-400 py-4">No hay destinos. Cargá una foto.</li>'; document.getElementById('btnViaje').classList.add('hidden'); document.getElementById('count').innerText = 0; return; } destinos.forEach((dir, i) => { setTimeout(() => { lista.innerHTML += `<li class="flex gap-2 border-b py-2 items-center"><span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">🏠</span><div class="flex-1"><b>${dir.direccion}</b><br><span class="text-xs text-green-600">${dir.distancia} km • ~${dir.tiempo} min</span></div><button onclick="borrarDestino(${dir.id})" class="text-red-500 text-xs px-2 hover:bg-red-50 rounded">🗑️</button></li>`; }, i * 80); }); document.getElementById('count').innerText = destinos.length; document.getElementById('btnViaje').classList.remove('hidden'); inicioViaje = inicioViaje || new Date(); }
+window.borrarDestino = async (id) => { if (estaVencido) return mostrarNotificacion("⚠️ Plan vencido.", "advertencia"); await fetch(`/api/destinos/${id}`, { method: 'DELETE', credentials: 'include' }); mostrarNotificacion("🗑️ Destino eliminado.", "info"); await cargarDestinos(); };
 
 function limpiarDireccion(direccion) { let limpia = direccion.replace(/^\d+\.\s*/, '').replace(/\[GR\]\s*/i, '').replace(/General\s+Rodríguez\s*,?\s*/gi, '').trim(); if (!/General\s+Rodríguez/i.test(limpia)) limpia += ', General Rodríguez, Buenos Aires'; return limpia; }
 
@@ -227,9 +239,9 @@ document.getElementById('btnViaje').addEventListener('click', () => {
   let url = '';
   if (direccionesLimpias.length === 1) url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(direccionesLimpias[0])}&travelmode=driving`;
   else { const destination = direccionesLimpias[direccionesLimpias.length - 1]; const waypoints = direccionesLimpias.slice(0, -1).map(d => encodeURIComponent(d)).join('|'); url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&waypoints=${waypoints}&travelmode=driving`; }
-  mostrarNotificacion("🗺️ Abriendo Google Maps...", "info"); window.open(url, "_blank");
+  mostrarNotificacion("️ Abriendo Google Maps...", "info"); window.open(url, "_blank");
   tramoActual += 10; const siguiente = tramoActual + 10;
-  document.getElementById('btnViaje').innerText = tramoActual < destinos.length ? `SIGUIENTE TRAMO (${tramoActual + 1} a ${Math.min(siguiente, destinos.length)})` : " VER ESTADISTICAS FINALES";
+  document.getElementById('btnViaje').innerText = tramoActual < destinos.length ? `SIGUIENTE TRAMO (${tramoActual + 1} a ${Math.min(siguiente, destinos.length)})` : "🏆 VER ESTADISTICAS FINALES";
 });
 
 async function abrirCamara() {
