@@ -1,32 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --primary: #5BA9E0;
-  --accent: #8FE8FF;
-  --dark: #0A2342;
+  --accent: #5BA9E0;
 }
 
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: var(--dark);
-  color: white;
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-}
+.text-accent { color: var(--accent); }
+.bg-accent { background-color: var(--accent); }
+.border-accent { border-color: var(--accent); }
+.focus\:border-accent:focus { border-color: var(--accent); }
 
 .app-container {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.logo-circle {
-  width: 120px;
-  height: 120px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 50%;
-  box-shadow: 0 0 30px rgba(91, 169, 224, 0.2);
+  background: linear-gradient(135deg, #0A2342 0%, #123A6B 100%);
+  color: white;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
 .toast-anim {
@@ -38,24 +27,17 @@ body {
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
-/* Scrollbar personalizado */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #0A2342;
-}
-::-webkit-scrollbar-thumb {
-  background: #5BA9E0;
-  border-radius: 4px;
+.logo-circle {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Animación de pulso suave */
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: .7; }
-}
+/* Scrollbar personalizada */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+::-webkit-scrollbar-thumb { background: rgba(91, 169, 224, 0.5); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(91, 169, 224, 0.8); }
