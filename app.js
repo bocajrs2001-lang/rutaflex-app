@@ -18,7 +18,7 @@ window.togglePass = (inputId, icon) => {
   if (!input) return;
   if (input.type === "password") {
     input.type = "text";
-    icon.innerText = "🙈"; // Mono tapándose los ojos
+    icon.innerText = ""; // Mono tapándose los ojos
   } else {
     input.type = "password";
     icon.innerText = "👁️"; // Ojo normal
@@ -50,7 +50,7 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
 }
 
 // ==========================================
-// INICIALIZACIÓN
+// INICIALIZACIÓN Y VERIFICACIÓN DE PAGO
 // ==========================================
 window.addEventListener('load', async () => {
   // Recuperar email guardado si existe
@@ -69,7 +69,36 @@ window.addEventListener('load', async () => {
   } catch (err) { 
     console.log('No hay sesión activa o error de conexión inicial'); 
   }
+
+  // 🔥 NUEVO: Verificar si volvió de un pago pendiente
+  if (sessionStorage.getItem('pagoPendiente') === 'true') {
+    sessionStorage.removeItem('pagoPendiente');
+    await verificarPagoDirecto();
+  }
 });
+
+// Función para verificar pago directo (Plan B)
+async function verificarPagoDirecto() {
+  mostrarNotificacion("Verificando tu pago...", "info");
+  try {
+    const res = await fetch('/api/verificar-pago-pendiente', { 
+      method: 'POST', 
+      credentials: 'include' 
+    });
+    const data = await res.json();
+    
+    if (data.ok && data.activado) {
+      mostrarNotificacion(`✅ ¡Pago confirmado! Plan activo por ${data.dias} días.`, "exito");
+      // Recargar la app para mostrar estado activo inmediatamente
+      setTimeout(() => location.reload(), 2000);
+    } else {
+      mostrarNotificacion("⏳ Tu pago está siendo procesado. Si ya pagaste y sigue vencido, contactá soporte.", "advertencia");
+    }
+  } catch (err) {
+    console.error("Error verificando pago:", err);
+    mostrarNotificacion("Error al verificar pago", "error");
+  }
+}
 
 // ==========================================
 // NAVEGACIÓN Y PANTALLAS
@@ -188,7 +217,7 @@ if(document.getElementById('formNewPassword')) {
           emailRecuperacion = ""; 
         }, 2000); 
       } else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; } 
-    } catch (err) { mostrarNotificacion(" Error", "error"); } 
+    } catch (err) { mostrarNotificacion("❌ Error", "error"); } 
   });
 }
 
@@ -215,7 +244,7 @@ if(document.getElementById('formRegistro')) {
         mostrarNotificacion("✅ ¡Cuenta creada!", "exito"); 
         setTimeout(() => mostrarApp(data.usuario.nombre, data.usuario.fecha_vencimiento), 1000); 
       } else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; } 
-    } catch (err) { mostrarNotificacion("❌ Error de conexión", "error"); } 
+    } catch (err) { mostrarNotificacion(" Error de conexión", "error"); } 
   });
 }
 
@@ -273,7 +302,7 @@ if(document.getElementById('formLogin')) {
 if(document.getElementById('btnLogout')) {
   document.getElementById('btnLogout').addEventListener('click', async () => { 
     await fetch('/api/logout', { method: 'POST', credentials: 'include' }); 
-    mostrarNotificacion(" Sesión cerrada.", "info"); 
+    mostrarNotificacion("👋 Sesión cerrada.", "info"); 
     setTimeout(() => location.reload(), 1000); 
   });
 }
@@ -328,7 +357,7 @@ if(document.getElementById('btnPromo')) {
   });
 }
 
-// Simular Pago (Redirección a MP)
+// Simular Pago (Redirección a MP) - AHORA MARCA QUE HAY PAGO PENDIENTE
 window.simularPago = async (plan) => {
   mostrarNotificacion("Generando link de pago seguro...", "info");
   try {
@@ -340,6 +369,8 @@ window.simularPago = async (plan) => {
     });
     const data = await res.json();
     if (res.ok && data.init_point) {
+      //  Guardar flag de pago pendiente ANTES de redirigir
+      sessionStorage.setItem('pagoPendiente', 'true');
       mostrarNotificacion("Redirigiendo a Mercado Pago...", "info");
       window.location.href = data.init_point;
     } else {
@@ -459,9 +490,9 @@ if(document.getElementById('fileImg')) {
       const { data: { text } } = await Tesseract.recognize(file, 'spa', { logger: m => console.log(m) });
       const lineas = text.split('\n').map(l => l.trim()).filter(l => l.length > 3);
       
-      if (lineas.length === 0) mostrarNotificacion("️ No se detectó texto claro.", "advertencia");
+      if (lineas.length === 0) mostrarNotificacion("⚠️ No se detectó texto claro.", "advertencia");
       else { destinosDetectados = lineas; mostrarModalEdicion(); }
-    } catch (error) { console.error(error); mostrarNotificacion(" Error al procesar imagen.", "error"); } 
+    } catch (error) { console.error(error); mostrarNotificacion("❌ Error al procesar imagen.", "error"); } 
     finally { 
         if(btn) {
             btn.innerText = textoOriginal; 
@@ -503,7 +534,7 @@ if(document.getElementById('btnGuardarEdicion')) {
     const inputs = document.querySelectorAll('.input-direccion'); 
     const finales = Array.from(inputs).map(i => i.value.trim()).filter(v => v.length > 0);
     
-    if (finales.length === 0) return mostrarNotificacion("⚠️ Sin direcciones válidas.", "advertencia");
+    if (finales.length === 0) return mostrarNotificacion("️ Sin direcciones válidas.", "advertencia");
     
     const btn = document.getElementById('btnGuardarEdicion'); 
     const originalText = btn.innerText;
@@ -566,7 +597,7 @@ function renderLista() {
 
 // Borrar Destino Individual
 window.borrarDestino = async (id) => { 
-  if (estaVencido) return mostrarNotificacion("⚠️ Plan vencido.", "advertencia"); 
+  if (estaVencido) return mostrarNotificacion("️ Plan vencido.", "advertencia"); 
   await fetch(`/api/destinos/${id}`, { method: 'DELETE', credentials: 'include' }); 
   mostrarNotificacion("🗑️ Destino eliminado.", "info"); 
   await cargarDestinos(); 
@@ -633,6 +664,6 @@ async function abrirCamara() {
       try { 
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }); 
         video.srcObject = stream; 
-      } catch (err) { mostrarNotificacion("📷 No se pudo acceder a la cámara.", "error"); }
+      } catch (err) { mostrarNotificacion(" No se pudo acceder a la cámara.", "error"); }
   }
 }
