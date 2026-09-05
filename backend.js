@@ -32,7 +32,7 @@ const codigosVerificacion = new Map(); // Almacena códigos temporalmente en mem
 // Conectar a MongoDB Atlas
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ Conectado a MongoDB Atlas'))
-  .catch(err => console.error(' Error MongoDB:', err));
+  .catch(err => console.error('❌ Error MongoDB:', err));
 
 // Middlewares
 app.use(cors({ 
@@ -66,7 +66,7 @@ function suscripcionVigente(req, res, next) {
 }
 
 // ==========================================
-// 💳 RUTAS DE MERCADO PAGO
+//  RUTAS DE MERCADO PAGO
 // ==========================================
 
 // Crear preferencia de pago
@@ -121,7 +121,54 @@ app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
   }
 });
 
-// Webhook para recibir notificaciones de pago
+// 🔥 RUTA DE EMERGENCIA: Verificar pago directo (Plan B)
+// Se usa cuando el usuario vuelve de MP y el webhook no llegó
+app.post('/api/verificar-pago-pendiente', usuarioLogueado, async (req, res) => {
+  try {
+    const userId = req.session.userId.toString();
+    console.log(`🔍 Verificando pagos pendientes para usuario: ${userId}`);
+    
+    // Buscar pagos aprobados asociados a este usuario en las últimas 24hs
+    const payments = await mpClient.payment.search({ 
+      options: { 
+        external_reference: userId,
+        sort: 'date_created',
+        criteria: 'desc',
+        limit: 5 // Revisamos los últimos 5 pagos por seguridad
+      } 
+    });
+    
+    if (payments.results && payments.results.length > 0) {
+      // Buscamos el primer pago aprobado
+      const pagoAprobado = payments.results.find(p => p.status === 'approved');
+      
+      if (pagoAprobado) {
+        console.log(`✅ Pago encontrado: ${pagoAprobado.id} - Estado: ${pagoAprobado.status}`);
+        
+        // Determinar días según título del item
+        const itemTitle = pagoAprobado.additional_info?.items?.[0]?.title || '';
+        const diasExtra = itemTitle.includes('Mensual') ? 30 : 7;
+        
+        // Activar usuario en BD
+        await actualizarVencimiento(userId, diasExtra);
+        
+        // Actualizar sesión actual
+        req.session.user.fecha_vencimiento = new Date(Date.now() + diasExtra * 24 * 60 * 60 * 1000);
+        
+        return res.json({ ok: true, activado: true, dias: diasExtra });
+      }
+    }
+    
+    console.log('ℹ️ No se encontraron pagos aprobados recientes');
+    res.json({ ok: false, activado: false });
+    
+  } catch (err) {
+    console.error("❌ Error verificando pago directo:", err);
+    res.status(500).json({ ok: false, activado: false, error: err.message });
+  }
+});
+
+// Webhook para recibir notificaciones de pago (Plan A)
 app.post('/api/webhook-mp', async (req, res) => {
   const { type, data } = req.body;
   console.log(`📩 Webhook recibido: Tipo=${type}, DataID=${data?.id}`);
@@ -149,12 +196,12 @@ app.post('/api/webhook-mp', async (req, res) => {
           // Actualizar fecha de vencimiento en la base de datos
           await actualizarVencimiento(userId, diasExtra);
           
-          console.log(`✅ USUARIO ${userId} ACTIVADO EXITOSAMENTE`);
+          console.log(`✅ USUARIO ${userId} ACTIVADO EXITOSAMENTE POR WEBHOOK`);
         } else {
           console.error('❌ ERROR: El pago no tiene external_reference (UserID)');
         }
       } else {
-        console.log(` Pago ${paymentId} aún no aprobado. Estado: ${mpPayment.status}`);
+        console.log(`⏳ Pago ${paymentId} aún no aprobado. Estado: ${mpPayment.status}`);
       }
     } catch (err) {
       console.error('❌ ERROR CRÍTICO EN WEBHOOK:', err.message);
