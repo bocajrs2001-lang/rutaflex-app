@@ -5,7 +5,7 @@ const session = require('express-session');
 const path = require('path');
 const mongoose = require('mongoose');
 const { Resend } = require('resend');
-const { MercadoPagoConfig, Preference } = require('mercadopago');
+const { MercadoPagoConfig, Preference } = require('mercadopago'); // Librería oficial MP
 
 const { 
   registrarUsuario, loginUsuario, obtenerDestinosDeUsuario, agregarDestino, 
@@ -16,7 +16,10 @@ const {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Inicializar Mercado Pago
+// ==========================================
+//  INICIALIZACIÓN DE MERCADO PAGO
+// ==========================================
+// Asegurate de que MP_ACCESS_TOKEN en Render sea APP_USR-... para producción
 const mpClient = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -44,10 +47,13 @@ function suscripcionVigente(req, res, next) {
   next();
 }
 
+// ==========================================
 // 💳 CREAR PREFERENCIA DE PAGO
+// ==========================================
 app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
   try {
     const { plan } = req.body;
+    
     let precio, titulo, diasExtra;
     if (plan === 'mensual') {
       precio = 14990;
@@ -62,13 +68,15 @@ app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
     const preference = new Preference(mpClient);
     const result = await preference.create({
       body: {
-        items: [{
-          id: `rutaflex_${plan}_${req.session.userId}`,
-          title: titulo,
-          quantity: 1,
-          currency_id: 'ARS',
-          unit_price: precio
-        }],
+        items: [
+          {
+            id: `rutaflex_${plan}_${req.session.userId}`,
+            title: titulo,
+            quantity: 1,
+            currency_id: 'ARS',
+            unit_price: precio
+          }
+        ],
         payer: {
           email: req.session.user.email,
           name: req.session.nombre
@@ -80,11 +88,10 @@ app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
         },
         auto_return: 'approved',
         notification_url: 'https://rutaflex-app.onrender.com/api/webhook-mp',
-        external_reference: req.session.userId.toString()
+        external_reference: req.session.userId.toString() // ID del usuario para identificarlo después
       }
     });
 
-    req.session.pagoPendiente = { plan, diasExtra, userId: req.session.userId };
     res.json({ ok: true, init_point: result.init_point });
     
   } catch (err) {
@@ -93,24 +100,58 @@ app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
   }
 });
 
-// 🔔 WEBHOOK DE MERCADO PAGO
+// ==========================================
+// 🔔 WEBHOOK ROBUSTO (ACTIVACIÓN AUTOMÁTICA)
+// ==========================================
 app.post('/api/webhook-mp', async (req, res) => {
   try {
     const { type, data } = req.body;
-    if (type === 'payment') {
-      console.log('💰 Notificación de pago recibida:', data.id);
-      // En producción real, aquí consultarías mp.payment.get(data.id)
-      // para verificar el estado y obtener el external_reference.
-      console.log('Pago procesado (simulado). En producción, verificar con MP API.');
+    
+    // MP envía 'payment' o 'pay' dependiendo de la versión
+    if (type === 'payment' || type === 'pay') {
+      const paymentId = data.id;
+      console.log(`💰 Webhook recibido para pago ID: ${paymentId}`);
+      
+      try {
+        // Consultar a MP para obtener detalles reales y verificar estado
+        const mpPayment = await mpClient.payment.get({ id: paymentId });
+        
+        // Solo activar si el pago está aprobado
+        if (mpPayment.status === 'approved') {
+          const userId = mpPayment.external_reference; // El ID que guardamos al crear el pago
+          
+          if (userId) {
+            // Determinar días extra según el título del item comprado
+            const itemTitle = mpPayment.additional_info?.items?.[0]?.title || '';
+            let diasExtra = 7; // Default semanal
+            if (itemTitle.includes('Mensual')) diasExtra = 30;
+            
+            // Actualizar usuario en BD
+            await actualizarVencimiento(userId, diasExtra);
+            console.log(`✅ Usuario ${userId} activado automáticamente por ${diasExtra} días`);
+          } else {
+            console.error('❌ No se encontró external_reference (userId) en el pago');
+          }
+        } else {
+          console.log(` Pago ${paymentId} en estado pendiente: ${mpPayment.status}`);
+        }
+      } catch (mpError) {
+        console.error('❌ Error consultando pago a MP:', mpError);
+      }
     }
+    
+    // Siempre responder 200 OK a MP para que no reintente infinitamente
     res.status(200).send('OK');
+    
   } catch (err) {
-    console.error('Error webhook:', err);
-    res.status(500).send('Error');
+    console.error('❌ Error general en webhook:', err);
+    res.status(200).send('OK'); 
   }
 });
 
+// ==========================================
 // RUTAS DE GESTIÓN Y AUTENTICACIÓN
+// ==========================================
 app.post('/api/cancelar-suscripcion', usuarioLogueado, async (req, res) => {
   try { await cancelarSuscripcionUsuario(req.session.userId); res.json({ ok: true, mensaje: 'Cancelado' }); } 
   catch (err) { res.status(500).json({ error: 'Error' }); }
