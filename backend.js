@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 3000;
 //  INICIALIZACIÓN DE SERVICIOS
 // ==========================================
 const mpClient = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
-console.log('🔑 Token MP cargado:', process.env.MP_ACCESS_TOKEN ? 'OK (' + process.env.MP_ACCESS_TOKEN.substring(0,8) + '...)' : '️ FALTA TOKEN');
+console.log('🔑 Token MP cargado:', process.env.MP_ACCESS_TOKEN ? 'OK (' + process.env.MP_ACCESS_TOKEN.substring(0,8) + '...)' : '⚠️ FALTA TOKEN');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const codigosVerificacion = new Map();
@@ -60,7 +60,7 @@ function suscripcionVigente(req, res, next) {
 }
 
 // ==========================================
-// 💳 RUTAS DE MERCADO PAGO
+// 💳 RUTAS DE MERCADO PAGO (PLAN A Y PLAN B)
 // ==========================================
 
 // Crear preferencia de pago
@@ -90,7 +90,7 @@ app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
         },
         auto_return: 'approved',
         notification_url: 'https://rutaflex-app.onrender.com/api/webhook-mp',
-        external_reference: req.session.userId.toString() // CRUCIAL: ID del usuario
+        external_reference: req.session.userId.toString() // CLAVE: ID del usuario
       }
     });
     
@@ -109,7 +109,7 @@ app.post('/api/verificar-pago-directo', usuarioLogueado, async (req, res) => {
     const userId = req.session.userId.toString();
     console.log(`🔍 Verificando pagos directos para usuario: ${userId}`);
     
-    // Buscar pagos aprobados asociados a este usuario en las últimas 24hs
+    // Buscar pagos aprobados asociados a este usuario
     const payments = await mpClient.payment.search({ 
       options: { 
         external_reference: userId,
@@ -170,7 +170,7 @@ app.post('/api/webhook-mp', async (req, res) => {
         }
       }
     } catch (err) {
-      console.error(' ERROR EN WEBHOOK:', err.message);
+      console.error('❌ ERROR EN WEBHOOK:', err.message);
     }
   }
   
