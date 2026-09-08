@@ -3,7 +3,7 @@
 // ==========================================
 const CONFIG_RUTAFLEX = {
   whatsapp: "5491123793596",
-  alias: "RUTAFLEX94.MP", // ⚠️ CAMBIAR POR TU ALIAS REAL DE MERCADO PAGO
+  alias: "RUTAFLEX94.MP", // ️ CAMBIAR POR TU ALIAS REAL DE MERCADO PAGO
   linkSemanal: "https://mpago.la/2DjaHdB",
   linkMensual: "https://mpago.la/2aNpJ1B"
 };
@@ -22,7 +22,7 @@ window.togglePass = (inputId, icon) => {
   const input = document.getElementById(inputId);
   if (!input) return;
   if (input.type === "password") { input.type = "text"; icon.innerText = "🙈"; } 
-  else { input.type = "password"; icon.innerText = "👁️"; }
+  else { input.type = "password"; icon.innerText = "️"; }
 };
 
 function mostrarNotificacion(mensaje, tipo = 'info') {
@@ -40,7 +40,7 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
 }
 
 // ==========================================
-// FUNCIONES DEL MODAL DE PAGOS (NUEVO)
+// FUNCIONES DEL MODAL DE PAGOS
 // ==========================================
 window.abrirModalPagos = function(plan, precio) {
   document.getElementById('modal-plan-texto').innerText = `Plan ${plan} - $${precio}`;
@@ -68,7 +68,7 @@ window.copiarAlias = function() {
 };
 
 // ==========================================
-// INICIALIZACIÓN Y VERIFICACIÓN DE PAGO
+// INICIALIZACIÓN Y VERIFICACIÓN DE PAGO (PLAN B)
 // ==========================================
 window.addEventListener('load', async () => {
   const emailGuardado = localStorage.getItem('rutaflex_email');
@@ -80,6 +80,7 @@ window.addEventListener('load', async () => {
     if (data.ok) mostrarApp(data.nombre, data.fecha_vencimiento);
   } catch (err) { console.log('Sin sesión activa'); }
 
+  // 🔥 SI VOLVIÓ DE UN PAGO, VERIFICAR AUTOMÁTICAMENTE (PLAN B)
   if (sessionStorage.getItem('pagoPendiente') === 'true') {
     sessionStorage.removeItem('pagoPendiente');
     await verificarPagoDirecto();
@@ -91,6 +92,7 @@ async function verificarPagoDirecto() {
   try {
     const res = await fetch('/api/verificar-pago-directo', { method: 'POST', credentials: 'include' });
     const data = await res.json();
+    
     if (data.ok && data.activado) {
       mostrarNotificacion(`✅ ¡Pago confirmado! Plan activo por ${data.dias} días.`, "exito");
       setTimeout(() => location.reload(), 2000);
@@ -162,7 +164,7 @@ if(document.getElementById('formRecoverCode')) document.getElementById('formReco
     const data = await res.json(); 
     if (res.ok) { mostrarNotificacion("✅ Código correcto", "exito"); ocultarTodasLasPantallasExcepto('recoverStep3'); if(document.getElementById('recoverMsg3')) document.getElementById('recoverMsg3').innerText = ''; } 
     else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; } 
-  } catch (err) { mostrarNotificacion("❌ Error", "error"); } 
+  } catch (err) { mostrarNotificacion(" Error", "error"); } 
 });
 
 if(document.getElementById('formNewPassword')) document.getElementById('formNewPassword').addEventListener('submit', async (e) => { 
@@ -187,7 +189,7 @@ if(document.getElementById('formRegistro')) document.getElementById('formRegistr
     const data = await res.json(); 
     if (res.ok) { localStorage.setItem('rutaflex_email', email); mostrarNotificacion("✅ ¡Cuenta creada!", "exito"); setTimeout(() => mostrarApp(data.usuario.nombre, data.usuario.fecha_vencimiento), 1000); } 
     else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; } 
-  } catch (err) { mostrarNotificacion("❌ Error de conexión", "error"); } 
+  } catch (err) { mostrarNotificacion(" Error de conexión", "error"); } 
 });
 
 if(document.getElementById('formLogin')) document.getElementById('formLogin').addEventListener('submit', async (e) => {
@@ -207,6 +209,7 @@ if(document.getElementById('formLogin')) document.getElementById('formLogin').ad
 
 if(document.getElementById('btnLogout')) document.getElementById('btnLogout').addEventListener('click', async () => { await fetch('/api/logout', { method: 'POST', credentials: 'include' }); mostrarNotificacion("👋 Sesión cerrada.", "info"); setTimeout(() => location.reload(), 1000); });
 
+// CANCELAR SUSCRIPCIÓN (CORREGIDO: No hace logout, solo actualiza estado)
 if(document.getElementById('btnCancelarSub')) document.getElementById('btnCancelarSub').addEventListener('click', async () => {
   if (!confirm("¿Cancelar plan? Perderás acceso premium pero podrás seguir usando la app.")) return;
   mostrarNotificacion("Procesando...", "info");
@@ -272,7 +275,7 @@ if(document.getElementById('fileImg')) document.getElementById('fileImg').addEve
     if (typeof Tesseract === 'undefined') throw new Error('Tesseract no cargó');
     const { data: { text } } = await Tesseract.recognize(file, 'spa');
     const lineas = text.split('\n').map(l => l.trim()).filter(l => l.length > 3);
-    if (lineas.length === 0) mostrarNotificacion("⚠️ Texto no detectado.", "advertencia");
+    if (lineas.length === 0) mostrarNotificacion("️ Texto no detectado.", "advertencia");
     else { destinosDetectados = lineas; mostrarModalEdicion(); }
   } catch (error) { mostrarNotificacion("❌ Error al procesar.", "error"); } 
   finally { if(btn) { btn.innerText = txt; btn.disabled = false; btn.classList.remove('opacity-75'); } e.target.value = ''; }
@@ -281,7 +284,7 @@ if(document.getElementById('fileImg')) document.getElementById('fileImg').addEve
 function mostrarModalEdicion() { 
   const c = document.getElementById('contenedorInputs'); if(!c) return; c.innerHTML = ''; 
   if (destinosDetectados.length === 0) c.innerHTML = '<p class="text-center text-gray-500 py-4">Sin direcciones.</p>';
-  else destinosDetectados.forEach((dir, i) => { c.innerHTML += `<div class="flex gap-2 items-center bg-gray-50 p-2 rounded-lg border"><span class="text-gray-400 font-bold w-6">${i+1}.</span><input type="text" value="${dir.replace(/"/g, '&quot;')}" class="input-direccion flex-1 bg-transparent border-none p-1 text-sm focus:outline-none focus:bg-white rounded"><button onclick="eliminarLinea(${i})" class="text-red-500 p-2">🗑️</button></div>`; });
+  else destinosDetectados.forEach((dir, i) => { c.innerHTML += `<div class="flex gap-2 items-center bg-gray-50 p-2 rounded-lg border"><span class="text-gray-400 font-bold w-6">${i+1}.</span><input type="text" value="${dir.replace(/"/g, '&quot;')}" class="input-direccion flex-1 bg-transparent border-none p-1 text-sm focus:outline-none focus:bg-white rounded"><button onclick="eliminarLinea(${i})" class="text-red-500 p-2">️</button></div>`; });
   const m = document.getElementById('modalEdicion'); if(m) m.classList.remove('hidden'); 
 }
 window.eliminarLinea = (i) => { destinosDetectados.splice(i, 1); mostrarModalEdicion(); };
