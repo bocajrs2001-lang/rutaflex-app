@@ -1,3 +1,13 @@
+// ==========================================
+// CONFIGURACIÓN RUTAFLEX (FASE 1.2)
+// ==========================================
+const CONFIG_RUTAFLEX = {
+  whatsapp: "5491123793596",
+  alias: "RUTAFLEX.MP", // ⚠️ CAMBIAR POR TU ALIAS REAL DE MERCADO PAGO
+  linkSemanal: "https://mpago.la/2DjaHdB",
+  linkMensual: "https://mpago.la/2aNpJ1B"
+};
+
 let destinos = [];
 let destinosDetectados = [];
 let inicioViaje = null;
@@ -11,7 +21,7 @@ let estaVencido = false;
 window.togglePass = (inputId, icon) => {
   const input = document.getElementById(inputId);
   if (!input) return;
-  if (input.type === "password") { input.type = "text"; icon.innerText = ""; } 
+  if (input.type === "password") { input.type = "text"; icon.innerText = "🙈"; } 
   else { input.type = "password"; icon.innerText = "👁️"; }
 };
 
@@ -30,7 +40,35 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
 }
 
 // ==========================================
-// INICIALIZACIÓN Y VERIFICACIÓN DE PAGO (PLAN B)
+// FUNCIONES DEL MODAL DE PAGOS (NUEVO)
+// ==========================================
+window.abrirModalPagos = function(plan, precio) {
+  document.getElementById('modal-plan-texto').innerText = `Plan ${plan} - $${precio}`;
+  document.getElementById('modal-alias-texto').innerText = CONFIG_RUTAFLEX.alias;
+  
+  const msg = encodeURIComponent(`Hola RutaFlex! Envío comprobante Plan ${plan} - $${precio}`);
+  document.getElementById('btn-wsp-pago').href = `https://wa.me/${CONFIG_RUTAFLEX.whatsapp}?text=${msg}`;
+  
+  const linkMP = (plan === 'Semanal') ? CONFIG_RUTAFLEX.linkSemanal : CONFIG_RUTAFLEX.linkMensual;
+  document.getElementById('btn-mp-pago').href = linkMP;
+  
+  document.getElementById('payment-modal').classList.remove('hidden');
+};
+
+window.cerrarModalPagos = function() {
+  document.getElementById('payment-modal').classList.add('hidden');
+};
+
+window.copiarAlias = function() {
+  navigator.clipboard.writeText(CONFIG_RUTAFLEX.alias).then(() => {
+    mostrarNotificacion("✅ Alias copiado al portapapeles", "exito");
+  }).catch(err => {
+    mostrarNotificacion("❌ Error al copiar", "error");
+  });
+};
+
+// ==========================================
+// INICIALIZACIÓN Y VERIFICACIÓN DE PAGO
 // ==========================================
 window.addEventListener('load', async () => {
   const emailGuardado = localStorage.getItem('rutaflex_email');
@@ -42,7 +80,6 @@ window.addEventListener('load', async () => {
     if (data.ok) mostrarApp(data.nombre, data.fecha_vencimiento);
   } catch (err) { console.log('Sin sesión activa'); }
 
-  // 🔥 SI VOLVIÓ DE UN PAGO, VERIFICAR AUTOMÁTICAMENTE
   if (sessionStorage.getItem('pagoPendiente') === 'true') {
     sessionStorage.removeItem('pagoPendiente');
     await verificarPagoDirecto();
@@ -54,7 +91,6 @@ async function verificarPagoDirecto() {
   try {
     const res = await fetch('/api/verificar-pago-directo', { method: 'POST', credentials: 'include' });
     const data = await res.json();
-    
     if (data.ok && data.activado) {
       mostrarNotificacion(`✅ ¡Pago confirmado! Plan activo por ${data.dias} días.`, "exito");
       setTimeout(() => location.reload(), 2000);
@@ -68,7 +104,7 @@ async function verificarPagoDirecto() {
 // NAVEGACIÓN
 // ==========================================
 function ocultarTodasLasPantallasExcepto(id) { 
-  ['authScreen', 'recoverStep1', 'recoverStep2', 'recoverStep3', 'appScreen'].forEach(s => {
+  ['authScreen', 'recoverStep1', 'recoverStep2', 'recoverStep3', 'appScreen', 'payment-modal'].forEach(s => {
     const el = document.getElementById(s); if(el) el.classList.add('hidden');
   }); 
   const target = document.getElementById(id); if(target) target.classList.remove('hidden');
@@ -111,7 +147,7 @@ async function enviarCodigoRecuperacion() {
   try { 
     const res = await fetch('/api/enviar-codigo-recuperacion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) }); 
     const data = await res.json(); 
-    if (res.ok) { emailRecuperacion = email; mostrarNotificacion(" Código enviado", "exito"); ocultarTodasLasPantallasExcepto('recoverStep2'); if(document.getElementById('recoverMsg2')) document.getElementById('recoverMsg2').innerText = ''; } 
+    if (res.ok) { emailRecuperacion = email; mostrarNotificacion("📧 Código enviado", "exito"); ocultarTodasLasPantallasExcepto('recoverStep2'); if(document.getElementById('recoverMsg2')) document.getElementById('recoverMsg2').innerText = ''; } 
     else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; } 
   } catch (err) { mostrarNotificacion("❌ Error de conexión", "error"); } 
 }
@@ -171,7 +207,6 @@ if(document.getElementById('formLogin')) document.getElementById('formLogin').ad
 
 if(document.getElementById('btnLogout')) document.getElementById('btnLogout').addEventListener('click', async () => { await fetch('/api/logout', { method: 'POST', credentials: 'include' }); mostrarNotificacion("👋 Sesión cerrada.", "info"); setTimeout(() => location.reload(), 1000); });
 
-// CANCELAR SUSCRIPCIÓN (CORREGIDO: No hace logout)
 if(document.getElementById('btnCancelarSub')) document.getElementById('btnCancelarSub').addEventListener('click', async () => {
   if (!confirm("¿Cancelar plan? Perderás acceso premium pero podrás seguir usando la app.")) return;
   mostrarNotificacion("Procesando...", "info");
@@ -191,21 +226,8 @@ if(document.getElementById('btnPromo')) document.getElementById('btnPromo').addE
   if (data.valido) { mostrarNotificacion("✨ " + data.mensaje, "exito"); if(msg) msg.className = "hidden"; } else { mostrarNotificacion("❌ " + data.mensaje, "error"); if(msg) msg.className = "hidden"; } 
 });
 
-// PAGO (MARCA PENDIENTE ANTES DE REDIRIGIR)
-window.simularPago = async (plan) => {
-  mostrarNotificacion("Generando link seguro...", "info");
-  try {
-    const res = await fetch('/api/crear-preferencia-pago', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ plan }) });
-    const data = await res.json();
-    if (res.ok && data.init_point) {
-      sessionStorage.setItem('pagoPendiente', 'true'); // 🔥 FLAG PARA PLAN B
-      window.location.href = data.init_point;
-    } else { mostrarNotificacion("Error: " + (data.error || 'Desconocido'), "error"); }
-  } catch (err) { mostrarNotificacion("Error de conexión", "error"); }
-};
-
 // ==========================================
-// DASHBOARD
+// DASHBOARD Y DESTINOS
 // ==========================================
 function mostrarApp(nombre, fechaVencimiento) {
   ocultarTodasLasPantallasExcepto('appScreen');
@@ -283,7 +305,7 @@ function renderLista() {
   const c=document.getElementById('count'); if(c) c.innerText=destinos.length; const b=document.getElementById('btnViaje'); if(b){b.classList.remove('hidden'); inicioViaje=inicioViaje||new Date();}
 }
 
-window.borrarDestino = async (id) => { if(estaVencido) return mostrarNotificacion("⚠️ Vencido.","advertencia"); await fetch(`/api/destinos/${id}`,{method:'DELETE',credentials:'include'}); mostrarNotificacion("️ Eliminado.","info"); await cargarDestinos(); };
+window.borrarDestino = async (id) => { if(estaVencido) return mostrarNotificacion("⚠️ Vencido.","advertencia"); await fetch(`/api/destinos/${id}`,{method:'DELETE',credentials:'include'}); mostrarNotificacion("🗑️ Eliminado.","info"); await cargarDestinos(); };
 
 function limpiarDireccion(d) { let l=d.replace(/^\d+\.\s*/,'').replace(/\[GR\]\s*/i,'').replace(/General\s+Rodríguez\s*,?\s*/gi,'').trim(); if(!/General\s+Rodríguez/i.test(l)) l+=', General Rodríguez, Buenos Aires'; return l; }
 
