@@ -3,7 +3,7 @@
 // ==========================================
 const CONFIG_RUTAFLEX = {
   whatsapp: "5491123793596",
-  alias: "RUTAFLEX.MP", // ⚠️ CAMBIAR POR TU ALIAS REAL DE MERCADO PAGO
+  alias: "RUTAFLEX94.MP", // ⚠️ CAMBIAR POR TU ALIAS REAL DE MERCADO PAGO
   linkSemanal: "https://mpago.la/2DjaHdB",
   linkMensual: "https://mpago.la/2aNpJ1B"
 };
