@@ -106,14 +106,13 @@
         <div id="contadorDias" class="text-xs font-bold mt-1 px-2 py-0.5 rounded-full inline-block"></div>
         <div class="flex gap-2 justify-end mt-1">
            <button id="btnLogout" class="text-xs text-white/70 hover:text-white underline transition-all">Salir</button>
-           <button id="btnCancelarSub" class="text-xs text-red-400 hover:text-red-200 underline transition-all ml-2">Cancelar Plan</button>
         </div>
       </div>
     </header>
 
     <!-- ALERTAS CENTRADAS -->
     <div id="alertaProximoVencimiento" class="hidden bg-yellow-500 text-[#0A2342] p-3 text-center font-bold animate-pulse border-b-2 border-yellow-600 mx-4 rounded-b-xl">⚠️ ¡TU PLAN VENCE MAÑANA! Renová ahora.</div>
-    <div id="bannerVencido" class="hidden bg-red-600 text-white p-4 text-center font-bold animate-pulse border-b-2 border-red-800 mx-4 rounded-b-xl">🔒 TU PLAN ESTÁ VENCIDO. RENOVÁ PARA USAR EL SERVICIO.</div>
+    <div id="bannerVencido" class="hidden bg-red-600 text-white p-4 text-center font-bold animate-pulse border-b-2 border-red-800 mx-4 rounded-b-xl"> TU PLAN ESTÁ VENCIDO. RENOVÁ PARA USAR EL SERVICIO.</div>
 
     <div class="p-6 bg-gradient-to-b from-slate-50 to-white rounded-t-3xl mt-4 min-h-screen">
       <div class="text-center mb-6">
@@ -125,7 +124,7 @@
       <!-- BOTONES DE PAGO QUE ABREN EL MODAL -->
       <div class="grid grid-cols-2 gap-3">
         <button onclick="abrirModalPagos('Semanal', 4990)" class="block w-full p-4 rounded-xl text-center font-bold text-white shadow-md hover:-translate-y-1 transition-transform cursor-pointer" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-          <div class="text-2xl mb-1">⚡</div><div class="text-xs opacity-90">SEMANAL</div><div class="text-lg font-black">$4.990</div>
+          <div class="text-2xl mb-1"></div><div class="text-xs opacity-90">SEMANAL</div><div class="text-lg font-black">$4.990</div>
         </button>
         
         <button onclick="abrirModalPagos('Mensual', 14990)" class="block w-full p-4 rounded-xl text-center font-bold text-white shadow-md hover:-translate-y-1 transition-transform relative cursor-pointer" style="background: linear-gradient(135deg, #1e40af 0%, #0A2342 100%);">
@@ -159,7 +158,7 @@
           <div class="font-bold text-[#0A2342]/70">PDF (Próximamente)</div>
         </div>
         <button onclick="abrirCamara()" class="bg-white border-2 border-dashed border-slate-300 p-4 rounded-xl text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all shadow-sm group w-full">
-          <div class="text-3xl mb-2 emoji-icon">📸</div>
+          <div class="text-3xl mb-2 emoji-icon"></div>
           <div class="font-bold text-[#0A2342]">Cámara</div>
         </button>
         <button onclick="alert('QR Scanner en desarrollo')" class="bg-white border-2 border-dashed border-slate-300 p-4 rounded-xl text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all shadow-sm group w-full">
