@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1787738134238,
+    "nombre": "Juan",
+    "email": "juan@prueba.com",
+    "password": "$2b$10$dq7CJjxLBZCoIKJgoPZUAOgEMw6JE9I1Hj2Msn0/RpIBNyzk9OucW",
+    "fecha_registro": "2026-08-26T09:55:34.238Z",
+    "cuenta_activa": 0
+  },
+  {
+    "id": 1787738750777,
+    "nombre": "Juan",
+    "email": "bocajrs2001@gmail.com",
+    "password": "$2b$10$cJNW2F8qd5jttF/8Nwj6duWzETlrVusmsC9L.tjXkTnndVX4a0hUy",
+    "fecha_registro": "2026-08-26T10:05:50.777Z",
+    "cuenta_activa": 0
+  },
+  {
+    "id": 1787807111895,
+    "nombre": "albertho",
+    "email": "alberth1mendoza@gmail.com",
+    "password": "$2b$10$5Be32mzMTgrAyYNyPs9RSOAEnMfk74rsMcwW37bbAGBQGxokJHMfi",
+    "fecha_registro": "2026-08-27T05:05:11.895Z",
+    "cuenta_activa": 0
+  }
+]

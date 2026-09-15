@@ -1,0 +1,290 @@
+[
+  {
+    "id": 1787783911110.0437,
+    "userId": 1787738750777,
+    "direccion": "Av. Corrientes 1234, San Telmo, CABA",
+    "distancia": "0.8",
+    "tiempo": 5,
+    "completado": false,
+    "fecha_creacion": "2026-08-26T22:38:31.110Z"
+  },
+  {
+    "id": 1787783911116.6018,
+    "userId": 1787738750777,
+    "direccion": "Defensa 854, San Telmo",
+    "distancia": "1.4",
+    "tiempo": 7,
+    "completado": false,
+    "fecha_creacion": "2026-08-26T22:38:31.116Z"
+  },
+  {
+    "id": 1787783911120.1174,
+    "userId": 1787738750777,
+    "direccion": "Chile 1150, Monserrat",
+    "distancia": "2.0",
+    "tiempo": 9,
+    "completado": false,
+    "fecha_creacion": "2026-08-26T22:38:31.120Z"
+  },
+  {
+    "id": 1787783911125.796,
+    "userId": 1787738750777,
+    "direccion": "Av. Paseo Colón 800, Puerto Madero",
+    "distancia": "2.6",
+    "tiempo": 11,
+    "completado": false,
+    "fecha_creacion": "2026-08-26T22:38:31.126Z"
+  },
+  {
+    "id": 1787783911130.299,
+    "userId": 1787738750777,
+    "direccion": "Humberto 1° 1600, San Cristobal",
+    "distancia": "3.2",
+    "tiempo": 13,
+    "completado": false,
+    "fecha_creacion": "2026-08-26T22:38:31.130Z"
+  },
+  {
+    "id": 1787783911135.5623,
+    "userId": 1787738750777,
+    "direccion": "Av. Independencia 2200, Boedo",
+    "distancia": "3.8",
+    "tiempo": 15,
+    "completado": false,
+    "fecha_creacion": "2026-08-26T22:38:31.135Z"
+  },
+  {
+    "id": 1787783911139.3193,
+    "userId": 1787738750777,
+    "direccion": "Cochabamba 2100, Barracas",
+    "distancia": "4.4",
+    "tiempo": 17,
+    "completado": false,
+    "fecha_creacion": "2026-08-26T22:38:31.139Z"
+  },
+  {
+    "id": 1787783911143.0532,
+    "userId": 1787738750777,
+    "direccion": "Iriarte 2300, Barracas",
+    "distancia": "5.0",
+    "tiempo": 19,
+    "completado": false,
+    "fecha_creacion": "2026-08-26T22:38:31.143Z"
+  },
+  {
+    "id": 1787783911147.801,
+    "userId": 1787738750777,
+    "direccion": "Av. Montes de Oca 1500, Barracas",
+    "distancia": "5.6",
+    "tiempo": 21,
+    "completado": false,
+    "fecha_creacion": "2026-08-26T22:38:31.147Z"
+  },
+  {
+    "id": 1787802384251.9204,
+    "userId": 1787738750777,
+    "direccion": "Guia de Direcciones para Visitar",
+    "distancia": "6.2",
+    "tiempo": 23,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.251Z"
+  },
+  {
+    "id": 1787802384257.734,
+    "userId": 1787738750777,
+    "direccion": "Una seleccion de 10 puntos de interes. espacios publicos e hos historicos en los municipios",
+    "distancia": "6.8",
+    "tiempo": 25,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.257Z"
+  },
+  {
+    "id": 1787802384261.5134,
+    "userId": 1787738750777,
+    "direccion": "de General Rodiiguez, Lujan y Moreno",
+    "distancia": "7.4",
+    "tiempo": 27,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.261Z"
+  },
+  {
+    "id": 1787802384265.7004,
+    "userId": 1787738750777,
+    "direccion": "General Rodriguez",
+    "distancia": "8.0",
+    "tiempo": 29,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.265Z"
+  },
+  {
+    "id": 1787802384269.9788,
+    "userId": 1787738750777,
+    "direccion": "Museo Historico , \"—_ scsy — samiento 518, B1740001 Gral",
+    "distancia": "8.6",
+    "tiempo": 31,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.269Z"
+  },
+  {
+    "id": 1787802384272.4673,
+    "userId": 1787738750777,
+    "direccion": "Municipal seoluion Hs d a cua Rodauez",
+    "distancia": "9.2",
+    "tiempo": 33,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.272Z"
+  },
+  {
+    "id": 1787802384276.846,
+    "userId": 1787738750777,
+    "direccion": "Predio General Espoo A Bear de igoyon 1064",
+    "distancia": "9.8",
+    "tiempo": 35,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.276Z"
+  },
+  {
+    "id": 1787802384280.8125,
+    "userId": 1787738750777,
+    "direccion": "Rodriguez Tera asuonamias yde nes BITS Gral Roiuez",
+    "distancia": "10.4",
+    "tiempo": 37,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.280Z"
+  },
+  {
+    "id": 1787802384283.5063,
+    "userId": 1787738750777,
+    "direccion": "Estatua dela Liberia Una repo cursa ubicada en una zona Res Provincia 24 y Rb Primer, Gral",
+    "distancia": "11.0",
+    "tiempo": 39,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.283Z"
+  },
+  {
+    "id": 1787802384287.7317,
+    "userId": 1787738750777,
+    "direccion": "local aja mr und Venda reas: Peso",
+    "distancia": "11.6",
+    "tiempo": 41,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.287Z"
+  },
+  {
+    "id": 1787802384290.073,
+    "userId": 1787738750777,
+    "direccion": "Basilica de Lujan co , seo Sanar 51 BOTOOCCU Lujan",
+    "distancia": "12.2",
+    "tiempo": 43,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.290Z"
+  },
+  {
+    "id": 1787802384294.3462,
+    "userId": 1787738750777,
+    "direccion": "Complejo Mussografco 1 Caio ti aa del Vivy Lazio y Tora 17, 700 Ljn",
+    "distancia": "12.8",
+    "tiempo": 45,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.294Z"
+  },
+  {
+    "id": 1787802384297.2456,
+    "userId": 1787738750777,
+    "direccion": "Udaondo 1 od",
+    "distancia": "13.4",
+    "tiempo": 47,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.297Z"
+  },
+  {
+    "id": 1787802384301.5261,
+    "userId": 1787738750777,
+    "direccion": "PARQUE LUJAN micos cicindes Pare Salvo, 56700 Lujan",
+    "distancia": "14.0",
+    "tiempo": 49,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.301Z"
+  },
+  {
+    "id": 1787802384304.1667,
+    "userId": 1787738750777,
+    "direccion": "Diversiones L b ts de dd",
+    "distancia": "14.6",
+    "tiempo": 51,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.304Z"
+  },
+  {
+    "id": 1787802384308.2605,
+    "userId": 1787738750777,
+    "direccion": "Plaza Belgrano ea au san Mann 10,670 Lujan",
+    "distancia": "15.2",
+    "tiempo": 53,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.308Z"
+  },
+  {
+    "id": 1787802384312.3777,
+    "userId": 1787738750777,
+    "direccion": "Moreno",
+    "distancia": "15.8",
+    "tiempo": 55,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.312Z"
+  },
+  {
+    "id": 1787802384315.522,
+    "userId": 1787738750777,
+    "direccion": "Reserva Municipal Los — Granbosqe se por cord Bando Juro y Abaro ita",
+    "distancia": "16.4",
+    "tiempo": 57,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.315Z"
+  },
+  {
+    "id": 1787802384319.644,
+    "userId": 1787738750777,
+    "direccion": "Robles ms yal 1745 La Rai",
+    "distancia": "17.0",
+    "tiempo": 59,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.319Z"
+  },
+  {
+    "id": 1787802384322.5369,
+    "userId": 1787738750777,
+    "direccion": "T——— e T—];;———] CI—T—;—— e OO",
+    "distancia": "17.6",
+    "tiempo": 61,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.322Z"
+  },
+  {
+    "id": 1787802384326.8276,
+    "userId": 1787738750777,
+    "direccion": "Dique Roggero din que Maromó Aca (mo reno io)",
+    "distancia": "18.2",
+    "tiempo": 63,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.326Z"
+  },
+  {
+    "id": 1787802384330.9387,
+    "userId": 1787738750777,
+    "direccion": "Paseo Tematco Av ; so qu vuelo Av Sim 124, B1738 Moreno",
+    "distancia": "18.8",
+    "tiempo": 65,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.330Z"
+  },
+  {
+    "id": 1787802384334.9138,
+    "userId": 1787738750777,
+    "direccion": "stomi aerar lan ropubna",
+    "distancia": "19.4",
+    "tiempo": 67,
+    "completado": false,
+    "fecha_creacion": "2026-08-27T03:46:24.334Z"
+  }
+]
