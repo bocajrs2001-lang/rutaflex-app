@@ -36,17 +36,11 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Scrollbar personalizada */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
 ::-webkit-scrollbar-thumb { background: rgba(91, 169, 224, 0.5); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(91, 169, 224, 0.8); }
 
-/* ========================================== */
-/* 🆕 CORRECCIÓN MODAL DE EDICIÓN (FASE 1.2) */
-/* ========================================== */
-
-/* Forzar texto oscuro en los inputs del modal de edición */
 #contenedorInputs input.input-direccion {
   color: #0A2342 !important;
   background-color: #ffffff !important;
@@ -67,19 +61,16 @@
   color: #9ca3af !important;
 }
 
-/* Forzar color de los números de cada ítem */
 #contenedorInputs span {
   color: #6b7280 !important;
   font-weight: 700;
 }
 
-/* Contenedor de cada fila del modal */
 #contenedorInputs > div {
   background-color: #f9fafb !important;
   border: 1px solid #e5e7eb !important;
 }
 
-/* Botón de eliminar (basurero) */
 #contenedorInputs button {
   color: #ef4444 !important;
 }
@@ -88,7 +79,63 @@
   background-color: #fee2e2 !important;
 }
 
-/* Animación del modal de pagos */
+.direcciones-container.vacio {
+  min-height: 90px !important;
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 16px 0;
+  padding: 16px;
+  transition: all 0.3s ease;
+}
+
+.direcciones-container.con-datos {
+  min-height: auto !important;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: block;
+  transition: all 0.3s ease;
+}
+
+.placeholder-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+}
+
+.placeholder-vacio p {
+  font-weight: 700;
+  color: #334155;
+  margin: 0 0 4px 0;
+  font-size: 14px;
+}
+
+.placeholder-vacio span {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.placeholder-vacio[style*="display: none"] {
+  display: none !important;
+}
+
+#lista {
+  width: 100%;
+}
+
+#lista:empty {
+  display: none;
+}
+
 @keyframes slide-up {
   from { transform: translateY(100%); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
