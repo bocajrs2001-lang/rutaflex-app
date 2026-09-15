@@ -1,9 +1,6 @@
-// ==========================================
-// CONFIGURACIÓN RUTAFLEX (FASE 1.2)
-// ==========================================
 const CONFIG_RUTAFLEX = {
   whatsapp: "5491123793596",
-  alias: "RUTAFLEX94.MP", // ️ CAMBIAR POR TU ALIAS REAL DE MERCADO PAGO
+  alias: "RUTAFLEX.MP",
   linkSemanal: "https://mpago.la/2DjaHdB",
   linkMensual: "https://mpago.la/2aNpJ1B"
 };
@@ -15,14 +12,11 @@ let tramoActual = 0;
 let emailRecuperacion = ""; 
 let estaVencido = false;
 
-// ==========================================
-// UTILIDADES UI
-// ==========================================
 window.togglePass = (inputId, icon) => {
   const input = document.getElementById(inputId);
   if (!input) return;
   if (input.type === "password") { input.type = "text"; icon.innerText = "🙈"; } 
-  else { input.type = "password"; icon.innerText = "️"; }
+  else { input.type = "password"; icon.innerText = "👁️"; }
 };
 
 function mostrarNotificacion(mensaje, tipo = 'info') {
@@ -39,9 +33,6 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
   setTimeout(() => { notif.style.opacity = '0'; notif.style.transform = 'translate(-50%, -20px)'; notif.style.transition = 'all 0.5s ease'; setTimeout(() => notif.remove(), 500); }, 4000);
 }
 
-// ==========================================
-// FUNCIONES DEL MODAL DE PAGOS
-// ==========================================
 window.abrirModalPagos = function(plan, precio) {
   document.getElementById('modal-plan-texto').innerText = `Plan ${plan} - $${precio}`;
   document.getElementById('modal-alias-texto').innerText = CONFIG_RUTAFLEX.alias;
@@ -67,9 +58,6 @@ window.copiarAlias = function() {
   });
 };
 
-// ==========================================
-// INICIALIZACIÓN Y VERIFICACIÓN DE PAGO (PLAN B)
-// ==========================================
 window.addEventListener('load', async () => {
   const emailGuardado = localStorage.getItem('rutaflex_email');
   if (emailGuardado && document.getElementById('loginEmail')) document.getElementById('loginEmail').value = emailGuardado;
@@ -80,7 +68,6 @@ window.addEventListener('load', async () => {
     if (data.ok) mostrarApp(data.nombre, data.fecha_vencimiento);
   } catch (err) { console.log('Sin sesión activa'); }
 
-  // 🔥 SI VOLVIÓ DE UN PAGO, VERIFICAR AUTOMÁTICAMENTE (PLAN B)
   if (sessionStorage.getItem('pagoPendiente') === 'true') {
     sessionStorage.removeItem('pagoPendiente');
     await verificarPagoDirecto();
@@ -102,9 +89,6 @@ async function verificarPagoDirecto() {
   } catch (err) { console.error("Error verificando pago:", err); }
 }
 
-// ==========================================
-// NAVEGACIÓN
-// ==========================================
 function ocultarTodasLasPantallasExcepto(id) { 
   ['authScreen', 'recoverStep1', 'recoverStep2', 'recoverStep3', 'appScreen', 'payment-modal'].forEach(s => {
     const el = document.getElementById(s); if(el) el.classList.add('hidden');
@@ -137,9 +121,6 @@ if(document.getElementById('btnOlvideContrasena')) document.getElementById('btnO
 if(document.getElementById('btnVolverLogin1')) document.getElementById('btnVolverLogin1').addEventListener('click', () => ocultarTodasLasPantallasExcepto('authScreen'));
 if(document.getElementById('btnReenviarCodigo')) document.getElementById('btnReenviarCodigo').addEventListener('click', enviarCodigoRecuperacion);
 
-// ==========================================
-// RECUPERACIÓN
-// ==========================================
 async function enviarCodigoRecuperacion() { 
   const emailInput = document.getElementById('recoverEmailInput'); const msg = document.getElementById('recoverMsg1');
   if(!emailInput || !msg) return;
@@ -164,7 +145,7 @@ if(document.getElementById('formRecoverCode')) document.getElementById('formReco
     const data = await res.json(); 
     if (res.ok) { mostrarNotificacion("✅ Código correcto", "exito"); ocultarTodasLasPantallasExcepto('recoverStep3'); if(document.getElementById('recoverMsg3')) document.getElementById('recoverMsg3').innerText = ''; } 
     else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; } 
-  } catch (err) { mostrarNotificacion(" Error", "error"); } 
+  } catch (err) { mostrarNotificacion("❌ Error", "error"); } 
 });
 
 if(document.getElementById('formNewPassword')) document.getElementById('formNewPassword').addEventListener('submit', async (e) => { 
@@ -178,9 +159,6 @@ if(document.getElementById('formNewPassword')) document.getElementById('formNewP
   } catch (err) { mostrarNotificacion("❌ Error", "error"); } 
 });
 
-// ==========================================
-// AUTENTICACIÓN
-// ==========================================
 if(document.getElementById('formRegistro')) document.getElementById('formRegistro').addEventListener('submit', async (e) => { 
   e.preventDefault(); const nombre = document.getElementById('regNombre').value; const email = document.getElementById('regEmail').value; const password = document.getElementById('regPassword').value; const msg = document.getElementById('authMessage'); 
   msg.innerText = "Creando cuenta..."; msg.className = "text-blue-300 font-bold text-sm mt-4 text-center"; 
@@ -189,7 +167,7 @@ if(document.getElementById('formRegistro')) document.getElementById('formRegistr
     const data = await res.json(); 
     if (res.ok) { localStorage.setItem('rutaflex_email', email); mostrarNotificacion("✅ ¡Cuenta creada!", "exito"); setTimeout(() => mostrarApp(data.usuario.nombre, data.usuario.fecha_vencimiento), 1000); } 
     else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; } 
-  } catch (err) { mostrarNotificacion(" Error de conexión", "error"); } 
+  } catch (err) { mostrarNotificacion("❌ Error de conexión", "error"); } 
 });
 
 if(document.getElementById('formLogin')) document.getElementById('formLogin').addEventListener('submit', async (e) => {
@@ -202,26 +180,12 @@ if(document.getElementById('formLogin')) document.getElementById('formLogin').ad
     if (res.ok) { localStorage.setItem('rutaflex_email', email); mostrarNotificacion(`👋 ¡Bienvenido, ${data.usuario.nombre}!`, "exito"); setTimeout(() => mostrarApp(data.usuario.nombre, data.usuario.fecha_vencimiento), 1000); } 
     else { msg.innerText = data.error || "Email o contraseña incorrectos"; msg.className = "text-center text-sm mt-4 font-bold text-red-300"; }
   } catch (err) { 
-    if (err.message === 'TIMEOUT') { msg.innerText = "⏳ Servidor despertando (~40 seg). Esperá y probá de nuevo."; msg.className = "text-center text-sm mt-4 font-bold text-yellow-300"; } 
+    if (err.message === 'TIMEOUT') { msg.innerText = " Servidor despertando (~40 seg). Esperá y probá de nuevo."; msg.className = "text-center text-sm mt-4 font-bold text-yellow-300"; } 
     else { msg.innerText = "❌ Error de conexión."; msg.className = "text-center text-sm mt-4 font-bold text-red-300"; }
   }
 });
 
 if(document.getElementById('btnLogout')) document.getElementById('btnLogout').addEventListener('click', async () => { await fetch('/api/logout', { method: 'POST', credentials: 'include' }); mostrarNotificacion("👋 Sesión cerrada.", "info"); setTimeout(() => location.reload(), 1000); });
-
-// CANCELAR SUSCRIPCIÓN (CORREGIDO: No hace logout, solo actualiza estado)
-if(document.getElementById('btnCancelarSub')) document.getElementById('btnCancelarSub').addEventListener('click', async () => {
-  if (!confirm("¿Cancelar plan? Perderás acceso premium pero podrás seguir usando la app.")) return;
-  mostrarNotificacion("Procesando...", "info");
-  try {
-    const res = await fetch('/api/cancelar-suscripcion', { method: 'POST', credentials: 'include' });
-    const data = await res.json();
-    if (res.ok) { 
-      mostrarNotificacion("Plan cancelado. Podés reactivarlo cuando quieras.", "advertencia"); 
-      setTimeout(() => { const n = document.getElementById('userName')?.innerText.replace('¡Hola, ', '').replace('! 👋', '') || "Usuario"; mostrarApp(n, new Date(0)); }, 1500);
-    } else { mostrarNotificacion("Error: " + data.error, "error"); }
-  } catch (err) { mostrarNotificacion("Error de conexión", "error"); }
-});
 
 if(document.getElementById('btnPromo')) document.getElementById('btnPromo').addEventListener('click', async () => { 
   const codigo = document.getElementById('promo').value; if (!codigo) return mostrarNotificacion("⚠️ Escribí un código.", "advertencia"); 
@@ -229,9 +193,6 @@ if(document.getElementById('btnPromo')) document.getElementById('btnPromo').addE
   if (data.valido) { mostrarNotificacion("✨ " + data.mensaje, "exito"); if(msg) msg.className = "hidden"; } else { mostrarNotificacion("❌ " + data.mensaje, "error"); if(msg) msg.className = "hidden"; } 
 });
 
-// ==========================================
-// DASHBOARD Y DESTINOS
-// ==========================================
 function mostrarApp(nombre, fechaVencimiento) {
   ocultarTodasLasPantallasExcepto('appScreen');
   const userNameEl = document.getElementById('userName'); if(userNameEl) userNameEl.innerText = `¡Hola, ${nombre}! 👋`;
@@ -275,7 +236,7 @@ if(document.getElementById('fileImg')) document.getElementById('fileImg').addEve
     if (typeof Tesseract === 'undefined') throw new Error('Tesseract no cargó');
     const { data: { text } } = await Tesseract.recognize(file, 'spa');
     const lineas = text.split('\n').map(l => l.trim()).filter(l => l.length > 3);
-    if (lineas.length === 0) mostrarNotificacion("️ Texto no detectado.", "advertencia");
+    if (lineas.length === 0) mostrarNotificacion("⚠️ Texto no detectado.", "advertencia");
     else { destinosDetectados = lineas; mostrarModalEdicion(); }
   } catch (error) { mostrarNotificacion("❌ Error al procesar.", "error"); } 
   finally { if(btn) { btn.innerText = txt; btn.disabled = false; btn.classList.remove('opacity-75'); } e.target.value = ''; }
@@ -284,7 +245,7 @@ if(document.getElementById('fileImg')) document.getElementById('fileImg').addEve
 function mostrarModalEdicion() { 
   const c = document.getElementById('contenedorInputs'); if(!c) return; c.innerHTML = ''; 
   if (destinosDetectados.length === 0) c.innerHTML = '<p class="text-center text-gray-500 py-4">Sin direcciones.</p>';
-  else destinosDetectados.forEach((dir, i) => { c.innerHTML += `<div class="flex gap-2 items-center bg-gray-50 p-2 rounded-lg border"><span class="text-gray-400 font-bold w-6">${i+1}.</span><input type="text" value="${dir.replace(/"/g, '&quot;')}" class="input-direccion flex-1 bg-transparent border-none p-1 text-sm focus:outline-none focus:bg-white rounded"><button onclick="eliminarLinea(${i})" class="text-red-500 p-2">️</button></div>`; });
+  else destinosDetectados.forEach((dir, i) => { c.innerHTML += `<div class="flex gap-2 items-center bg-gray-50 p-2 rounded-lg border"><span class="text-gray-400 font-bold w-6">${i+1}.</span><input type="text" value="${dir.replace(/"/g, '&quot;')}" class="input-direccion flex-1 bg-transparent border-none p-1 text-sm focus:outline-none focus:bg-white rounded"><button onclick="eliminarLinea(${i})" class="text-red-500 p-2">🗑️</button></div>`; });
   const m = document.getElementById('modalEdicion'); if(m) m.classList.remove('hidden'); 
 }
 window.eliminarLinea = (i) => { destinosDetectados.splice(i, 1); mostrarModalEdicion(); };
@@ -302,13 +263,57 @@ if(document.getElementById('btnCancelarEdicion')) document.getElementById('btnCa
 if(document.getElementById('btnCerrarModal')) document.getElementById('btnCerrarModal').addEventListener('click', () => document.getElementById('modalEdicion').classList.add('hidden'));
 
 function renderLista() { 
-  const l = document.getElementById('lista'); if(!l) return; l.innerHTML = ""; 
-  if (destinos.length === 0) { l.innerHTML = '<li class="text-center text-gray-400 py-4">Sin destinos. Cargá una foto.</li>'; const b=document.getElementById('btnViaje'); if(b) b.classList.add('hidden'); const c=document.getElementById('count'); if(c) c.innerText=0; return; } 
-  destinos.forEach((d, i) => { setTimeout(() => { l.innerHTML += `<li class="flex gap-2 border-b py-2 items-center bg-white/50 p-2 rounded-lg"><span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs flex-shrink-0">🏠</span><div class="flex-1 min-w-0"><b class="block truncate">${d.direccion}</b><span class="text-xs text-green-600">${d.distancia} km • ~${d.tiempo} min</span></div><button onclick="borrarDestino('${d._id}')" class="text-red-500 text-xs px-2 hover:bg-red-50 rounded flex-shrink-0">🗑️</button></li>`; }, i*50); });
-  const c=document.getElementById('count'); if(c) c.innerText=destinos.length; const b=document.getElementById('btnViaje'); if(b){b.classList.remove('hidden'); inicioViaje=inicioViaje||new Date();}
+  const l = document.getElementById('lista'); 
+  const container = document.getElementById('direccionesContainer');
+  const placeholder = document.getElementById('placeholderVacio');
+  
+  if(!l) return; 
+  
+  l.innerHTML = ""; 
+  
+  if (destinos.length === 0) { 
+    if(container) {
+      container.classList.remove('con-datos');
+      container.classList.add('vacio');
+    }
+    if(placeholder) placeholder.style.display = 'flex';
+    
+    const b=document.getElementById('btnViaje'); 
+    if(b) b.classList.add('hidden'); 
+    
+    const c=document.getElementById('count'); 
+    if(c) c.innerText=0; 
+    
+    return; 
+  } 
+  
+  if(placeholder) placeholder.style.display = 'none';
+  if(container) {
+    container.classList.remove('vacio');
+    container.classList.add('con-datos');
+  }
+  
+  destinos.forEach((d, i) => { 
+    setTimeout(() => { 
+      l.innerHTML += `<li class="flex gap-2 border-b py-2 items-center bg-white/50 p-2 rounded-lg">
+        <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs flex-shrink-0">🏠</span>
+        <div class="flex-1 min-w-0"><b class="block truncate">${d.direccion}</b><span class="text-xs text-green-600">${d.distancia} km • ~${d.tiempo} min</span></div>
+        <button onclick="borrarDestino('${d._id}')" class="text-red-500 text-xs px-2 hover:bg-red-50 rounded flex-shrink-0">🗑️</button>
+      </li>`; 
+    }, i*50); 
+  }); 
+  
+  const c=document.getElementById('count'); 
+  if(c) c.innerText=destinos.length; 
+  
+  const b=document.getElementById('btnViaje'); 
+  if(b){
+    b.classList.remove('hidden'); 
+    inicioViaje=inicioViaje||new Date();
+  }
 }
 
-window.borrarDestino = async (id) => { if(estaVencido) return mostrarNotificacion("⚠️ Vencido.","advertencia"); await fetch(`/api/destinos/${id}`,{method:'DELETE',credentials:'include'}); mostrarNotificacion("🗑️ Eliminado.","info"); await cargarDestinos(); };
+window.borrarDestino = async (id) => { if(estaVencido) return mostrarNotificacion("⚠️ Vencido.","advertencia"); await fetch(`/api/destinos/${id}`,{method:'DELETE',credentials:'include'}); mostrarNotificacion("️ Eliminado.","info"); await cargarDestinos(); };
 
 function limpiarDireccion(d) { let l=d.replace(/^\d+\.\s*/,'').replace(/\[GR\]\s*/i,'').replace(/General\s+Rodríguez\s*,?\s*/gi,'').trim(); if(!/General\s+Rodríguez/i.test(l)) l+=', General Rodríguez, Buenos Aires'; return l; }
 
