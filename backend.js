@@ -36,6 +36,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({ 
   secret: 'rutaflex_secret_super_seguro_2026', 
   resave: false, 
