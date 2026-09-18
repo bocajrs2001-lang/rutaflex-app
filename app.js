@@ -130,7 +130,7 @@ async function enviarCodigoRecuperacion() {
   try { 
     const res = await fetch('/api/enviar-codigo-recuperacion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) }); 
     const data = await res.json(); 
-    if (res.ok) { emailRecuperacion = email; mostrarNotificacion("📧 Código enviado", "exito"); ocultarTodasLasPantallasExcepto('recoverStep2'); if(document.getElementById('recoverMsg2')) document.getElementById('recoverMsg2').innerText = ''; } 
+    if (res.ok) { emailRecuperacion = email; mostrarNotificacion(" Código enviado", "exito"); ocultarTodasLasPantallasExcepto('recoverStep2'); if(document.getElementById('recoverMsg2')) document.getElementById('recoverMsg2').innerText = ''; } 
     else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; } 
   } catch (err) { mostrarNotificacion("❌ Error de conexión", "error"); } 
 }
@@ -181,7 +181,7 @@ if(document.getElementById('formLogin')) document.getElementById('formLogin').ad
     else { msg.innerText = data.error || "Email o contraseña incorrectos"; msg.className = "text-center text-sm mt-4 font-bold text-red-300"; }
   } catch (err) { 
     if (err.message === 'TIMEOUT') { msg.innerText = " Servidor despertando (~40 seg). Esperá y probá de nuevo."; msg.className = "text-center text-sm mt-4 font-bold text-yellow-300"; } 
-    else { msg.innerText = "❌ Error de conexión."; msg.className = "text-center text-sm mt-4 font-bold text-red-300"; }
+    else { msg.innerText = " Error de conexión."; msg.className = "text-center text-sm mt-4 font-bold text-red-300"; }
   }
 });
 
@@ -313,7 +313,7 @@ function renderLista() {
   }
 }
 
-window.borrarDestino = async (id) => { if(estaVencido) return mostrarNotificacion("⚠️ Vencido.","advertencia"); await fetch(`/api/destinos/${id}`,{method:'DELETE',credentials:'include'}); mostrarNotificacion("️ Eliminado.","info"); await cargarDestinos(); };
+window.borrarDestino = async (id) => { if(estaVencido) return mostrarNotificacion("️ Vencido.","advertencia"); await fetch(`/api/destinos/${id}`,{method:'DELETE',credentials:'include'}); mostrarNotificacion("️ Eliminado.","info"); await cargarDestinos(); };
 
 function limpiarDireccion(d) { let l=d.replace(/^\d+\.\s*/,'').replace(/\[GR\]\s*/i,'').replace(/General\s+Rodríguez\s*,?\s*/gi,'').trim(); if(!/General\s+Rodríguez/i.test(l)) l+=', General Rodríguez, Buenos Aires'; return l; }
 
@@ -328,16 +328,16 @@ if(document.getElementById('btnViaje')) document.getElementById('btnViaje').addE
 });
 
 async function abrirCamara() {
-  if(estaVencido) return mostrarNotificacion("⚠️ Vencido.","advertencia");
+  if(estaVencido) return mostrarNotificacion("️ Vencido.","advertencia");
   const v=document.getElementById('camara'); if(v){v.classList.remove('hidden'); try{const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});v.srcObject=s;}catch(e){mostrarNotificacion("📷 Error cámara.","error");}}
 }
 
 // ==========================================
-//  REGISTRO DE SERVICE WORKER (PWA)
+// 📱 REGISTRO DE SERVICE WORKER (PWA)
 // ==========================================
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
+    navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
       .then(registration => {
         console.log('[PWA] ServiceWorker registrado:', registration.scope);
       })

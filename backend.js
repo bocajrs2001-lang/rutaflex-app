@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 3000;
 //  INICIALIZACIÓN DE SERVICIOS
 // ==========================================
 const mpClient = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
-console.log('🔑 Token MP cargado:', process.env.MP_ACCESS_TOKEN ? 'OK (' + process.env.MP_ACCESS_TOKEN.substring(0,8) + '...)' : '⚠️ FALTA TOKEN');
+console.log(' Token MP cargado:', process.env.MP_ACCESS_TOKEN ? 'OK (' + process.env.MP_ACCESS_TOKEN.substring(0,8) + '...)' : '️ FALTA TOKEN');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const codigosVerificacion = new Map();
@@ -35,8 +35,11 @@ app.use(cors({
   credentials: true 
 }));
 app.use(express.json());
+
+// 🆕 SERVIR ARCHIVOS ESTÁTICOS (RAÍZ Y CARPETA PUBLIC)
 app.use(express.static(path.join(__dirname)));
 app.use(express.static(path.join(__dirname, 'public')));
+
 app.use(session({ 
   secret: 'rutaflex_secret_super_seguro_2026', 
   resave: false, 
@@ -157,7 +160,7 @@ app.post('/api/webhook-mp', async (req, res) => {
       const paymentId = data.id;
       const mpPayment = await mpClient.payment.get({ id: paymentId });
       
-      console.log(`🔍 Estado del pago ${paymentId}: ${mpPayment.status}`);
+      console.log(` Estado del pago ${paymentId}: ${mpPayment.status}`);
 
       if (mpPayment.status === 'approved') {
         const userId = mpPayment.external_reference;
