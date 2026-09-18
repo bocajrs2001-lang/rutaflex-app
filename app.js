@@ -130,7 +130,7 @@ async function enviarCodigoRecuperacion() {
   try { 
     const res = await fetch('/api/enviar-codigo-recuperacion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) }); 
     const data = await res.json(); 
-    if (res.ok) { emailRecuperacion = email; mostrarNotificacion("📧 Código enviado", "exito"); ocultarTodasLasPantallasExcepto('recoverStep2'); if(document.getElementById('recoverMsg2')) document.getElementById('recoverMsg2').innerText = ''; } 
+    if (res.ok) { emailRecuperacion = email; mostrarNotificacion(" Código enviado", "exito"); ocultarTodasLasPantallasExcepto('recoverStep2'); if(document.getElementById('recoverMsg2')) document.getElementById('recoverMsg2').innerText = ''; } 
     else { msg.innerText = data.error; msg.className = "text-red-300 font-bold text-sm mt-4 text-center"; } 
   } catch (err) { mostrarNotificacion("❌ Error de conexión", "error"); } 
 }
@@ -181,7 +181,7 @@ if(document.getElementById('formLogin')) document.getElementById('formLogin').ad
     else { msg.innerText = data.error || "Email o contraseña incorrectos"; msg.className = "text-center text-sm mt-4 font-bold text-red-300"; }
   } catch (err) { 
     if (err.message === 'TIMEOUT') { msg.innerText = " Servidor despertando (~40 seg). Esperá y probá de nuevo."; msg.className = "text-center text-sm mt-4 font-bold text-yellow-300"; } 
-    else { msg.innerText = "❌ Error de conexión."; msg.className = "text-center text-sm mt-4 font-bold text-red-300"; }
+    else { msg.innerText = " Error de conexión."; msg.className = "text-center text-sm mt-4 font-bold text-red-300"; }
   }
 });
 
@@ -296,7 +296,7 @@ function renderLista() {
   destinos.forEach((d, i) => { 
     setTimeout(() => { 
       l.innerHTML += `<li class="flex gap-2 border-b py-2 items-center bg-white/50 p-2 rounded-lg">
-        <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs flex-shrink-0">🏠</span>
+        <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs flex-shrink-0"></span>
         <div class="flex-1 min-w-0"><b class="block truncate">${d.direccion}</b><span class="text-xs text-green-600">${d.distancia} km • ~${d.tiempo} min</span></div>
         <button onclick="borrarDestino('${d._id}')" class="text-red-500 text-xs px-2 hover:bg-red-50 rounded flex-shrink-0">🗑️</button>
       </li>`; 
@@ -313,7 +313,7 @@ function renderLista() {
   }
 }
 
-window.borrarDestino = async (id) => { if(estaVencido) return mostrarNotificacion("⚠️ Vencido.","advertencia"); await fetch(`/api/destinos/${id}`,{method:'DELETE',credentials:'include'}); mostrarNotificacion("️ Eliminado.","info"); await cargarDestinos(); };
+window.borrarDestino = async (id) => { if(estaVencido) return mostrarNotificacion("️ Vencido.","advertencia"); await fetch(`/api/destinos/${id}`,{method:'DELETE',credentials:'include'}); mostrarNotificacion("️ Eliminado.","info"); await cargarDestinos(); };
 
 function limpiarDireccion(d) { let l=d.replace(/^\d+\.\s*/,'').replace(/\[GR\]\s*/i,'').replace(/General\s+Rodríguez\s*,?\s*/gi,'').trim(); if(!/General\s+Rodríguez/i.test(l)) l+=', General Rodríguez, Buenos Aires'; return l; }
 
@@ -328,6 +328,21 @@ if(document.getElementById('btnViaje')) document.getElementById('btnViaje').addE
 });
 
 async function abrirCamara() {
-  if(estaVencido) return mostrarNotificacion("⚠️ Vencido.","advertencia");
+  if(estaVencido) return mostrarNotificacion("️ Vencido.","advertencia");
   const v=document.getElementById('camara'); if(v){v.classList.remove('hidden'); try{const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});v.srcObject=s;}catch(e){mostrarNotificacion("📷 Error cámara.","error");}}
+}
+
+// ==========================================
+// 📱 REGISTRO DE SERVICE WORKER (PWA)
+// ==========================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
+      .then(registration => {
+        console.log('[PWA] ServiceWorker registrado:', registration.scope);
+      })
+      .catch(error => {
+        console.log('[PWA] ServiceWorker falló:', error);
+      });
+  });
 }
