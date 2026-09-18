@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RUTAFLEX - El camino inteligente</title>
+
+<!-- PWA META TAGS -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#5BA9E0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RutaFlex">
+<link rel="apple-touch-icon" href="/icon-192x192.png">
+
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <link rel="stylesheet" href="style.css">
@@ -81,7 +90,7 @@
     <form id="formNewPassword" class="space-y-4 w-full max-w-sm mx-auto"><p class="text-white/80 text-sm mb-4">Creá una contraseña segura.</p>
       <div class="password-wrapper">
         <input type="password" id="newPasswordInput" placeholder="Nueva contraseña" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 pr-12 rounded-xl focus:outline-none focus:border-accent" required minlength="8">
-        <span class="toggle-password" onclick="togglePass('newPasswordInput', this)">️</span>
+        <span class="toggle-password" onclick="togglePass('newPasswordInput', this)">👁️</span>
       </div>
       <p class="text-xs text-white/50 mt-1 text-left">Mín. 8 car., 1 Mayús, 1 Núm, 1 Símbolo</p>
       <button type="submit" class="w-full bg-[#10b981] text-white font-black py-3.5 rounded-xl hover:bg-[#059669] transition-all shadow-lg">GUARDAR</button>
@@ -147,7 +156,7 @@
           <input type="file" id="fileImg" accept="image/*" hidden>
         </label>
         <div class="bg-slate-200/50 border-2 border-dashed border-slate-300 p-4 rounded-xl text-sm text-center opacity-70 cursor-not-allowed">
-          <div class="text-3xl mb-2 grayscale emoji-icon"></div>
+          <div class="text-3xl mb-2 grayscale emoji-icon">📄</div>
           <div class="font-bold text-[#0A2342]/70">PDF (Próximamente)</div>
         </div>
         <button onclick="abrirCamara()" class="bg-white border-2 border-dashed border-slate-300 p-4 rounded-xl text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all shadow-sm group w-full">
@@ -165,27 +174,27 @@
     <div id="listaContainer" class="p-4 border-t border-gray-100 transition-opacity duration-300">
       <div class="flex justify-between items-center mb-3">
         <h3 class="font-black text-lg text-[#0A2342]">Tus destinos (<span id="count">0</span>)</h3>
-        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold">📍 Ordenados</span>
+        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold"> Ordenados</span>
       </div>
       
       <div id="direccionesContainer" class="direcciones-container vacio">
         <ul id="lista" class="space-y-2 text-sm"></ul>
         <div id="placeholderVacio" class="placeholder-vacio">
-          <p>📍 Agregá tus paradas arriba para armar tu ruta</p>
+          <p> Agregá tus paradas arriba para armar tu ruta</p>
           <span>Ej: Av. Corrientes 1234, La Bombonera, etc.</span>
         </div>
       </div>
       
-      <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg hover:bg-[#123A6B] transition-all">️ COMENZAR VIAJE</button>
+      <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg hover:bg-[#123A6B] transition-all">🗺️ COMENZAR VIAJE</button>
       <p class="text-center text-xs mt-2 text-gray-500">Se abrirá en Google Maps (de a 10)</p>
     </div>
 
     <div id="stats" class="p-6 m-4 rounded-2xl hidden bg-gradient-to-br from-blue-50 to-indigo-50 border border-[#5BA4D9]/30">
-      <h3 class="font-black text-[#0A2342] text-xl mb-4">¡Ruta completada! </h3>
+      <h3 class="font-black text-[#0A2342] text-xl mb-4">¡Ruta completada! 🏆</h3>
       <div class="grid grid-cols-3 gap-2">
         <div class="text-center p-3 bg-white rounded-xl shadow-sm"><div class="text-2xl mb-1">⏱️</div><div class="text-[10px] text-gray-500 uppercase font-bold">Horas</div><div class="font-black text-xl text-[#0A2342]"><span id="statHoras">0</span></div></div>
         <div class="text-center p-3 bg-white rounded-xl shadow-sm"><div class="text-2xl mb-1">🛣️</div><div class="text-[10px] text-gray-500 uppercase font-bold">KM</div><div class="font-black text-xl text-[#0A2342]"><span id="statKm">0</span></div></div>
-        <div class="text-center p-3 bg-white rounded-xl shadow-sm"><div class="text-2xl mb-1">📦</div><div class="text-[10px] text-gray-500 uppercase font-bold">Entregas</div><div class="font-black text-xl text-[#0A2342]"><span id="statEntregas">0</span></div></div>
+        <div class="text-center p-3 bg-white rounded-xl shadow-sm"><div class="text-2xl mb-1"></div><div class="text-[10px] text-gray-500 uppercase font-bold">Entregas</div><div class="font-black text-xl text-[#0A2342]"><span id="statEntregas">0</span></div></div>
       </div>
     </div>
   </div>
