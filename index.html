@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- VERIFICACIÓN DE GOOGLE SEARCH CONSOLE -->
+<meta name="google-site-verification" content="uzyX6zsqHquA4NB7C3qKIhV-1NMKW6EV2nanwHVo_wU" />
+
 <!-- SEO META TAGS PARA GOOGLE -->
 <title>RutaFlex - App de Logística y Gestión de Rutas</title>
 <meta name="description" content="RutaFlex es la plataforma para optimizar rutas, gestionar envíos y logística de tu empresa de forma simple y rápida." />
@@ -127,7 +130,7 @@
     </header>
 
     <div id="alertaProximoVencimiento" class="hidden bg-yellow-500 text-[#0A2342] p-3 text-center font-bold animate-pulse border-b-2 border-yellow-600 mx-4 rounded-b-xl">⚠️ ¡TU PLAN VENCE MAÑANA! Renová ahora.</div>
-    <div id="bannerVencido" class="hidden bg-red-600 text-white p-4 text-center font-bold animate-pulse border-b-2 border-red-800 mx-4 rounded-b-xl">🔒 TU PLAN ESTÁ VENCIDO. RENOVÁ PARA USAR EL SERVICIO.</div>
+    <div id="bannerVencido" class="hidden bg-red-600 text-white p-4 text-center font-bold animate-pulse border-b-2 border-red-800 mx-4 rounded-b-xl"> TU PLAN ESTÁ VENCIDO. RENOVÁ PARA USAR EL SERVICIO.</div>
 
     <div class="p-6 bg-gradient-to-b from-slate-50 to-white rounded-t-3xl mt-4 min-h-screen">
       <div class="text-center mb-6">
@@ -161,12 +164,12 @@
       <h3 class="font-bold text-[#0A2342] mt-6 mb-3">Agregar destinos con IA</h3>
       <div class="grid grid-cols-2 gap-3">
         <label class="bg-white border-2 border-dashed border-slate-300 p-4 rounded-xl cursor-pointer text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all shadow-sm group">
-          <div class="text-3xl mb-2 emoji-icon">📷</div>
+          <div class="text-3xl mb-2 emoji-icon"></div>
           <div class="font-bold text-[#0A2342]">Imagen / Foto</div>
           <input type="file" id="fileImg" accept="image/*" hidden>
         </label>
         <div class="bg-slate-200/50 border-2 border-dashed border-slate-300 p-4 rounded-xl text-sm text-center opacity-70 cursor-not-allowed">
-          <div class="text-3xl mb-2 grayscale emoji-icon">📄</div>
+          <div class="text-3xl mb-2 grayscale emoji-icon"></div>
           <div class="font-bold text-[#0A2342]/70">PDF (Próximamente)</div>
         </div>
         <button onclick="abrirCamara()" class="bg-white border-2 border-dashed border-slate-300 p-4 rounded-xl text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all shadow-sm group w-full">
@@ -195,23 +198,23 @@
         </div>
       </div>
       
-      <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg hover:bg-[#123A6B] transition-all">🗺️ COMENZAR VIAJE</button>
+      <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg hover:bg-[#123A6B] transition-all">️ COMENZAR VIAJE</button>
       <p class="text-center text-xs mt-2 text-gray-500">Se abrirá en Google Maps (de a 10)</p>
     </div>
 
     <div id="stats" class="p-6 m-4 rounded-2xl hidden bg-gradient-to-br from-blue-50 to-indigo-50 border border-[#5BA4D9]/30">
-      <h3 class="font-black text-[#0A2342] text-xl mb-4">¡Ruta completada! 🏆</h3>
+      <h3 class="font-black text-[#0A2342] text-xl mb-4">¡Ruta completada! </h3>
       <div class="grid grid-cols-3 gap-2">
-        <div class="text-center p-3 bg-white rounded-xl shadow-sm"><div class="text-2xl mb-1">️</div><div class="text-[10px] text-gray-500 uppercase font-bold">Horas</div><div class="font-black text-xl text-[#0A2342]"><span id="statHoras">0</span></div></div>
+        <div class="text-center p-3 bg-white rounded-xl shadow-sm"><div class="text-2xl mb-1">⏱️</div><div class="text-[10px] text-gray-500 uppercase font-bold">Horas</div><div class="font-black text-xl text-[#0A2342]"><span id="statHoras">0</span></div></div>
         <div class="text-center p-3 bg-white rounded-xl shadow-sm"><div class="text-2xl mb-1">️</div><div class="text-[10px] text-gray-500 uppercase font-bold">KM</div><div class="font-black text-xl text-[#0A2342]"><span id="statKm">0</span></div></div>
-        <div class="text-center p-3 bg-white rounded-xl shadow-sm"><div class="text-2xl mb-1"></div><div class="text-[10px] text-gray-500 uppercase font-bold">Entregas</div><div class="font-black text-xl text-[#0A2342]"><span id="statEntregas">0</span></div></div>
+        <div class="text-center p-3 bg-white rounded-xl shadow-sm"><div class="text-2xl mb-1">📦</div><div class="text-[10px] text-gray-500 uppercase font-bold">Entregas</div><div class="font-black text-xl text-[#0A2342]"><span id="statEntregas">0</span></div></div>
       </div>
     </div>
   </div>
 
   <div id="modalEdicion" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
     <div class="bg-white rounded-2xl w-full max-w-md max-h-[85vh] flex flex-col shadow-2xl">
-      <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-[#0A2342] to-[#123A6B] rounded-t-2xl"><h3 class="text-white font-black text-lg flex items-center gap-2">🤖 Revisar direcciones</h3><button id="btnCerrarModal" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button></div>
+      <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-[#0A2342] to-[#123A6B] rounded-t-2xl"><h3 class="text-white font-black text-lg flex items-center gap-2"> Revisar direcciones</h3><button id="btnCerrarModal" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button></div>
       <div class="p-2 text-center bg-blue-50 border-b border-blue-100"><p class="text-xs text-blue-800 font-medium">Editá, borrá o agregá líneas antes de guardar.</p></div>
       <div class="p-4 overflow-y-auto flex-1 space-y-2" id="contenedorInputs"></div>
       <div class="p-4 border-t border-gray-100 flex gap-2 bg-gray-50 rounded-b-2xl"><button id="btnCancelarEdicion" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-300 transition-all">Cancelar</button><button id="btnGuardarEdicion" class="flex-1 bg-[#10b981] text-white font-bold py-3 rounded-xl hover:bg-[#059669] transition-all shadow-lg">✅ Guardar Todo</button></div>
@@ -226,7 +229,7 @@
       </div>
       <div class="p-6 space-y-4">
         <a id="btn-mp-pago" href="#" target="_blank" class="flex items-center gap-4 p-4 rounded-xl border-2 border-[#009EE3] bg-blue-50 hover:bg-blue-100 transition-all group">
-          <div class="w-10 h-10 bg-[#009EE3] rounded-full flex items-center justify-center text-white text-xl">💳</div>
+          <div class="w-10 h-10 bg-[#009EE3] rounded-full flex items-center justify-center text-white text-xl"></div>
           <div class="flex-1 text-left">
             <div class="font-bold text-[#0A2342]">Mercado Pago</div>
             <div class="text-xs text-gray-600">Tarjeta, QR, dinero en cuenta</div>
