@@ -3,7 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RUTAFLEX - El camino inteligente</title>
+
+<!-- SEO META TAGS PARA GOOGLE -->
+<title>RutaFlex - App de Logística y Gestión de Rutas</title>
+<meta name="description" content="RutaFlex es la plataforma para optimizar rutas, gestionar envíos y logística de tu empresa de forma simple y rápida." />
+<meta name="keywords" content="RutaFlex, logistica, rutas, envios, gestion" />
+<meta name="author" content="RutaFlex" />
+<meta property="og:title" content="RutaFlex" />
+<meta property="og:description" content="Optimiza tus rutas y envíos con RutaFlex" />
+<meta property="og:url" content="https://rutaflex-app.onrender.com/" />
+<meta property="og:type" content="website" />
+<link rel="canonical" href="https://rutaflex-app.onrender.com/" />
 
 <!-- PWA META TAGS -->
 <link rel="manifest" href="/manifest.json">
@@ -160,7 +170,7 @@
           <div class="font-bold text-[#0A2342]/70">PDF (Próximamente)</div>
         </div>
         <button onclick="abrirCamara()" class="bg-white border-2 border-dashed border-slate-300 p-4 rounded-xl text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all shadow-sm group w-full">
-          <div class="text-3xl mb-2 emoji-icon"></div>
+          <div class="text-3xl mb-2 emoji-icon">📸</div>
           <div class="font-bold text-[#0A2342]">Cámara</div>
         </button>
         <button onclick="alert('QR Scanner en desarrollo')" class="bg-white border-2 border-dashed border-slate-300 p-4 rounded-xl text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all shadow-sm group w-full">
@@ -174,13 +184,13 @@
     <div id="listaContainer" class="p-4 border-t border-gray-100 transition-opacity duration-300">
       <div class="flex justify-between items-center mb-3">
         <h3 class="font-black text-lg text-[#0A2342]">Tus destinos (<span id="count">0</span>)</h3>
-        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold"> Ordenados</span>
+        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold">📍 Ordenados</span>
       </div>
       
       <div id="direccionesContainer" class="direcciones-container vacio">
         <ul id="lista" class="space-y-2 text-sm"></ul>
         <div id="placeholderVacio" class="placeholder-vacio">
-          <p> Agregá tus paradas arriba para armar tu ruta</p>
+          <p>📍 Agregá tus paradas arriba para armar tu ruta</p>
           <span>Ej: Av. Corrientes 1234, La Bombonera, etc.</span>
         </div>
       </div>
@@ -192,8 +202,8 @@
     <div id="stats" class="p-6 m-4 rounded-2xl hidden bg-gradient-to-br from-blue-50 to-indigo-50 border border-[#5BA4D9]/30">
       <h3 class="font-black text-[#0A2342] text-xl mb-4">¡Ruta completada! 🏆</h3>
       <div class="grid grid-cols-3 gap-2">
-        <div class="text-center p-3 bg-white rounded-xl shadow-sm"><div class="text-2xl mb-1">⏱️</div><div class="text-[10px] text-gray-500 uppercase font-bold">Horas</div><div class="font-black text-xl text-[#0A2342]"><span id="statHoras">0</span></div></div>
-        <div class="text-center p-3 bg-white rounded-xl shadow-sm"><div class="text-2xl mb-1">🛣️</div><div class="text-[10px] text-gray-500 uppercase font-bold">KM</div><div class="font-black text-xl text-[#0A2342]"><span id="statKm">0</span></div></div>
+        <div class="text-center p-3 bg-white rounded-xl shadow-sm"><div class="text-2xl mb-1">️</div><div class="text-[10px] text-gray-500 uppercase font-bold">Horas</div><div class="font-black text-xl text-[#0A2342]"><span id="statHoras">0</span></div></div>
+        <div class="text-center p-3 bg-white rounded-xl shadow-sm"><div class="text-2xl mb-1">️</div><div class="text-[10px] text-gray-500 uppercase font-bold">KM</div><div class="font-black text-xl text-[#0A2342]"><span id="statKm">0</span></div></div>
         <div class="text-center p-3 bg-white rounded-xl shadow-sm"><div class="text-2xl mb-1"></div><div class="text-[10px] text-gray-500 uppercase font-bold">Entregas</div><div class="font-black text-xl text-[#0A2342]"><span id="statEntregas">0</span></div></div>
       </div>
     </div>
