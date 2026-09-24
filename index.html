@@ -7,15 +7,28 @@
 <!-- VERIFICACIÓN DE GOOGLE SEARCH CONSOLE -->
 <meta name="google-site-verification" content="uzyX6zsqHquA4NB7C3qKIhV-1NMKW6EV2nanwHVo_wU" />
 
+<!-- FAVICON (Icono en pestaña del navegador y resultados de Google) -->
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192x192.png">
+<link rel="apple-touch-icon" href="/icon-192x192.png">
+
 <!-- SEO META TAGS PARA GOOGLE -->
 <title>RutaFlex - App de Logística y Gestión de Rutas</title>
 <meta name="description" content="RutaFlex es la plataforma para optimizar rutas, gestionar envíos y logística de tu empresa de forma simple y rápida." />
-<meta name="keywords" content="RutaFlex, logistica, rutas, envios, gestion" />
+<meta name="keywords" content="RutaFlex, logistica, rutas, envios, gestion, entregas, delivery, optimización" />
 <meta name="author" content="RutaFlex" />
-<meta property="og:title" content="RutaFlex" />
-<meta property="og:description" content="Optimiza tus rutas y envíos con RutaFlex" />
+
+<!-- OPEN GRAPH (Para que aparezca bien al compartir en redes y en Google) -->
+<meta property="og:site_name" content="RutaFlex" />
+<meta property="og:title" content="RutaFlex - App de Logística y Gestión de Rutas" />
+<meta property="og:description" content="Optimiza tus rutas de entrega. Del más cercano al más lejano. Ahorra nafta y tiempo." />
 <meta property="og:url" content="https://rutaflex-app.onrender.com/" />
 <meta property="og:type" content="website" />
+<meta property="og:image" content="https://rutaflex-app.onrender.com/icon-512x512.png" />
+<meta property="og:image:width" content="512" />
+<meta property="og:image:height" content="512" />
+<meta property="og:locale" content="es_AR" />
+
+<!-- CANONICAL URL -->
 <link rel="canonical" href="https://rutaflex-app.onrender.com/" />
 
 <!-- PWA META TAGS -->
@@ -24,7 +37,29 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="RutaFlex">
-<link rel="apple-touch-icon" href="/icon-192x192.png">
+
+<!-- JSON-LD (Datos estructurados para Google) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "RutaFlex",
+  "url": "https://rutaflex-app.onrender.com/",
+  "description": "Optimiza tu ruta de entrega. Del más cercano al más lejano. Ahorra nafta y tiempo.",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web, Android, iOS",
+  "offers": {
+    "@type": "Offer",
+    "price": "4990",
+    "priceCurrency": "ARS"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "RutaFlex",
+    "email": "rutaflex6@gmail.com"
+  }
+}
+</script>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -70,7 +105,7 @@
         <input type="email" id="loginEmail" placeholder="Email" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-accent" required>
         <div class="password-wrapper">
            <input type="password" id="loginPassword" placeholder="Contraseña" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 pr-12 rounded-xl focus:outline-none focus:border-accent" required>
-           <span class="toggle-password" onclick="togglePass('loginPassword', this)">👁️</span>
+           <span class="toggle-password" onclick="togglePass('loginPassword', this)">️</span>
         </div>
         <button type="submit" class="w-full bg-accent text-[#0A2342] font-black py-3.5 rounded-xl hover:bg-white transition-all shadow-lg">ENTRAR</button>
         <button type="button" id="btnOlvideContrasena" class="w-full text-white/60 text-sm hover:text-white underline mt-2">¿Olvidaste tu contraseña?</button>
@@ -103,7 +138,7 @@
     <form id="formNewPassword" class="space-y-4 w-full max-w-sm mx-auto"><p class="text-white/80 text-sm mb-4">Creá una contraseña segura.</p>
       <div class="password-wrapper">
         <input type="password" id="newPasswordInput" placeholder="Nueva contraseña" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 pr-12 rounded-xl focus:outline-none focus:border-accent" required minlength="8">
-        <span class="toggle-password" onclick="togglePass('newPasswordInput', this)">👁️</span>
+        <span class="toggle-password" onclick="togglePass('newPasswordInput', this)">️</span>
       </div>
       <p class="text-xs text-white/50 mt-1 text-left">Mín. 8 car., 1 Mayús, 1 Núm, 1 Símbolo</p>
       <button type="submit" class="w-full bg-[#10b981] text-white font-black py-3.5 rounded-xl hover:bg-[#059669] transition-all shadow-lg">GUARDAR</button>
@@ -130,7 +165,7 @@
     </header>
 
     <div id="alertaProximoVencimiento" class="hidden bg-yellow-500 text-[#0A2342] p-3 text-center font-bold animate-pulse border-b-2 border-yellow-600 mx-4 rounded-b-xl">⚠️ ¡TU PLAN VENCE MAÑANA! Renová ahora.</div>
-    <div id="bannerVencido" class="hidden bg-red-600 text-white p-4 text-center font-bold animate-pulse border-b-2 border-red-800 mx-4 rounded-b-xl"> TU PLAN ESTÁ VENCIDO. RENOVÁ PARA USAR EL SERVICIO.</div>
+    <div id="bannerVencido" class="hidden bg-red-600 text-white p-4 text-center font-bold animate-pulse border-b-2 border-red-800 mx-4 rounded-b-xl">🔒 TU PLAN ESTÁ VENCIDO. RENOVÁ PARA USAR EL SERVICIO.</div>
 
     <div class="p-6 bg-gradient-to-b from-slate-50 to-white rounded-t-3xl mt-4 min-h-screen">
       <div class="text-center mb-6">
@@ -141,12 +176,12 @@
       
       <div class="grid grid-cols-2 gap-3">
         <button onclick="abrirModalPagos('Semanal', 4990)" class="block w-full p-4 rounded-xl text-center font-bold text-white shadow-md hover:-translate-y-1 transition-transform cursor-pointer" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-          <div class="text-2xl mb-1">⚡</div><div class="text-xs opacity-90">SEMANAL</div><div class="text-lg font-black">$4.990</div>
+          <div class="text-2xl mb-1"></div><div class="text-xs opacity-90">SEMANAL</div><div class="text-lg font-black">$4.990</div>
         </button>
         
         <button onclick="abrirModalPagos('Mensual', 14990)" class="block w-full p-4 rounded-xl text-center font-bold text-white shadow-md hover:-translate-y-1 transition-transform relative cursor-pointer" style="background: linear-gradient(135deg, #1e40af 0%, #0A2342 100%);">
           <div class="absolute -top-2 -right-2 bg-yellow-400 text-[#0A2342] text-[10px] font-black px-2 py-1 rounded-full shadow-sm z-10">POPULAR</div>
-          <div class="text-2xl mb-1">🚀</div>
+          <div class="text-2xl mb-1"></div>
           <div class="text-xs opacity-90">MENSUAL</div>
           <div class="text-lg font-black">$14.990</div>
         </button>
@@ -164,12 +199,12 @@
       <h3 class="font-bold text-[#0A2342] mt-6 mb-3">Agregar destinos con IA</h3>
       <div class="grid grid-cols-2 gap-3">
         <label class="bg-white border-2 border-dashed border-slate-300 p-4 rounded-xl cursor-pointer text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all shadow-sm group">
-          <div class="text-3xl mb-2 emoji-icon"></div>
+          <div class="text-3xl mb-2 emoji-icon">📷</div>
           <div class="font-bold text-[#0A2342]">Imagen / Foto</div>
           <input type="file" id="fileImg" accept="image/*" hidden>
         </label>
         <div class="bg-slate-200/50 border-2 border-dashed border-slate-300 p-4 rounded-xl text-sm text-center opacity-70 cursor-not-allowed">
-          <div class="text-3xl mb-2 grayscale emoji-icon"></div>
+          <div class="text-3xl mb-2 grayscale emoji-icon">📄</div>
           <div class="font-bold text-[#0A2342]/70">PDF (Próximamente)</div>
         </div>
         <button onclick="abrirCamara()" class="bg-white border-2 border-dashed border-slate-300 p-4 rounded-xl text-sm text-center hover:border-[#5BA4D9] hover:bg-blue-50 transition-all shadow-sm group w-full">
@@ -198,15 +233,15 @@
         </div>
       </div>
       
-      <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg hover:bg-[#123A6B] transition-all">️ COMENZAR VIAJE</button>
+      <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg hover:bg-[#123A6B] transition-all">🗺️ COMENZAR VIAJE</button>
       <p class="text-center text-xs mt-2 text-gray-500">Se abrirá en Google Maps (de a 10)</p>
     </div>
 
     <div id="stats" class="p-6 m-4 rounded-2xl hidden bg-gradient-to-br from-blue-50 to-indigo-50 border border-[#5BA4D9]/30">
-      <h3 class="font-black text-[#0A2342] text-xl mb-4">¡Ruta completada! </h3>
+      <h3 class="font-black text-[#0A2342] text-xl mb-4">¡Ruta completada! 🏆</h3>
       <div class="grid grid-cols-3 gap-2">
-        <div class="text-center p-3 bg-white rounded-xl shadow-sm"><div class="text-2xl mb-1">⏱️</div><div class="text-[10px] text-gray-500 uppercase font-bold">Horas</div><div class="font-black text-xl text-[#0A2342]"><span id="statHoras">0</span></div></div>
-        <div class="text-center p-3 bg-white rounded-xl shadow-sm"><div class="text-2xl mb-1">️</div><div class="text-[10px] text-gray-500 uppercase font-bold">KM</div><div class="font-black text-xl text-[#0A2342]"><span id="statKm">0</span></div></div>
+        <div class="text-center p-3 bg-white rounded-xl shadow-sm"><div class="text-2xl mb-1">️</div><div class="text-[10px] text-gray-500 uppercase font-bold">Horas</div><div class="font-black text-xl text-[#0A2342]"><span id="statHoras">0</span></div></div>
+        <div class="text-center p-3 bg-white rounded-xl shadow-sm"><div class="text-2xl mb-1">🛣️</div><div class="text-[10px] text-gray-500 uppercase font-bold">KM</div><div class="font-black text-xl text-[#0A2342]"><span id="statKm">0</span></div></div>
         <div class="text-center p-3 bg-white rounded-xl shadow-sm"><div class="text-2xl mb-1">📦</div><div class="text-[10px] text-gray-500 uppercase font-bold">Entregas</div><div class="font-black text-xl text-[#0A2342]"><span id="statEntregas">0</span></div></div>
       </div>
     </div>
@@ -214,7 +249,7 @@
 
   <div id="modalEdicion" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
     <div class="bg-white rounded-2xl w-full max-w-md max-h-[85vh] flex flex-col shadow-2xl">
-      <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-[#0A2342] to-[#123A6B] rounded-t-2xl"><h3 class="text-white font-black text-lg flex items-center gap-2"> Revisar direcciones</h3><button id="btnCerrarModal" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button></div>
+      <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-[#0A2342] to-[#123A6B] rounded-t-2xl"><h3 class="text-white font-black text-lg flex items-center gap-2">🤖 Revisar direcciones</h3><button id="btnCerrarModal" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button></div>
       <div class="p-2 text-center bg-blue-50 border-b border-blue-100"><p class="text-xs text-blue-800 font-medium">Editá, borrá o agregá líneas antes de guardar.</p></div>
       <div class="p-4 overflow-y-auto flex-1 space-y-2" id="contenedorInputs"></div>
       <div class="p-4 border-t border-gray-100 flex gap-2 bg-gray-50 rounded-b-2xl"><button id="btnCancelarEdicion" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-300 transition-all">Cancelar</button><button id="btnGuardarEdicion" class="flex-1 bg-[#10b981] text-white font-bold py-3 rounded-xl hover:bg-[#059669] transition-all shadow-lg">✅ Guardar Todo</button></div>
@@ -229,7 +264,7 @@
       </div>
       <div class="p-6 space-y-4">
         <a id="btn-mp-pago" href="#" target="_blank" class="flex items-center gap-4 p-4 rounded-xl border-2 border-[#009EE3] bg-blue-50 hover:bg-blue-100 transition-all group">
-          <div class="w-10 h-10 bg-[#009EE3] rounded-full flex items-center justify-center text-white text-xl"></div>
+          <div class="w-10 h-10 bg-[#009EE3] rounded-full flex items-center justify-center text-white text-xl">💳</div>
           <div class="flex-1 text-left">
             <div class="font-bold text-[#0A2342]">Mercado Pago</div>
             <div class="text-xs text-gray-600">Tarjeta, QR, dinero en cuenta</div>
