@@ -90,7 +90,7 @@ async function verificarPagoDirecto() {
 }
 
 function ocultarTodasLasPantallasExcepto(id) { 
-  ['authScreen', 'recoverStep1', 'recoverStep2', 'recoverStep3', 'appScreen', 'payment-modal'].forEach(s => {
+  ['authScreen', 'recoverStep1', 'recoverStep2', 'recoverStep3', 'appScreen', 'perfilScreen', 'payment-modal'].forEach(s => {
     const el = document.getElementById(s); if(el) el.classList.add('hidden');
   }); 
   const target = document.getElementById(id); if(target) target.classList.remove('hidden');
@@ -180,17 +180,26 @@ if(document.getElementById('formLogin')) document.getElementById('formLogin').ad
     if (res.ok) { localStorage.setItem('rutaflex_email', email); mostrarNotificacion(`👋 ¡Bienvenido, ${data.usuario.nombre}!`, "exito"); setTimeout(() => mostrarApp(data.usuario.nombre, data.usuario.fecha_vencimiento), 1000); } 
     else { msg.innerText = data.error || "Email o contraseña incorrectos"; msg.className = "text-center text-sm mt-4 font-bold text-red-300"; }
   } catch (err) { 
-    if (err.message === 'TIMEOUT') { msg.innerText = " Servidor despertando (~40 seg). Esperá y probá de nuevo."; msg.className = "text-center text-sm mt-4 font-bold text-yellow-300"; } 
-    else { msg.innerText = " Error de conexión."; msg.className = "text-center text-sm mt-4 font-bold text-red-300"; }
+    if (err.message === 'TIMEOUT') { msg.innerText = "⏳ Servidor despertando (~40 seg). Esperá y probá de nuevo."; msg.className = "text-center text-sm mt-4 font-bold text-yellow-300"; } 
+    else { msg.innerText = "❌ Error de conexión."; msg.className = "text-center text-sm mt-4 font-bold text-red-300"; }
   }
 });
 
-if(document.getElementById('btnLogout')) document.getElementById('btnLogout').addEventListener('click', async () => { await fetch('/api/logout', { method: 'POST', credentials: 'include' }); mostrarNotificacion("👋 Sesión cerrada.", "info"); setTimeout(() => location.reload(), 1000); });
+async function hacerLogout() {
+  await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+  localStorage.removeItem('rutaflex_email');
+  mostrarNotificacion("👋 Sesión cerrada.", "info");
+  setTimeout(() => location.reload(), 1000);
+}
+
+if(document.getElementById('btnLogout')) document.getElementById('btnLogout').addEventListener('click', hacerLogout);
+if(document.getElementById('btnLogoutDropdown')) document.getElementById('btnLogoutDropdown').addEventListener('click', hacerLogout);
+if(document.getElementById('btnLogoutPerfil')) document.getElementById('btnLogoutPerfil').addEventListener('click', hacerLogout);
 
 if(document.getElementById('btnPromo')) document.getElementById('btnPromo').addEventListener('click', async () => { 
   const codigo = document.getElementById('promo').value; if (!codigo) return mostrarNotificacion("⚠️ Escribí un código.", "advertencia"); 
   const msg = document.getElementById('promoMessage'); const res = await fetch('/api/validar-promo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ codigo }) }); const data = await res.json(); 
-  if (data.valido) { mostrarNotificacion("✨ " + data.mensaje, "exito"); if(msg) msg.className = "hidden"; } else { mostrarNotificacion("❌ " + data.mensaje, "error"); if(msg) msg.className = "hidden"; } 
+  if (data.valido) { mostrarNotificacion("✨ " + data.mensaje, "exito"); if(msg) msg.className = "hidden"; } else { mostrarNotificacion(" " + data.mensaje, "error"); if(msg) msg.className = "hidden"; } 
 });
 
 function mostrarApp(nombre, fechaVencimiento) {
@@ -296,9 +305,9 @@ function renderLista() {
   destinos.forEach((d, i) => { 
     setTimeout(() => { 
       l.innerHTML += `<li class="flex gap-2 border-b py-2 items-center bg-white/50 p-2 rounded-lg">
-        <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs flex-shrink-0"></span>
+        <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs flex-shrink-0">${i+1}</span>
         <div class="flex-1 min-w-0"><b class="block truncate">${d.direccion}</b><span class="text-xs text-green-600">${d.distancia} km • ~${d.tiempo} min</span></div>
-        <button onclick="borrarDestino('${d._id}')" class="text-red-500 text-xs px-2 hover:bg-red-50 rounded flex-shrink-0">🗑️</button>
+        <button onclick="borrarDestino('${d._id}')" class="text-red-500 text-xs px-2 hover:bg-red-50 rounded flex-shrink-0">️</button>
       </li>`; 
     }, i*50); 
   }); 
@@ -313,7 +322,7 @@ function renderLista() {
   }
 }
 
-window.borrarDestino = async (id) => { if(estaVencido) return mostrarNotificacion("️ Vencido.","advertencia"); await fetch(`/api/destinos/${id}`,{method:'DELETE',credentials:'include'}); mostrarNotificacion("️ Eliminado.","info"); await cargarDestinos(); };
+window.borrarDestino = async (id) => { if(estaVencido) return mostrarNotificacion("⚠️ Vencido.","advertencia"); await fetch(`/api/destinos/${id}`,{method:'DELETE',credentials:'include'}); mostrarNotificacion("🗑️ Eliminado.","info"); await cargarDestinos(); };
 
 function limpiarDireccion(d) { let l=d.replace(/^\d+\.\s*/,'').replace(/\[GR\]\s*/i,'').replace(/General\s+Rodríguez\s*,?\s*/gi,'').trim(); if(!/General\s+Rodríguez/i.test(l)) l+=', General Rodríguez, Buenos Aires'; return l; }
 
@@ -328,8 +337,56 @@ if(document.getElementById('btnViaje')) document.getElementById('btnViaje').addE
 });
 
 async function abrirCamara() {
-  if(estaVencido) return mostrarNotificacion("️ Vencido.","advertencia");
+  if(estaVencido) return mostrarNotificacion("⚠️ Vencido.","advertencia");
   const v=document.getElementById('camara'); if(v){v.classList.remove('hidden'); try{const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});v.srcObject=s;}catch(e){mostrarNotificacion("📷 Error cámara.","error");}}
+}
+
+// ==========================================
+// 📱 MENÚ DEL LOGO Y PANTALLA DE PERFIL
+// ==========================================
+const logoMenuBtn = document.getElementById('logoMenuBtn');
+const logoDropdown = document.getElementById('logoDropdown');
+
+if (logoMenuBtn) {
+  logoMenuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    logoDropdown.classList.toggle('hidden');
+  });
+}
+
+document.addEventListener('click', (e) => {
+  if (logoDropdown && !logoDropdown.contains(e.target) && e.target !== logoMenuBtn) {
+    logoDropdown.classList.add('hidden');
+  }
+});
+
+if (document.getElementById('btnIrPerfil')) {
+  document.getElementById('btnIrPerfil').addEventListener('click', () => {
+    logoDropdown.classList.add('hidden');
+    mostrarPerfil();
+  });
+}
+
+function mostrarPerfil() {
+  ocultarTodasLasPantallasExcepto('perfilScreen');
+  
+  const nombreEl = document.getElementById('perfilNombre');
+  const emailEl = document.getElementById('perfilEmail');
+  const estadoEl = document.getElementById('perfilEstado');
+  
+  const userEmail = localStorage.getItem('rutaflex_email') || 'usuario@rutaflex.com';
+  const nombreUsuario = userEmail.split('@')[0].charAt(0).toUpperCase() + userEmail.split('@')[0].slice(1);
+  nombreEl.innerText = nombreUsuario;
+  emailEl.innerText = userEmail;
+  
+  estadoEl.innerText = "✅ ACTIVO"; 
+  estadoEl.className = "inline-block mt-3 px-4 py-1 rounded-full text-xs font-bold bg-green-500 text-white";
+}
+
+if (document.getElementById('btnVolverDePerfil')) {
+  document.getElementById('btnVolverDePerfil').addEventListener('click', () => {
+    ocultarTodasLasPantallasExcepto('appScreen');
+  });
 }
 
 // ==========================================
