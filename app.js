@@ -59,7 +59,7 @@ document.getElementById('fileImg')?.addEventListener('change', async (e) => {
   if (estaVencido) return mostrarNotificacion("⚠️ Plan vencido", "error");
   const file = e.target.files[0]; if (!file) return;
   const btn = document.getElementById('btnCargar'); const txt = btn.innerText;
-  btn.innerText = "🤖 Leyendo..."; btn.disabled = true;
+  btn.innerText = " Leyendo..."; btn.disabled = true;
   try {
     const { data: { text } } = await Tesseract.recognize(file, 'spa');
     let lineas = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
@@ -89,7 +89,7 @@ function mostrarModalEdicion(){
   else{
     destinosDetectados.forEach((dir,i)=>{
       let partes = dir.split(' - '); let titulo = partes.length > 1? partes[0] : `Destino ${i+1}`; let direccion = partes.length > 1? partes.slice(1).join(' - ') : dir;
-      c.innerHTML+=`<div class="flex gap-2 items-start bg-gray-50 p-3 rounded-xl border"><span class="bg-[#0A2342] text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold mt-1">${i+1}</span><div class="flex-1"><input type="text" value="${titulo.replace(/"/g,'&quot;')}" class="input-titulo w-full bg-white border rounded-lg px-3 py-2 text-sm font-bold text-[#0A2342] mb-1" placeholder="Nombre"><input type="text" value="${direccion.replace(/"/g,'&quot;')}" class="input-direccion w-full bg-white border rounded-lg px-3 py-2 text-sm" placeholder="Dirección"></div><button onclick="eliminarLinea(${i})" class="text-red-500 p-2">🗑️</button></div>`;
+      c.innerHTML+=`<div class="flex gap-2 items-start bg-gray-50 p-3 rounded-xl border"><span class="bg-[#0A2342] text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold mt-1">${i+1}</span><div class="flex-1"><input type="text" value="${titulo.replace(/"/g,'&quot;')}" class="input-titulo w-full bg-white border rounded-lg px-3 py-2 text-sm font-bold text-[#0A2342] mb-1" placeholder="Nombre"><input type="text" value="${direccion.replace(/"/g,'&quot;')}" class="input-direccion w-full bg-white border rounded-lg px-3 py-2 text-sm text-[#0A2342]" placeholder="Dirección"></div><button onclick="eliminarLinea(${i})" class="text-red-500 p-2">🗑️</button></div>`;
     });
   }
   document.getElementById('modalEdicion').classList.remove('hidden');
@@ -106,7 +106,6 @@ document.getElementById('btnGuardarEdicion')?.addEventListener('click',async()=>
 document.getElementById('btnCancelarEdicion')?.addEventListener('click',()=>{document.getElementById('modalEdicion').classList.add('hidden');destinosDetectados=[]});
 document.getElementById('btnCerrarModal')?.addEventListener('click',()=>{document.getElementById('modalEdicion').classList.add('hidden')});
 
-// ✅ RENDER LISTA CON DISTANCIAS CALCULADAS
 function renderLista(){
   const l=document.getElementById('lista'),ph=document.getElementById('placeholderVacio');if(!l)return;l.innerHTML="";
   if(destinos.length===0){ph.style.display='flex';document.getElementById('count').innerText=0;document.getElementById('btnViaje').classList.add('hidden');return}
@@ -117,8 +116,6 @@ function renderLista(){
     const partes = full.split(' - '); 
     const titulo = partes.length>1? partes[0] : ''; 
     const dir = partes.length>1? partes.slice(1).join(' - ') : full;
-    
-    // Cálculo de distancia estimado (1.5km por parada)
     const distancia = (i + 1) * 1.5;
     const tiempo = Math.round(distancia * 2.5);
 
@@ -129,7 +126,7 @@ function renderLista(){
         ${titulo?`<span class="block truncate text-gray-500 text-xs mb-1">${dir}</span>`:''}
         <span class="text-xs text-green-700 font-bold bg-green-100 px-2 py-0.5 rounded-full inline-block">${distancia.toFixed(1)} km • ~${tiempo} min</span>
       </div>
-      <button onclick="borrarDestino('${d._id}')" class="text-gray-300 hover:text-red-500 p-2 text-xl">✕</button>
+      <button onclick="borrarDestino('${d._id}')" class="text-gray-300 hover:text-red-500 p-2 text-xl"></button>
     </li>`;
   });
   document.getElementById('count').innerText=destinos.length;document.getElementById('btnViaje').classList.remove('hidden');
@@ -144,19 +141,75 @@ document.getElementById('btnCargar')?.addEventListener('click',()=>{
 });
 document.getElementById('btnAgregarLinea')?.addEventListener('click',()=>{destinosDetectados.push(""); mostrarModalEdicion();});
 
-document.getElementById('btnViaje')?.addEventListener('click',()=>{
-  if(destinos.length===0)return;
-  const base="https://www.google.com/maps/dir/?api=1";
-  const dirs=destinos.map(d=>{const full=d.direccion||d.dirección||''; const partes=full.split(' - '); return encodeURIComponent(partes.length>1? partes.slice(1).join(' - ') : full);});
-  const lote1=dirs.slice(0,9);
-  if(lote1.length>0){
-    const url=`${base}&destination=${lote1[lote1.length-1]}&waypoints=${lote1.slice(0,-1).join('|')}&travelmode=driving`;
-    window.open(url,'_blank');
-    mostrarNotificacion(`🚀 Ruta optimizada (${destinos.length} paradas)`,"exito");
-    document.getElementById('stats')?.classList.remove('hidden');
-    document.getElementById('statEntregas').innerText=destinos.length;
+// ✅ BOTÓN VIAJE CON GPS REAL
+document.getElementById('btnViaje')?.addEventListener('click', async () => {
+  if(destinos.length === 0) return;
+  
+  mostrarNotificacion("📍 Obteniendo tu ubicación...", "info");
+  
+  if (!navigator.geolocation) {
+    mostrarNotificacion("⚠️ Tu navegador no soporta geolocalización", "error");
+    return;
   }
-  if(dirs.length>9){setTimeout(()=>{if(confirm(`Tenés ${dirs.length} paradas. ¿Abrir tramo 10-${dirs.length}?`)){const lote2=dirs.slice(9,18);const url2=`${base}&destination=${lote2[lote2.length-1]}&waypoints=${lote2.slice(0,-1).join('|')}`;window.open(url2,'_blank')}},800);}
+  
+  try {
+    const position = await new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      });
+    });
+    
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+    const origen = `${lat},${lng}`;
+    
+    const dirs = destinos.map(d => {
+      const full = d.direccion || d.dirección || '';
+      const partes = full.split(' - ');
+      return encodeURIComponent(partes.length > 1 ? partes.slice(1).join(' - ') : full);
+    });
+    
+    const lote1 = dirs.slice(0, 9);
+    const base = "https://www.google.com/maps/dir/?api=1";
+    
+    if(lote1.length > 0) {
+      const url = `${base}&origin=${origen}&destination=${lote1[lote1.length-1]}&waypoints=${lote1.slice(0, -1).join('|')}&travelmode=driving`;
+      window.open(url, '_blank');
+      mostrarNotificacion(` Ruta desde tu ubicación (${destinos.length} paradas)`, "exito");
+      document.getElementById('stats')?.classList.remove('hidden');
+      document.getElementById('statEntregas').innerText = destinos.length;
+    }
+    
+    if(dirs.length > 9) {
+      setTimeout(() => {
+        if(confirm(`Tenés ${dirs.length} paradas. ¿Abrir tramo 10-${dirs.length}?`)) {
+          const lote2 = dirs.slice(9, 18);
+          const url2 = `${base}&origin=${lote1[lote1.length-1]}&destination=${lote2[lote2.length-1]}&waypoints=${lote2.slice(0, -1).join('|')}&travelmode=driving`;
+          window.open(url2, '_blank');
+        }
+      }, 800);
+    }
+    
+  } catch (error) {
+    console.error('Error GPS:', error);
+    mostrarNotificacion("⚠️ No se pudo obtener tu ubicación. Usando primera dirección como origen.", "advertencia");
+    
+    const primeraDir = destinos[0].direccion || destinos[0].dirección || '';
+    const partes = primeraDir.split(' - ');
+    const origen = encodeURIComponent(partes.length > 1 ? partes.slice(1).join(' - ') : primeraDir);
+    
+    const dirs = destinos.slice(1).map(d => {
+      const full = d.direccion || d.dirección || '';
+      const p = full.split(' - ');
+      return encodeURIComponent(p.length > 1 ? p.slice(1).join(' - ') : full);
+    });
+    
+    const base = "https://www.google.com/maps/dir/?api=1";
+    const url = `${base}&origin=${origen}&destination=${dirs[dirs.length-1]}&waypoints=${dirs.slice(0, -1).join('|')}&travelmode=driving`;
+    window.open(url, '_blank');
+  }
 });
 
 async function abrirCamara(){const v=document.getElementById('camara');v.classList.remove('hidden');try{const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});v.srcObject=s}catch{mostrarNotificacion("No se pudo abrir cámara","error")}}
