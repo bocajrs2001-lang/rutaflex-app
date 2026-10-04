@@ -3,23 +3,72 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="google-site-verification" content="uzyX6zsqHquA4NB7C3qKIhV-1NMKW6EV2nanwHVo_wU" />
+
+<!-- FAVICON EN MÚLTIPLES FORMATOS -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192x192.png">
-<link rel="apple-touch-icon" href="/icon-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512x512.png">
+<link rel="apple-touch-icon" sizes="192x192" href="/icon-192x192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="/icon-512x512.png">
+
+<!-- SEO META TAGS -->
+<meta name="google-site-verification" content="uzyX6zsqHquA4NB7C3qKIhV-1NMKW6EV2nanwHVo_wU" />
 <title>RutaFlex - El camino inteligente</title>
 <meta name="description" content="RutaFlex es la plataforma para optimizar rutas, gestionar envíos y logística de tu empresa de forma simple y rápida." />
 <meta name="keywords" content="RutaFlex, logistica, rutas, envios, gestion, entregas, delivery, optimización" />
 <meta name="author" content="RutaFlex" />
+<meta name="robots" content="index, follow" />
+
+<!-- OPEN GRAPH (Para que Google y redes sociales muestren bien) -->
 <meta property="og:site_name" content="RutaFlex" />
-<meta property="og:title" content="RutaFlex - App de Logística y Gestión de Rutas" />
+<meta property="og:title" content="RutaFlex - El camino inteligente" />
 <meta property="og:description" content="Optimiza tus rutas de entrega. Del más cercano al más lejano. Ahorra nafta y tiempo." />
 <meta property="og:url" content="https://rutaflex-app.onrender.com/" />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="https://rutaflex-app.onrender.com/icon-512x512.png" />
+<meta property="og:image:width" content="512" />
+<meta property="og:image:height" content="512" />
 <meta property="og:locale" content="es_AR" />
+
 <link rel="canonical" href="https://rutaflex-app.onrender.com/" />
+
+<!-- JSON-LD (Datos estructurados para Google) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "RutaFlex",
+  "alternateName": "RutaFlex - El camino inteligente",
+  "url": "https://rutaflex-app.onrender.com/",
+  "description": "Optimiza tu ruta de entrega. Del más cercano al más lejano. Ahorra nafta y tiempo.",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web, Android, iOS",
+  "offers": {
+    "@type": "Offer",
+    "price": "4990",
+    "priceCurrency": "ARS"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "RutaFlex",
+    "email": "rutaflex6@gmail.com"
+  },
+  "logo": {
+    "@type": "ImageObject",
+    "url": "https://rutaflex-app.onrender.com/icon-512x512.png",
+    "width": 512,
+    "height": 512
+  }
+}
+</script>
+
+<!-- PWA META TAGS -->
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0A2342">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RutaFlex">
+
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <link rel="stylesheet" href="style.css">
@@ -103,7 +152,7 @@
          <h1 class="text-xl font-black text-[#5BA9E0]">RUTAFLEX</h1>
          <div id="logoDropdown" class="hidden absolute top-12 left-0 w-60 bg-[#0B2545] rounded-2xl shadow-2xl z-50 flex-col overflow-hidden border border-white/10">
             <button id="btnIrPerfil" class="w-full text-left px-5 py-4 text-white hover:bg-[#13315c] flex items-center gap-3 font-semibold">👤 Mi Perfil</button>
-            <button onclick="window.open('https://wa.me/5491123793596', '_blank')" class="w-full text-left px-5 py-4 text-white hover:bg-[#13315c] flex items-center gap-3 font-semibold"> Soporte</button>
+            <button onclick="window.open('https://wa.me/5491123793596', '_blank')" class="w-full text-left px-5 py-4 text-white hover:bg-[#13315c] flex items-center gap-3 font-semibold">🎧 Soporte</button>
             <div class="h-px bg-white/10 my-1"></div>
             <button id="btnLogoutDropdown" class="w-full text-left px-5 py-4 text-red-300 hover:bg-red-500/10 flex items-center gap-3 font-semibold">🚪 Cerrar sesión</button>
          </div>
@@ -112,13 +161,13 @@
     </header>
 
     <div id="alertaProximoVencimiento" class="hidden bg-yellow-500 text-[#0A2342] p-3 text-center font-bold animate-pulse mx-4 rounded-b-xl">⚠️ ¡TU PLAN VENCE MAÑANA! Renová ahora.</div>
-    <div id="bannerVencido" class="hidden bg-red-600 text-white p-4 text-center font-bold animate-pulse mx-4 rounded-b-xl">🔒 TU PLAN ESTÁ VENCIDO. RENOVÁ PARA USAR EL SERVICIO.</div>
+    <div id="bannerVencido" class="hidden bg-red-600 text-white p-4 text-center font-bold animate-pulse mx-4 rounded-b-xl"> TU PLAN ESTÁ VENCIDO. RENOVÁ PARA USAR EL SERVICIO.</div>
 
     <div class="p-6 bg-white rounded-t-3xl mt-0">
       <div class="text-center mb-6"><span class="inline-block bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full mb-2">✨ 7 DÍAS GRATIS</span><h2 class="font-black text-xl text-[#0A2342]">Activa tu cuenta</h2></div>
       <div class="grid grid-cols-2 gap-3">
-        <button onclick="abrirModalPagos('Semanal', 4990)" class="p-4 rounded-xl text-center font-bold text-white shadow-md" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"><div class="text-2xl"></div><div class="text-xs">SEMANAL</div><div class="text-lg font-black">$4.990</div></button>
-        <button onclick="abrirModalPagos('Mensual', 14990)" class="p-4 rounded-xl text-center font-bold text-white shadow-md relative" style="background: linear-gradient(135deg, #1e40af 0%, #0A2342 100%);"><div class="absolute -top-2 -right-2 bg-yellow-400 text-[#0A2342] text-[10px] font-black px-2 py-1 rounded-full">POPULAR</div><div class="text-2xl"></div><div class="text-xs">MENSUAL</div><div class="text-lg font-black">$14.990</div></button>
+        <button onclick="abrirModalPagos('Semanal', 4990)" class="p-4 rounded-xl text-center font-bold text-white shadow-md" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"><div class="text-2xl">⚡</div><div class="text-xs">SEMANAL</div><div class="text-lg font-black">$4.990</div></button>
+        <button onclick="abrirModalPagos('Mensual', 14990)" class="p-4 rounded-xl text-center font-bold text-white shadow-md relative" style="background: linear-gradient(135deg, #1e40af 0%, #0A2342 100%);"><div class="absolute -top-2 -right-2 bg-yellow-400 text-[#0A2342] text-[10px] font-black px-2 py-1 rounded-full">POPULAR</div><div class="text-2xl">🚀</div><div class="text-xs">MENSUAL</div><div class="text-lg font-black">$14.990</div></button>
       </div>
       <div class="flex gap-2 mt-4"><input id="promo" placeholder="Código promocional" class="flex-1 border border-gray-300 p-2 rounded-xl text-sm font-bold text-[#0A2342]"><button id="btnPromo" class="bg-[#0A2342] text-white px-4 rounded-xl text-sm font-bold">Aplicar</button></div>
       <p id="promoMessage" class="text-xs text-center mt-2 font-bold"></p>
@@ -128,7 +177,7 @@
       <button id="btnCargar" class="w-full bg-[#10b981] text-white font-black py-4 rounded-2xl text-xl shadow-lg mb-4">+ CARGAR DESTINOS</button>
       <h3 class="font-bold text-[#0A2342] mt-2 mb-3">Agregar destinos con IA</h3>
       <div class="grid grid-cols-2 gap-3">
-        <label class="bg-white border-2 border-dashed border-slate-300 p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] cursor-pointer hover:border-[#5BA9E0] hover:bg-blue-50"><div class="text-3xl mb-1">️</div><div class="font-bold text-[#5BA9E0] text-[14px]">Imagen / Foto</div><input type="file" id="fileImg" accept="image/*" hidden></label>
+        <label class="bg-white border-2 border-dashed border-slate-300 p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] cursor-pointer hover:border-[#5BA9E0] hover:bg-blue-50"><div class="text-3xl mb-1">🖼️</div><div class="font-bold text-[#5BA9E0] text-[14px]">Imagen / Foto</div><input type="file" id="fileImg" accept="image/*" hidden></label>
         <div class="bg-[#eef2f7] border-2 border-dashed border-slate-300 p-5 rounded-xl text-center opacity-60 flex flex-col items-center justify-center min-h-[95px]"><div class="text-3xl mb-1">📄</div><div class="font-bold text-[#8da0b8] text-[13px]">PDF (Próximamente)</div></div>
         <button onclick="abrirCamara()" class="bg-white border-2 border-dashed border-slate-300 p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] w-full hover:border-[#5BA9E0] hover:bg-blue-50"><div class="text-3xl mb-1">📸</div><div class="font-bold text-[#5BA9E0] text-[14px]">Cámara</div></button>
         <button onclick="alert('QR Scanner en desarrollo')" class="bg-white border-2 border-dashed border-slate-300 p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] w-full hover:border-[#5BA9E0] hover:bg-blue-50"><div class="text-3xl mb-1">🔳</div><div class="font-bold text-[#5BA9E0] text-[14px]">Escanear QR</div></button>
@@ -140,11 +189,11 @@
       <div class="flex justify-between items-center mb-3"><h3 class="font-black text-lg text-[#0A2342]">Tus destinos (<span id="count">0</span>)</h3><span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold">📍 Ordenados</span></div>
       <ul id="lista" class="space-y-2 text-sm"></ul>
       <div id="placeholderVacio" class="text-center py-8 text-gray-400 hidden"><p>📍 Agregá tus paradas arriba para armar tu ruta</p><span class="text-xs">Ej: Av. Corrientes 1234</span></div>
-      <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg"> COMENZAR VIAJE</button>
+      <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg">🗺️ COMENZAR VIAJE</button>
       <p class="text-center text-xs mt-2 text-gray-500 mb-4">Se abrirá en Google Maps desde tu ubicación GPS</p>
     </div>
 
-    <div id="stats" class="p-6 m-4 rounded-2xl hidden bg-blue-50 border"><h3 class="font-black text-[#0A2342] text-xl mb-4">¡Ruta completada! </h3><div class="grid grid-cols-3 gap-2"><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statHoras">0</span>h</div></div><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statKm">0</span>km</div></div><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statEntregas">0</span></div></div></div></div>
+    <div id="stats" class="p-6 m-4 rounded-2xl hidden bg-blue-50 border"><h3 class="font-black text-[#0A2342] text-xl mb-4">¡Ruta completada! 🏆</h3><div class="grid grid-cols-3 gap-2"><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statHoras">0</span>h</div></div><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statKm">0</span>km</div></div><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statEntregas">0</span></div></div></div></div>
   </div>
 
   <!-- PERFIL SCREEN -->
