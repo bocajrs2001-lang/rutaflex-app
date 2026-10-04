@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- FAVICON - Usamos el PNG directamente (más confiable que .ico) -->
+<!-- FAVICON - Múltiples formatos para máxima compatibilidad -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192x192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="/icon-512x512.png">
-<link rel="shortcut icon" type="image/png" href="/icon-192x192.png">
+<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link rel="apple-touch-icon" sizes="192x192" href="/icon-192x192.png">
 <link rel="apple-touch-icon" sizes="512x512" href="/icon-512x512.png">
 
@@ -191,7 +192,7 @@
       <div class="text-right"><div id="userName" class="text-sm font-bold text-white">¡Hola!</div><div id="contadorDias" class="text-xs font-bold mt-1 px-2 py-0.5 rounded-full inline-block"></div></div>
     </header>
 
-    <div id="alertaProximoVencimiento" class="hidden bg-yellow-500 text-[#0A2342] p-3 text-center font-bold animate-pulse mx-4 rounded-b-xl">️ ¡TU PLAN VENCE MAÑANA! Renová ahora.</div>
+    <div id="alertaProximoVencimiento" class="hidden bg-yellow-500 text-[#0A2342] p-3 text-center font-bold animate-pulse mx-4 rounded-b-xl">⚠️ ¡TU PLAN VENCE MAÑANA! Renová ahora.</div>
     <div id="bannerVencido" class="hidden bg-red-600 text-white p-4 text-center font-bold animate-pulse mx-4 rounded-b-xl">🔒 TU PLAN ESTÁ VENCIDO. RENOVÁ PARA USAR EL SERVICIO.</div>
 
     <div class="p-6 bg-white rounded-t-3xl mt-0">
@@ -209,7 +210,7 @@
       <h3 class="font-bold text-[#0A2342] mt-2 mb-3">Agregar destinos con IA</h3>
       <div class="grid grid-cols-2 gap-3">
         <label class="bg-white border-2 border-dashed border-slate-300 p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] cursor-pointer hover:border-[#5BA9E0] hover:bg-blue-50"><div class="text-3xl mb-1">🖼️</div><div class="font-bold text-[#5BA9E0] text-[14px]">Imagen / Foto</div><input type="file" id="fileImg" accept="image/*" hidden></label>
-        <div class="bg-[#eef2f7] border-2 border-dashed border-slate-300 p-5 rounded-xl text-center opacity-60 flex flex-col items-center justify-center min-h-[95px]"><div class="text-3xl mb-1">📄</div><div class="font-bold text-[#8da0b8] text-[13px]">PDF (Próximamente)</div></div>
+        <div class="bg-[#eef2f7] border-2 border-dashed border-slate-300 p-5 rounded-xl text-center opacity-60 flex flex-col items-center justify-center min-h-[95px]"><div class="text-3xl mb-1"></div><div class="font-bold text-[#8da0b8] text-[13px]">PDF (Próximamente)</div></div>
         <button onclick="abrirCamara()" class="bg-white border-2 border-dashed border-slate-300 p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] w-full hover:border-[#5BA9E0] hover:bg-blue-50"><div class="text-3xl mb-1">📸</div><div class="font-bold text-[#5BA9E0] text-[14px]">Cámara</div></button>
         <button onclick="alert('QR Scanner en desarrollo')" class="bg-white border-2 border-dashed border-slate-300 p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] w-full hover:border-[#5BA9E0] hover:bg-blue-50"><div class="text-3xl mb-1">🔳</div><div class="font-bold text-[#5BA9E0] text-[14px]">Escanear QR</div></button>
       </div>
@@ -251,7 +252,7 @@
            </button>
            <div class="h-px bg-gray-100 mx-4"></div>
            <button onclick="window.open('https://wa.me/5491123793596', '_blank')" class="w-full flex justify-between items-center p-4 hover:bg-slate-50 rounded-xl transition-colors">
-              <span class="flex items-center gap-3 text-[#0A2342] font-bold text-[16px]">🎧 <span class="text-[#0A2342]">Soporte</span></span>
+              <span class="flex items-center gap-3 text-[#0A2342] font-bold text-[16px]"> <span class="text-[#0A2342]">Soporte</span></span>
               <span class="text-gray-400 text-xl font-bold">›</span>
            </button>
         </div>
