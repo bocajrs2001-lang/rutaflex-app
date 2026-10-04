@@ -17,7 +17,7 @@ window.togglePass = (id, icon) => {
   const i = document.getElementById(id);
   if (!i) return;
   i.type = i.type === "password" ? "text" : "password";
-  icon.innerText = i.type === "text" ? "🙈" : "👁️";
+  icon.innerText = i.type === "text" ? "🙈" : "️";
 };
 
 function mostrarNotificacion(m, t = 'info') {
@@ -207,28 +207,69 @@ async function cargarDestinos() {
   try {
     const r = await fetch('/api/destinos', { credentials: 'include' });
     destinos = await r.json();
+    console.log('📍 Destinos cargados:', destinos);
     renderLista();
-  } catch {}
+  } catch (err) {
+    console.error('Error cargando destinos:', err);
+    mostrarNotificacion("❌ Error al cargar destinos", "error");
+  }
 }
 
+// --- OCR MEJORADO ---
 document.getElementById('fileImg')?.addEventListener('change', async (e) => {
   if (estaVencido) return mostrarNotificacion("⚠️ Plan vencido", "advertencia");
   const file = e.target.files[0];
   if (!file) return;
+  
   const btn = document.getElementById('btnCargar');
-  const t = btn.innerText;
-  btn.innerText = "🤖 Leyendo...";
+  const textoOriginal = btn.innerText;
+  
+  btn.innerText = "🤖 Leyendo imagen...";
   btn.disabled = true;
+  btn.classList.add('opacity-75');
+  
   try {
-    const { data: { text } } = await Tesseract.recognize(file, 'spa');
-    destinosDetectados = text.split('\n').map(l => l.trim()).filter(l => l.length > 3);
-    if (destinosDetectados.length > 0) mostrarModalEdicion();
-    else mostrarNotificacion("⚠️ No se detectó texto", "advertencia");
-  } catch {
-    mostrarNotificacion("❌ Error", "error");
+    if (typeof Tesseract === 'undefined') {
+      throw new Error('Tesseract no está cargado');
+    }
+    
+    mostrarNotificacion("🔍 Procesando imagen...", "info");
+    
+    const { data: { text, confidence } } = await Tesseract.recognize(file, 'spa', {
+      logger: m => console.log(m)
+    });
+    
+    console.log('📝 Texto detectado:', text);
+    console.log('📊 Confianza:', confidence);
+    
+    if (confidence < 50) {
+      mostrarNotificacion("️ Baja calidad de imagen. Intentá con otra foto.", "advertencia");
+    }
+    
+    // Limpiar y filtrar líneas de texto
+    const lineas = text.split('\n')
+      .map(l => l.trim())
+      .filter(l => l.length > 5 && !l.match(/^\d+\.?\s*$/)) // Filtrar solo números
+      .filter(l => !l.match(/^(imagen|foto|qr|cámara)/i)); // Filtrar palabras de la UI
+    
+    console.log('📋 Líneas filtradas:', lineas);
+    
+    if (lineas.length === 0) {
+      mostrarNotificacion("⚠️ No se detectaron direcciones. Intentá: 1) Mejor luz 2) Foto más clara 3) Texto más grande", "advertencia");
+      return;
+    }
+    
+    destinosDetectados = lineas;
+    mostrarNotificacion(`✅ Se detectaron ${lineas.length} direcciones`, "exito");
+    mostrarModalEdicion();
+    
+  } catch (error) {
+    console.error('❌ Error en OCR:', error);
+    mostrarNotificacion("❌ Error al procesar: " + error.message, "error");
   } finally {
-    btn.innerText = t;
+    btn.innerText = textoOriginal;
     btn.disabled = false;
+    btn.classList.remove('opacity-75');
     e.target.value = '';
   }
 });
@@ -237,10 +278,23 @@ function mostrarModalEdicion() {
   const c = document.getElementById('contenedorInputs');
   if (!c) return;
   c.innerHTML = '';
-  destinosDetectados.forEach((dir, i) => {
-    c.innerHTML += `<div class="flex gap-2 items-center bg-gray-50 p-2 rounded-lg border"><span class="text-gray-400 font-bold w-6">${i + 1}.</span><input type="text" value="${dir.replace(/"/g, '&quot;')}" class="input-direccion flex-1 bg-transparent border-none p-1 text-sm"><button onclick="eliminarLinea(${i})" class="text-red-500 p-2">🗑️</button></div>`;
-  });
-  document.getElementById('modalEdicion').classList.remove('hidden');
+  
+  if (destinosDetectados.length === 0) {
+    c.innerHTML = '<p class="text-center text-gray-500 py-4">Sin direcciones detectadas</p>';
+  } else {
+    destinosDetectados.forEach((dir, i) => {
+      c.innerHTML += `
+        <div class="flex gap-2 items-center bg-gray-50 p-3 rounded-lg border border-gray-200">
+          <span class="bg-blue-600 text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold flex-shrink-0">${i + 1}</span>
+          <input type="text" value="${dir.replace(/"/g, '&quot;')}" class="input-direccion flex-1 bg-white border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Dirección ${i + 1}">
+          <button onclick="eliminarLinea(${i})" class="text-red-500 hover:bg-red-50 p-2 rounded transition-colors">🗑️</button>
+        </div>
+      `;
+    });
+  }
+  
+  const modal = document.getElementById('modalEdicion');
+  if (modal) modal.classList.remove('hidden');
 }
 
 window.eliminarLinea = i => {
@@ -250,55 +304,122 @@ window.eliminarLinea = i => {
 
 document.getElementById('btnGuardarEdicion')?.addEventListener('click', async () => {
   const inputs = document.querySelectorAll('.input-direccion');
-  const finales = Array.from(inputs).map(i => i.value.trim()).filter(v => v);
-  if (finales.length === 0) return;
-  const btn = document.getElementById('btnGuardarEdicion');
-  btn.innerText = "Guardando...";
-  btn.disabled = true;
-  for (const d of finales) {
-    await fetch('/api/destinos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ direccion: d }) });
+  const finales = Array.from(inputs).map(i => i.value.trim()).filter(v => v.length > 3);
+  
+  if (finales.length === 0) {
+    mostrarNotificacion("️ Ingresá al menos una dirección válida", "advertencia");
+    return;
   }
-  btn.innerText = "✅ Guardar Todo";
-  btn.disabled = false;
-  document.getElementById('modalEdicion').classList.add('hidden');
-  cargarDestinos();
+  
+  const btn = document.getElementById('btnGuardarEdicion');
+  const textoOriginal = btn.innerText;
+  btn.innerText = "💾 Guardando...";
+  btn.disabled = true;
+  
+  try {
+    let guardados = 0;
+    for (const direccion of finales) {
+      const r = await fetch('/api/destinos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ direccion })
+      });
+      
+      if (r.ok) guardados++;
+    }
+    
+    mostrarNotificacion(`✅ ${guardados} direcciones guardadas`, "exito");
+    document.getElementById('modalEdicion').classList.add('hidden');
+    await cargarDestinos();
+    
+  } catch (error) {
+    console.error('Error guardando:', error);
+    mostrarNotificacion("❌ Error al guardar", "error");
+  } finally {
+    btn.innerText = textoOriginal;
+    btn.disabled = false;
+  }
 });
 
-document.getElementById('btnCancelarEdicion')?.addEventListener('click', () => document.getElementById('modalEdicion').classList.add('hidden'));
-document.getElementById('btnCerrarModal')?.addEventListener('click', () => document.getElementById('modalEdicion').classList.add('hidden'));
+document.getElementById('btnCancelarEdicion')?.addEventListener('click', () => {
+  document.getElementById('modalEdicion').classList.add('hidden');
+  destinosDetectados = [];
+});
+
+document.getElementById('btnCerrarModal')?.addEventListener('click', () => {
+  document.getElementById('modalEdicion').classList.add('hidden');
+  destinosDetectados = [];
+});
 
 function renderLista() {
   const l = document.getElementById('lista');
   const ph = document.getElementById('placeholderVacio');
   if (!l) return;
+  
   l.innerHTML = "";
+  
   if (destinos.length === 0) {
-    ph.style.display = 'block';
+    ph.style.display = 'flex';
     document.getElementById('count').innerText = 0;
     document.getElementById('btnViaje').classList.add('hidden');
     return;
   }
+  
   ph.style.display = 'none';
+  
   destinos.forEach((d, i) => {
-    l.innerHTML += `<li class="flex gap-2 border-b py-2 items-center bg-white/50 p-2 rounded-lg"><span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">${i + 1}</span><div class="flex-1"><b class="block truncate">${d.direccion}</b><span class="text-xs text-green-600">${d.distancia || 0} km</span></div><button onclick="borrarDestino('${d._id}')" class="text-red-500 text-xs">🗑️</button></li>`;
+    // Verificar si la dirección existe
+    const direccionTexto = d.direccion || d.dirección || 'Sin dirección';
+    const distancia = d.distancia || 0;
+    const tiempo = d.tiempo || 0;
+    
+    l.innerHTML += `
+      <li class="flex gap-3 border-b border-gray-100 py-3 items-center bg-white/50 p-3 rounded-lg hover:bg-blue-50/50 transition-colors">
+        <span class="bg-blue-600 text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold flex-shrink-0">${i + 1}</span>
+        <div class="flex-1 min-w-0">
+          <b class="block truncate text-[#0A2342] font-semibold">${direccionTexto}</b>
+          <span class="text-xs text-green-600 font-medium">${distancia} km • ~${tiempo} min</span>
+        </div>
+        <button onclick="borrarDestino('${d._id}')" class="text-red-500 hover:bg-red-50 p-2 rounded transition-colors flex-shrink-0">🗑️</button>
+      </li>
+    `;
   });
+  
   document.getElementById('count').innerText = destinos.length;
   document.getElementById('btnViaje').classList.remove('hidden');
 }
 
 window.borrarDestino = async (id) => {
-  await fetch(`/api/destinos/${id}`, { method: 'DELETE', credentials: 'include' });
-  cargarDestinos();
+  if (!confirm('¿Eliminar esta dirección?')) return;
+  
+  try {
+    await fetch(`/api/destinos/${id}`, { method: 'DELETE', credentials: 'include' });
+    mostrarNotificacion("🗑️ Dirección eliminada", "info");
+    await cargarDestinos();
+  } catch (error) {
+    console.error('Error eliminando:', error);
+    mostrarNotificacion("❌ Error al eliminar", "error");
+  }
 };
 
 async function abrirCamara() {
+  if (estaVencido) return mostrarNotificacion("⚠️ Plan vencido", "advertencia");
+  
   const v = document.getElementById('camara');
   if (!v) return;
+  
   v.classList.remove('hidden');
+  
   try {
-    v.srcObject = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-  } catch {
-    mostrarNotificacion("📷 Error cámara", "error");
+    const stream = await navigator.mediaDevices.getUserMedia({ 
+      video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } } 
+    });
+    v.srcObject = stream;
+    mostrarNotificacion("📸 Cámara activa. Sacá una foto clara del texto.", "info");
+  } catch (error) {
+    console.error('Error cámara:', error);
+    mostrarNotificacion(" Error: No se pudo acceder a la cámara", "error");
   }
 }
 
