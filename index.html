@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- FAVICON EN MÚLTIPLES FORMATOS -->
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<!-- FAVICON - Usamos el PNG directamente (más confiable que .ico) -->
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192x192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="/icon-512x512.png">
+<link rel="shortcut icon" type="image/png" href="/icon-192x192.png">
 <link rel="apple-touch-icon" sizes="192x192" href="/icon-192x192.png">
 <link rel="apple-touch-icon" sizes="512x512" href="/icon-512x512.png">
 
@@ -83,12 +83,9 @@
         <div class="flex items-center justify-center mb-6 mx-auto w-36 h-36 rounded-full bg-[#0d2b5e] p-2 shadow-2xl">
            <div class="w-full h-full rounded-full bg-[#5BA9E0] flex items-center justify-center">
               <svg width="80" height="80" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                 <!-- S en forma de ruta sinuosa -->
                  <path d="M 70 30 L 40 30 C 25 30 25 50 40 50 L 60 50 C 75 50 75 70 60 70 L 30 70" 
                        fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-                 <!-- Nodo superior derecho -->
                  <circle cx="70" cy="30" r="6" fill="white"/>
-                 <!-- Nodo inferior izquierdo -->
                  <circle cx="30" cy="70" r="6" fill="white"/>
               </svg>
            </div>
@@ -178,7 +175,6 @@
   <div id="appScreen" class="hidden">
     <header class="p-4 flex justify-between items-center relative bg-gradient-to-br from-[#0A2342] to-[#1e3a8a]">
       <div class="flex items-center gap-2 relative">
-         <!-- LOGO HEADER CON ANILLO Y NODOS -->
          <div id="logoMenuBtn" class="w-11 h-11 rounded-full bg-[#0d2b5e] p-0.5 cursor-pointer hover:opacity-80 ring-2 ring-white/20">
             <div class="w-full h-full rounded-full bg-[#5BA9E0] flex items-center justify-center">
                <svg width="28" height="28" viewBox="0 0 100 100"><path d="M 70 30 L 40 30 C 25 30 25 50 40 50 L 60 50 C 75 50 75 70 60 70 L 30 70" fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/><circle cx="70" cy="30" r="7" fill="white"/><circle cx="30" cy="70" r="7" fill="white"/></svg>
@@ -189,14 +185,14 @@
             <button id="btnIrPerfil" class="w-full text-left px-5 py-4 text-white hover:bg-[#13315c] flex items-center gap-3 font-semibold">👤 Mi Perfil</button>
             <button onclick="window.open('https://wa.me/5491123793596', '_blank')" class="w-full text-left px-5 py-4 text-white hover:bg-[#13315c] flex items-center gap-3 font-semibold">🎧 Soporte</button>
             <div class="h-px bg-white/10 my-1"></div>
-            <button id="btnLogoutDropdown" class="w-full text-left px-5 py-4 text-red-300 hover:bg-red-500/10 flex items-center gap-3 font-semibold"> Cerrar sesión</button>
+            <button id="btnLogoutDropdown" class="w-full text-left px-5 py-4 text-red-300 hover:bg-red-500/10 flex items-center gap-3 font-semibold">🚪 Cerrar sesión</button>
          </div>
       </div>
       <div class="text-right"><div id="userName" class="text-sm font-bold text-white">¡Hola!</div><div id="contadorDias" class="text-xs font-bold mt-1 px-2 py-0.5 rounded-full inline-block"></div></div>
     </header>
 
-    <div id="alertaProximoVencimiento" class="hidden bg-yellow-500 text-[#0A2342] p-3 text-center font-bold animate-pulse mx-4 rounded-b-xl">⚠️ ¡TU PLAN VENCE MAÑANA! Renová ahora.</div>
-    <div id="bannerVencido" class="hidden bg-red-600 text-white p-4 text-center font-bold animate-pulse mx-4 rounded-b-xl"> TU PLAN ESTÁ VENCIDO. RENOVÁ PARA USAR EL SERVICIO.</div>
+    <div id="alertaProximoVencimiento" class="hidden bg-yellow-500 text-[#0A2342] p-3 text-center font-bold animate-pulse mx-4 rounded-b-xl">️ ¡TU PLAN VENCE MAÑANA! Renová ahora.</div>
+    <div id="bannerVencido" class="hidden bg-red-600 text-white p-4 text-center font-bold animate-pulse mx-4 rounded-b-xl">🔒 TU PLAN ESTÁ VENCIDO. RENOVÁ PARA USAR EL SERVICIO.</div>
 
     <div class="p-6 bg-white rounded-t-3xl mt-0">
       <div class="text-center mb-6"><span class="inline-block bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full mb-2">✨ 7 DÍAS GRATIS</span><h2 class="font-black text-xl text-[#0A2342]">Activa tu cuenta</h2></div>
@@ -215,13 +211,13 @@
         <label class="bg-white border-2 border-dashed border-slate-300 p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] cursor-pointer hover:border-[#5BA9E0] hover:bg-blue-50"><div class="text-3xl mb-1">🖼️</div><div class="font-bold text-[#5BA9E0] text-[14px]">Imagen / Foto</div><input type="file" id="fileImg" accept="image/*" hidden></label>
         <div class="bg-[#eef2f7] border-2 border-dashed border-slate-300 p-5 rounded-xl text-center opacity-60 flex flex-col items-center justify-center min-h-[95px]"><div class="text-3xl mb-1">📄</div><div class="font-bold text-[#8da0b8] text-[13px]">PDF (Próximamente)</div></div>
         <button onclick="abrirCamara()" class="bg-white border-2 border-dashed border-slate-300 p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] w-full hover:border-[#5BA9E0] hover:bg-blue-50"><div class="text-3xl mb-1">📸</div><div class="font-bold text-[#5BA9E0] text-[14px]">Cámara</div></button>
-        <button onclick="alert('QR Scanner en desarrollo')" class="bg-white border-2 border-dashed border-slate-300 p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] w-full hover:border-[#5BA9E0] hover:bg-blue-50"><div class="text-3xl mb-1"></div><div class="font-bold text-[#5BA9E0] text-[14px]">Escanear QR</div></button>
+        <button onclick="alert('QR Scanner en desarrollo')" class="bg-white border-2 border-dashed border-slate-300 p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] w-full hover:border-[#5BA9E0] hover:bg-blue-50"><div class="text-3xl mb-1">🔳</div><div class="font-bold text-[#5BA9E0] text-[14px]">Escanear QR</div></button>
       </div>
       <video id="camara" autoplay class="hidden w-full mt-3 rounded-xl border-2 border-[#5BA4D9]"></video>
     </div>
 
     <div id="listaContainer" class="p-4 border-t border-gray-100 bg-[#f8fafc]">
-      <div class="flex justify-between items-center mb-3"><h3 class="font-black text-lg text-[#0A2342]">Tus destinos (<span id="count">0</span>)</h3><span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold"> Ordenados</span></div>
+      <div class="flex justify-between items-center mb-3"><h3 class="font-black text-lg text-[#0A2342]">Tus destinos (<span id="count">0</span>)</h3><span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold">📍 Ordenados</span></div>
       <ul id="lista" class="space-y-2 text-sm"></ul>
       <div id="placeholderVacio" class="text-center py-8 text-gray-400 hidden"><p>📍 Agregá tus paradas arriba para armar tu ruta</p><span class="text-xs">Ej: Av. Corrientes 1234</span></div>
       <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg">🗺️ COMENZAR VIAJE</button>
@@ -236,7 +232,6 @@
      <div class="bg-[#0A2342] pb-8 pt-6 px-6 text-center text-white relative rounded-b-[28px]">
         <button id="btnVolverDePerfil" class="absolute top-6 left-5 text-white text-[22px] font-bold">←</button>
         <h3 class="font-bold text-[11px] tracking-[1.5px] opacity-50 mb-4">PERFIL</h3>
-        <!-- LOGO PERFIL CON ANILLO Y NODOS -->
         <div id="perfilAvatarWrapper" class="w-[110px] h-[110px] mx-auto rounded-full bg-[#0d2b5e] p-1.5 mb-4" style="border-color: rgba(255,255,255,0.2)">
            <div class="w-full h-full rounded-full bg-[#7bc8ff] flex items-center justify-center">
               <svg width="60" height="60" viewBox="0 0 100 100"><path d="M 70 30 L 40 30 C 25 30 25 50 40 50 L 60 50 C 75 50 75 70 60 70 L 30 70" fill="none" stroke="white" stroke-width="6" stroke-linecap="round"/><circle cx="70" cy="30" r="7" fill="white"/><circle cx="30" cy="70" r="7" fill="white"/></svg>
@@ -267,7 +262,7 @@
   <!-- MODAL EDICION -->
   <div id="modalEdicion" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-2xl w-full max-w-md max-h-[85vh] flex flex-col">
-      <div class="p-4 bg-[#0A2342] rounded-t-2xl flex justify-between items-center"><h3 class="text-white font-black"> Revisar direcciones</h3><button id="btnCerrarModal" class="text-white text-2xl">&times;</button></div>
+      <div class="p-4 bg-[#0A2342] rounded-t-2xl flex justify-between items-center"><h3 class="text-white font-black">🤖 Revisar direcciones</h3><button id="btnCerrarModal" class="text-white text-2xl">&times;</button></div>
       <div id="contenedorInputs" class="p-4 space-y-2 flex-1 overflow-y-auto"></div>
       <div class="p-4 flex gap-2 bg-gray-50 rounded-b-2xl">
          <button id="btnAgregarLinea" class="flex-1 bg-blue-100 text-[#0A2342] py-3 rounded-xl font-bold hover:bg-blue-200">+ Agregar</button>
