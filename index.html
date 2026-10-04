@@ -2,51 +2,103 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="google-site-verification" content="uzyX6zsqHquA4NB7C3qKIhV-1NMKW6EV2nanwHVo_wU" />
-<link rel="icon" type="image/png" href="/icon-192x192.png">
-<title>RutaFlex - El camino inteligente</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>RutaFlex - Optimiza tus entregas</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <link rel="stylesheet" href="style.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;800;900&display=swap" rel="stylesheet">
 </head>
-<body>
-<div class="app-container">
-  <!-- AUTH -->
-  <div id="authScreen" class="min-h-screen flex flex-col justify-center items-center p-6 bg-[#0A2342] relative overflow-hidden">
-     <div class="absolute -top-24 -right-24 w-96 h-96 bg-[#5BA9E0]/20 blur-[80px] rounded-full"></div>
-     <div class="w-full max-w-sm relative z-10 text-center">
-        <div class="w-20 h-20 bg-white rounded-[22px] flex items-center justify-center mx-auto mb-5 shadow-2xl"><svg width="48" height="48" viewBox="0 0 512 512"><circle cx="256" cy="256" r="240" fill="#5BA9E0"/><path d="M 360 180 H 200 C 160 180 160 256 200 256 H 312 C 352 256 352 332 312 332 H 152" fill="none" stroke="white" stroke-width="32" stroke-linecap="round"/><circle cx="360" cy="180" r="24" fill="white"/><circle cx="152" cy="332" r="24" fill="white"/></svg></div>
-        <h1 class="text-4xl font-black text-white tracking-tight">RUTAFLEX</h1>
-        <p class="text-white/60 font-semibold mt-1 mb-8">El camino inteligente</p>
-        <div class="flex bg-white/10 rounded-2xl p-1 mb-6 backdrop-blur"><button id="tabLogin" class="flex-1 py-2.5 rounded-xl font-bold bg-white text-[#0A2342]">Iniciar Sesión</button><button id="tabRegistro" class="flex-1 py-2.5 rounded-xl font-bold text-white/60">Crear Cuenta</button></div>
-        <form id="formLogin" class="space-y-3 text-left"><input type="email" id="loginEmail" placeholder="Email" class="input-pro" required><div class="password-wrapper"><input type="password" id="loginPassword" placeholder="Contraseña" class="input-pro" required><span class="toggle-password" onclick="togglePass('loginPassword', this)">👁️</span></div><button type="submit" class="btn-primary w-full">ENTRAR →</button><button type="button" id="btnOlvideContrasena" class="w-full text-white/50 text-sm underline mt-2 text-center">¿Olvidaste tu contraseña?</button></form>
-        <form id="formRegistro" class="space-y-3 text-left hidden"><input type="text" id="regNombre" placeholder="Nombre completo" class="input-pro" required><input type="email" id="regEmail" placeholder="Email" class="input-pro" required><div class="password-wrapper"><input type="password" id="regPassword" placeholder="Contraseña" class="input-pro" required><span class="toggle-password" onclick="togglePass('regPassword', this)">👁️</span></div><button type="submit" class="btn-success w-full">CREAR CUENTA GRATIS</button></form>
-        <p id="authMessage" class="text-sm mt-4 font-bold text-red-300 min-h-[20px]"></p>
-     </div>
+<body class="bg-[#0A2342]">
+
+<!-- AUTH (igual que antes) -->
+<div id="authScreen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#0A2342] to-[#123b6d]">
+  <div class="bg-white w-full max-w-sm rounded-[28px] p-8 shadow-2xl">
+    <h1 class="font-black text-3xl text-center text-[#0A2342]">RutaFlex</h1>
+    <p class="text-center text-gray-400 text-sm mb-6">Optimiza tus entregas</p>
+    <div class="flex gap-2 mb-6 bg-gray-100 p-1 rounded-xl">
+      <button id="tabLogin" class="flex-1 py-2 rounded-lg bg-[#0A2342] text-white font-bold text-sm">Ingresar</button>
+      <button id="tabRegistro" class="flex-1 py-2 rounded-lg font-bold text-sm">Registrarme</button>
+    </div>
+    <form id="formLogin" class="space-y-3"><input id="loginEmail" placeholder="Email" class="w-full border p-3 rounded-xl"><div class="relative"><input id="loginPassword" type="password" placeholder="Contraseña" class="w-full border p-3 rounded-xl"><span onclick="togglePass('loginPassword',this)" class="absolute right-3 top-3 cursor-pointer">👁️</span></div><button class="w-full bg-[#0A2342] text-white py-3 rounded-xl font-black">ENTRAR</button><button id="btnOlvideContrasena" type="button" class="text-xs text-gray-500 w-full mt-2">¿Olvidaste tu contraseña?</button></form>
+    <form id="formRegistro" class="space-y-3 hidden"><input id="regNombre" placeholder="Nombre" class="w-full border p-3 rounded-xl"><input id="regEmail" placeholder="Email" class="w-full border p-3 rounded-xl"><div class="relative"><input id="regPassword" type="password" placeholder="Contraseña" class="w-full border p-3 rounded-xl"><span onclick="togglePass('regPassword',this)" class="absolute right-3 top-3 cursor-pointer">👁️</span></div><button class="w-full bg-[#0A2342] text-white py-3 rounded-xl font-black">CREAR CUENTA</button></form>
+    <p id="authMessage" class="text-center text-sm mt-3 text-red-500"></p>
   </div>
-
-  <div id="recoverStep1" class="hidden min-h-screen flex flex-col justify-center items-center p-6 bg-[#0A2342]"><form id="formRecoverEmail" class="w-full max-w-sm space-y-4"><h2 class="text-white font-black text-xl text-center">Recuperar cuenta</h2><input type="email" id="recoverEmailInput" placeholder="tu@email.com" class="input-pro" required><button type="submit" class="btn-primary w-full">ENVIAR CÓDIGO</button><button type="button" id="btnVolverLogin1" class="w-full text-white/60 underline text-center">Volver</button></form></div>
-  <div id="recoverStep2" class="hidden min-h-screen flex flex-col justify-center items-center p-6 bg-[#0A2342]"><form id="formRecoverCode" class="w-full max-w-sm space-y-4"><h2 class="text-white font-black text-xl text-center">Ingresá el código</h2><input type="text" id="recoverCodeInput" placeholder="123456" maxlength="6" class="input-pro text-center text-2xl tracking-[6px]" required><button type="submit" class="btn-success w-full">VERIFICAR</button><button type="button" id="btnReenviarCodigo" class="w-full text-accent underline text-center">Reenviar</button></form></div>
-  <div id="recoverStep3" class="hidden min-h-screen flex flex-col justify-center items-center p-6 bg-[#0A2342]"><form id="formNewPassword" class="w-full max-w-sm space-y-4"><h2 class="text-white font-black text-xl text-center">Nueva contraseña</h2><div class="password-wrapper"><input type="password" id="newPasswordInput" placeholder="Nueva contraseña" class="input-pro" required><span class="toggle-password" onclick="togglePass('newPasswordInput', this)">👁️</span></div><button type="submit" class="btn-success w-full">GUARDAR</button></form></div>
-
-  <div id="appScreen" class="hidden">
-    <header class="p-4 flex justify-between items-center sticky top-0 z-50 bg-[#0A2342]"><div class="flex items-center gap-3 relative"><div id="logoMenuBtn" class="w-10 h-10 bg-white rounded-full flex items-center justify-center cursor-pointer"><svg width="24" height="24" viewBox="0 0 512 512"><circle cx="256" cy="256" r="240" fill="#5BA9E0"/><path d="M 360 180 H 200 C 160 180 160 256 200 256 H 312 C 352 256 352 332 312 332 H 152" fill="none" stroke="white" stroke-width="32" stroke-linecap="round"/></svg></div><h1 class="text-xl font-black text-white">RUTAFLEX</h1><div id="logoDropdown" class="hidden absolute top-12 left-0 w-60 bg-[#0B2545] rounded-2xl shadow-2xl z-50 flex-col overflow-hidden border border-white/10"><button id="btnIrPerfil" class="w-full text-left px-5 py-4 text-white hover:bg-[#13315c] font-semibold">👤 Mi Perfil</button><button onclick="window.open('https://wa.me/5491123793596','_blank')" class="w-full text-left px-5 py-4 text-white hover:bg-[#13315c] font-semibold">🎧 Soporte</button><div class="h-px bg-white/10 my-1"></div><button id="btnLogoutDropdown" class="w-full text-left px-5 py-4 text-red-300 hover:bg-red-500/10 font-semibold">🚪 Cerrar sesión</button></div></div><div class="text-right"><div id="userName" class="text-sm font-bold text-white">¡Hola!</div><div id="contadorDias" class="text-xs font-bold mt-1 px-2 py-0.5 rounded-full inline-block"></div></div></header>
-    <div id="alertaProximoVencimiento" class="hidden bg-yellow-400 text-[#0A2342] p-3 text-center font-bold">⚠️ ¡TU PLAN VENCE MAÑANA!</div>
-    <div id="bannerVencido" class="hidden bg-red-600 text-white p-4 text-center font-bold">🔒 TU PLAN ESTÁ VENCIDO. RENOVÁ PARA USAR EL SERVICIO.</div>
-    <div class="p-5 bg-white"><div class="text-center mb-4"><span class="bg-yellow-100 text-yellow-800 text-xs font-black px-3 py-1 rounded-full">✨ 7 DÍAS GRATIS</span><h2 class="font-black text-xl text-[#0A2342] mt-2">Activa tu cuenta</h2></div><div class="grid grid-cols-2 gap-3"><button onclick="abrirModalPagos('Semanal', 4990)" class="p-4 rounded-2xl text-center font-bold text-white" style="background: linear-gradient(135deg,#10b981,#059669)"><div>⚡</div><div class="text-xs">SEMANAL</div><div class="text-lg">$4.990</div></button><button onclick="abrirModalPagos('Mensual', 14990)" class="p-4 rounded-2xl text-center font-bold text-white relative" style="background: linear-gradient(135deg,#1e40af,#0A2342)"><div class="absolute -top-2 -right-2 bg-yellow-400 text-[#0A2342] text-[10px] px-2 py-1 rounded-full font-black">POPULAR</div><div>🚀</div><div class="text-xs">MENSUAL</div><div class="text-lg">$14.990</div></button></div><div class="flex gap-2 mt-4"><input id="promo" placeholder="Código promocional" class="flex-1 border border-gray-200 p-3 rounded-xl text-sm font-bold"><button id="btnPromo" class="bg-[#0A2342] text-white px-5 rounded-xl text-sm font-black">Aplicar</button></div><p id="promoMessage" class="text-xs text-center mt-2 font-bold"></p></div>
-    <div id="seccionDestinos" class="p-4 bg-[#f8fafc] border-t"><button id="btnCargar" class="w-full bg-[#10b981] text-white font-black py-4 rounded-2xl text-lg shadow-lg">+ CARGAR DESTINOS</button><h3 class="font-bold text-[#0A2342] mt-6 mb-3">Agregar con IA</h3><div class="grid grid-cols-2 gap-3"><label class="card-ia"><div class="text-3xl">🖼️</div><div class="font-bold text-[#5BA9E0] text-sm">Imagen / Foto</div><input type="file" id="fileImg" accept="image/*" hidden></label><div class="card-ia opacity-60"><div class="text-3xl">📄</div><div class="font-bold text-gray-400 text-sm">PDF pronto</div></div><button onclick="abrirCamara()" class="card-ia"><div class="text-3xl">📸</div><div class="font-bold text-[#5BA9E0] text-sm">Cámara</div></button><button onclick="alert('QR en desarrollo')" class="card-ia"><div class="text-3xl">🔳</div><div class="font-bold text-[#5BA9E0] text-sm">Escanear QR</div></button></div><video id="camara" autoplay class="hidden w-full mt-3 rounded-xl"></video></div>
-    <div id="listaContainer" class="p-4 bg-white min-h-[300px]"><div class="flex justify-between items-center mb-4"><h3 class="font-black text-lg text-[#0A2342]">Tus destinos (<span id="count">0</span>)</h3><span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold">📍 Optimizados</span></div><ul id="lista" class="space-y-2"></ul><div id="placeholderVacio" class="text-center py-10 text-gray-400 border-2 border-dashed rounded-2xl"><p class="font-semibold">📍 Agregá tus paradas arriba</p><span class="text-xs">Ej: Av. Corrientes 1234, CABA</span></div><button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden sticky bottom-4 shadow-xl">COMENZAR VIAJE 🚀</button><p class="text-center text-[11px] mt-2 text-gray-400">Se abrirá en Google Maps optimizado (de a 10)</p></div>
-    <div id="stats" class="p-6 m-4 rounded-2xl hidden bg-blue-50 border"><h3 class="font-black text-[#0A2342] text-xl mb-3">¡Ruta completada! 🏆</h3><div class="grid grid-cols-3 gap-2 text-center"><div class="bg-white p-3 rounded-xl"><b><span id="statHoras">0</span>h</b></div><div class="bg-white p-3 rounded-xl"><b><span id="statKm">0</span>km</b></div><div class="bg-white p-3 rounded-xl"><b><span id="statEntregas">0</span></b></div></div></div>
-  </div>
-
-  <div id="perfilScreen" class="hidden min-h-screen bg-[#f6f8fa]"><div class="bg-[#0A2342] pb-8 pt-6 px-6 text-center text-white rounded-b-[28px] relative"><button id="btnVolverDePerfil" class="absolute top-6 left-5 text-white text-xl">←</button><h3 class="text-[11px] opacity-50 tracking-widest mb-4">PERFIL</h3><div id="perfilAvatarWrapper" class="w-24 h-24 mx-auto bg-[#7bc8ff] rounded-full flex items-center justify-center mb-3 border-4 border-white/20"><svg width="44" height="44" viewBox="0 0 512 512"><circle cx="256" cy="256" r="240" fill="#7bc8ff"/><path d="M 360 180 H 200 C 160 180 160 256 200 256 H 312 C 352 256 352 332 312 332 H 152" fill="none" stroke="white" stroke-width="36" stroke-linecap="round"/></svg></div><h2 id="perfilNombre" class="text-xl font-black">Usuario</h2><p id="perfilEmail" class="text-white/60 text-sm"></p><span id="perfilEstado" class="inline-block mt-4 px-5 py-1.5 rounded-full text-xs font-black bg-green-500">✅ ACTIVO</span><button id="btnRenovarPerfil" class="hidden mt-5 w-full bg-white text-[#0A2342] font-black py-3.5 rounded-xl">Renovar mi plan</button></div><div class="p-4 space-y-3"><div class="bg-white p-2 rounded-2xl shadow-sm border"><button onclick="abrirModalPagos('Mensual', 14990)" class="w-full flex justify-between p-4 font-bold text-[#0A2342]"><span>🔒 Mi Plan</span><span>›</span></button></div><button id="btnLogoutPerfil" class="w-full bg-[#fff0f0] text-[#d32f2f] font-bold py-4 rounded-xl border">🚪 Cerrar sesión</button></div></div>
-
-  <div id="modalEdicion" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"><div class="bg-white rounded-[22px] w-full max-w-md overflow-hidden"><div class="p-4 bg-[#0A2342] flex justify-between items-center"><h3 class="text-white font-black">🤖 Revisar direcciones</h3><button id="btnCerrarModal" class="text-white text-2xl">&times;</button></div><div id="contenedorInputs" class="p-4 space-y-3 max-h-[60vh] overflow-y-auto"></div><div class="p-4 flex gap-2 bg-gray-50"><button id="btnCancelarEdicion" class="flex-1 bg-gray-200 py-3 rounded-xl font-bold">Cancelar</button><button id="btnGuardarEdicion" class="flex-1 bg-[#10b981] text-white py-3 rounded-xl font-bold">✅ Guardar Todo</button></div></div></div>
-  <div id="payment-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center z-[60] p-4"><div class="bg-white rounded-3xl w-full max-w-md p-6"><h3 class="text-2xl font-black text-center">Elegí cómo pagar</h3><p id="modal-plan-texto" class="text-center font-bold text-blue-600 mt-2"></p><div class="mt-4 space-y-3"><a id="btn-mp-pago" href="#" target="_blank" class="flex items-center gap-4 p-4 rounded-xl border-2 border-[#009EE3] bg-blue-50 font-bold">💳 Mercado Pago</a><div class="p-4 rounded-xl border bg-gray-50 flex justify-between items-center"><span>Alias: <b id="modal-alias-texto" class="font-mono text-blue-600">RUTAFLEX.MP</b></span><button onclick="copiarAlias()" class="bg-[#0A2342] text-white text-xs px-3 py-2 rounded-lg">Copiar</button></div><a id="btn-wsp-pago" href="#" target="_blank" class="block p-4 rounded-xl bg-green-500 text-white font-bold text-center">💬 Enviar comprobante</a><button onclick="cerrarModalPagos()" class="w-full p-3 text-gray-500 text-sm">Cerrar</button></div></div></div>
-  <div id="notificaciones" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 w-11/12 max-w-sm pointer-events-none"></div>
 </div>
+
+<!-- APP -->
+<div id="appScreen" class="hidden min-h-screen max-w-[480px] mx-auto bg-[#f1f5f9]">
+  <!-- HEADER -->
+  <div class="bg-[#0A2342] p-4 flex justify-between items-center text-white sticky top-0 z-10">
+    <div class="flex items-center gap-2"><button id="logoMenuBtn" class="font-black text-xl">RutaFlex</button><div id="userName" class="text-xs opacity-70"></div></div>
+    <div class="relative"><div id="contadorDias" class="text-xs font-bold px-3 py-1 rounded-full bg-green-500"></div><div id="logoDropdown" class="hidden absolute right-0 top-10 bg-white text-black rounded-xl shadow-xl flex-col w-48 overflow-hidden"><button id="btnIrPerfil" class="p-3 text-left text-sm hover:bg-gray-100">👤 Mi Perfil</button><button id="btnLogoutDropdown" class="p-3 text-left text-sm hover:bg-gray-100 text-red-500">Salir</button></div></div>
+  </div>
+
+  <!-- BANNER VENCIDO -->
+  <div id="bannerVencido" class="hidden bg-red-600 text-white text-center p-4 font-bold text-sm">⚠️ Plan vencido. Renová para seguir usando.</div>
+  <div id="alertaProximoVencimiento" class="hidden bg-yellow-400 text-[#0A2342] text-center p-2 font-bold text-xs">⏳ Tu plan vence pronto</div>
+
+  <!-- PLANES -->
+  <div class="p-4 bg-white grid grid-cols-2 gap-3">
+    <div class="border-2 border-[#0A2342] rounded-2xl p-4"><b class="block">SEMANAL</b><span class="text-xs text-gray-500">7 días full</span><p class="font-black text-xl my-2">$8.000</p><button onclick="abrirModalPagos('Semanal','8000')" class="w-full bg-[#0A2342] text-white py-2 rounded-xl text-xs font-bold">CONTRATAR</button></div>
+    <div class="border-2 border-green-500 rounded-2xl p-4 relative"><span class="absolute -top-2 right-2 bg-green-500 text-white text-[10px] px-2 py-0.5 rounded-full">AHORRO</span><b class="block">MENSUAL</b><span class="text-xs text-gray-500">30 días full</span><p class="font-black text-xl my-2">$24.000</p><button onclick="abrirModalPagos('Mensual','24000')" class="w-full bg-green-500 text-white py-2 rounded-xl text-xs font-bold">CONTRATAR</button></div>
+    <div class="col-span-2 flex gap-2 mt-1"><input id="promo" placeholder="Código promo" class="flex-1 border p-2 rounded-xl text-sm"><button id="btnPromo" class="bg-[#0A2342] text-white px-4 rounded-xl text-sm font-bold">Validar</button></div>
+  </div>
+
+  <!-- LISTA ARRIBA - ACÁ ES DONDE VOS QUERÍAS QUE APAREZCA -->
+  <div id="listaContainer" class="p-4 bg-white">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="font-black text-lg text-[#0A2342]">Tus destinos (<span id="count">0</span>)</h3>
+      <span class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold">📍 Ordenados</span>
+    </div>
+    <ul id="lista" class="space-y-3"></ul>
+    <div id="placeholderVacio" class="text-center py-12 text-gray-400 border-2 border-dashed rounded-2xl"><p class="font-bold">📍 Todavía no tenés destinos</p><span class="text-xs">Cargá tu primer parada con los botones de abajo</span></div>
+    <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-6 hidden shadow-xl">COMENZAR VIAJE 🚀</button>
+    <div id="stats" class="hidden mt-4 p-3 bg-gray-50 rounded-xl text-center text-sm">Entregas: <span id="statEntregas" class="font-bold"></span></div>
+  </div>
+
+  <!-- BOTONES ABAJO - CON ICONO DE FOTO ARREGLADO -->
+  <div id="seccionDestinos" class="p-4 bg-[#0A2342] rounded-t-[32px] mt-2 pb-10">
+    <button id="btnCargar" class="w-full bg-[#10b981] hover:bg-[#0d9a6d] text-white font-black py-4 rounded-2xl text-lg shadow-lg">+ CARGAR DESTINOS</button>
+    <h3 class="font-bold text-white/50 mt-6 mb-3 text-[11px] tracking-widest">AGREGAR CON IA</h3>
+    <div class="grid grid-cols-2 gap-3">
+      <label class="bg-white rounded-2xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer active:scale-95 transition">
+        <span class="text-3xl">🖼️</span>
+        <span class="font-black text-[#0A2342] text-sm">Imagen / Foto</span>
+        <input type="file" id="fileImg" accept="image/*" hidden>
+      </label>
+      <div class="bg-white/10 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-white/20">
+        <span class="text-3xl">📄</span>
+        <span class="font-bold text-white/40 text-sm text-center">PDF (Próximamente)</span>
+      </div>
+      <button onclick="abrirCamara()" class="bg-white rounded-2xl p-4 flex flex-col items-center justify-center gap-2 active:scale-95 transition">
+        <span class="text-3xl">📸</span>
+        <span class="font-black text-[#0A2342] text-sm">Cámara</span>
+      </button>
+      <button onclick="alert('QR pronto')" class="bg-white rounded-2xl p-4 flex flex-col items-center justify-center gap-2 active:scale-95 transition">
+        <span class="text-3xl">🔳</span>
+        <span class="font-black text-[#0A2342] text-sm">Escanear QR</span>
+      </button>
+    </div>
+    <video id="camara" autoplay class="hidden w-full mt-3 rounded-xl"></video>
+  </div>
+</div>
+
+<!-- MODAL EDICION -->
+<div id="modalEdicion" class="hidden fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <div class="bg-white w-full max-w-md rounded-t-[28px] sm:rounded-[28px] max-h-[85vh] flex flex-col">
+    <div class="p-5 border-b flex justify-between items-center"><b class="text-[#0A2342]">Editar destinos detectados</b><button id="btnCerrarModal" class="text-2xl">✕</button></div>
+    <div id="contenedorInputs" class="p-4 space-y-3 overflow-auto flex-1"></div>
+    <div class="p-4 border-t space-y-2 bg-gray-50 rounded-t-none sm:rounded-b-[28px]"><button id="btnAgregarLinea" class="w-full border-2 border-dashed py-2 rounded-xl font-bold text-gray-500">+ Agregar otra dirección</button><div class="flex gap-2"><button id="btnCancelarEdicion" class="flex-1 py-3 rounded-xl bg-gray-200 font-bold">Cancelar</button><button id="btnGuardarEdicion" class="flex-1 py-3 rounded-xl bg-[#0A2342] text-white font-black">✅ Guardar Todo</button></div></div>
+  </div>
+</div>
+
+<!-- MODAL PAGOS / PERFIL / RECUPERAR (igual que tenés) -->
+<div id="payment-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"><div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center"><h3 id="modal-plan-texto" class="font-black text-lg"></h3><p class="my-3 text-sm">Alias: <b id="modal-alias-texto"></b></p><div class="flex gap-2"><a id="btn-wsp-pago" target="_blank" class="flex-1 bg-green-500 text-white py-3 rounded-xl font-bold">Enviar comprobante</a><a id="btn-mp-pago" target="_blank" class="flex-1 bg-[#009ee3] text-white py-3 rounded-xl font-bold">Pagar con MP</a></div><button onclick="cerrarModalPagos()" class="mt-3 text-sm text-gray-500">Cerrar</button></div></div>
+<div id="perfilScreen" class="hidden min-h-screen max-w-[480px] mx-auto bg-white p-6"><button id="btnVolverDePerfil" class="mb-4">← Volver</button><div class="text-center"><div class="w-20 h-20 bg-[#0A2342] rounded-full mx-auto flex items-center justify-center text-white text-3xl">👤</div><h2 id="perfilNombre" class="font-black text-xl mt-3"></h2><p id="perfilEmail" class="text-gray-500 text-sm"></p><span id="perfilEstado" class="inline-block mt-4 px-5 py-1.5 rounded-full text-xs font-black"></span><button id="btnRenovarPerfil" onclick="abrirModalPagos('Mensual','24000')" class="hidden mt-4 w-full bg-red-600 text-white py-3 rounded-xl font-bold">RENOVAR PLAN</button><button id="btnLogoutPerfil" class="mt-6 w-full border py-3 rounded-xl font-bold">Cerrar sesión</button></div></div>
+<div id="recoverStep1" class="hidden min-h-screen flex items-center justify-center p-4 bg-[#0A2342]"><form id="formRecoverEmail" class="bg-white p-6 rounded-2xl w-full max-w-sm"><h3 class="font-black mb-3">Recuperar contraseña</h3><input id="recoverEmailInput" placeholder="Tu email" class="w-full border p-3 rounded-xl"><button class="w-full bg-[#0A2342] text-white py-3 rounded-xl mt-3 font-bold">Enviar código</button><button id="btnVolverLogin1" type="button" class="w-full mt-2 text-sm">Volver</button></form></div>
+<div id="recoverStep2" class="hidden min-h-screen flex items-center justify-center p-4 bg-[#0A2342]"><form id="formRecoverCode" class="bg-white p-6 rounded-2xl w-full max-w-sm"><h3 class="font-black mb-3">Código</h3><input id="recoverCodeInput" placeholder="Código" class="w-full border p-3 rounded-xl"><button class="w-full bg-[#0A2342] text-white py-3 rounded-xl mt-3 font-bold">Verificar</button></form></div>
+<div id="recoverStep3" class="hidden min-h-screen flex items-center justify-center p-4 bg-[#0A2342]"><form id="formNewPassword" class="bg-white p-6 rounded-2xl w-full max-w-sm"><h3 class="font-black mb-3">Nueva contraseña</h3><input id="newPasswordInput" type="password" placeholder="Nueva contraseña" class="w-full border p-3 rounded-xl"><button class="w-full bg-[#0A2342] text-white py-3 rounded-xl mt-3 font-bold">Cambiar</button></form></div>
+<div id="notificaciones" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] space-y-2 w-[90%] max-w-sm"></div>
 <script src="app.js"></script>
 </body>
 </html>
