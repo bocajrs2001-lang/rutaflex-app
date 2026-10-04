@@ -7,7 +7,6 @@ const mongoose = require('mongoose');
 const { Resend } = require('resend');
 const { MercadoPagoConfig, Preference } = require('mercadopago');
 
-// Importar funciones de base de datos
 const { 
   registrarUsuario, loginUsuario, obtenerDestinosDeUsuario, agregarDestino, 
   borrarDestino, borrarDestinosDeUsuario, actualizarContrasena, 
@@ -17,11 +16,8 @@ const {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ==========================================
-//  INICIALIZACIÓN DE SERVICIOS
-// ==========================================
 const mpClient = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
-console.log(' Token MP cargado:', process.env.MP_ACCESS_TOKEN ? 'OK (' + process.env.MP_ACCESS_TOKEN.substring(0,8) + '...)' : '️ FALTA TOKEN');
+console.log(' Token MP cargado:', process.env.MP_ACCESS_TOKEN ? 'OK' : ' FALTA TOKEN');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const codigosVerificacion = new Map();
@@ -40,6 +36,11 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 app.use(express.static(path.join(__dirname, 'public')));
 
+//  ENDPOINT ESPECÍFICO PARA FAVICON (Soluciona el problema de Google)
+app.get('/favicon.ico', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'icon-192x192.png'));
+});
+
 app.use(session({ 
   secret: 'rutaflex_secret_super_seguro_2026', 
   resave: false, 
@@ -47,9 +48,6 @@ app.use(session({
   cookie: { maxAge: 7 * 24 * 60 * 60 * 1000, sameSite: 'lax', secure: false } 
 }));
 
-// ==========================================
-// 🛡️ MIDDLEWARES
-// ==========================================
 function usuarioLogueado(req, res, next) {
   if (req.session && req.session.userId) return next();
   res.status(401).json({ error: 'Debes iniciar sesión' });
@@ -63,11 +61,7 @@ function suscripcionVigente(req, res, next) {
   next();
 }
 
-// ==========================================
-// 💳 RUTAS DE MERCADO PAGO (PLAN A Y PLAN B)
-// ==========================================
-
-// Crear preferencia de pago
+// 💳 RUTAS DE MERCADO PAGO
 app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
   try {
     const { plan } = req.body;
@@ -94,7 +88,7 @@ app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
         },
         auto_return: 'approved',
         notification_url: 'https://rutaflex-app.onrender.com/api/webhook-mp',
-        external_reference: req.session.userId.toString() // CLAVE: ID del usuario
+        external_reference: req.session.userId.toString()
       }
     });
     
@@ -107,13 +101,11 @@ app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
   }
 });
 
-// 🔥 PLAN B: Verificar pago directo (Cuando el webhook falla o Render duerme)
 app.post('/api/verificar-pago-directo', usuarioLogueado, async (req, res) => {
   try {
     const userId = req.session.userId.toString();
     console.log(`🔍 Verificando pagos directos para usuario: ${userId}`);
     
-    // Buscar pagos aprobados asociados a este usuario
     const payments = await mpClient.payment.search({ 
       options: { 
         external_reference: userId,
@@ -132,10 +124,8 @@ app.post('/api/verificar-pago-directo', usuarioLogueado, async (req, res) => {
         const itemTitle = pagoAprobado.additional_info?.items?.[0]?.title || '';
         const diasExtra = itemTitle.includes('Mensual') ? 30 : 7;
         
-        // Activar usuario en BD
         await actualizarVencimiento(userId, diasExtra);
         
-        // Actualizar sesión actual para que el frontend lo vea al instante
         req.session.user.fecha_vencimiento = new Date(Date.now() + diasExtra * 24 * 60 * 60 * 1000);
         
         return res.json({ ok: true, activado: true, dias: diasExtra });
@@ -150,7 +140,6 @@ app.post('/api/verificar-pago-directo', usuarioLogueado, async (req, res) => {
   }
 });
 
-// Webhook (PLAN A)
 app.post('/api/webhook-mp', async (req, res) => {
   const { type, data } = req.body;
   console.log(`📩 Webhook recibido: Tipo=${type}, DataID=${data?.id}`);
@@ -168,7 +157,7 @@ app.post('/api/webhook-mp', async (req, res) => {
           const itemTitle = mpPayment.additional_info?.items?.[0]?.title || '';
           const diasExtra = itemTitle.includes('Mensual') ? 30 : 7;
           
-          console.log(`⚙️ Activando usuario ${userId} por ${diasExtra} días...`);
+          console.log(`️ Activando usuario ${userId} por ${diasExtra} días...`);
           await actualizarVencimiento(userId, diasExtra);
           console.log(`✅ USUARIO ${userId} ACTIVADO POR WEBHOOK`);
         }
@@ -181,9 +170,7 @@ app.post('/api/webhook-mp', async (req, res) => {
   res.status(200).send('OK');
 });
 
-// ==========================================
 // 👤 AUTENTICACIÓN Y USUARIO
-// ==========================================
 app.post('/api/cancelar-suscripcion', usuarioLogueado, async (req, res) => {
   try { 
     await cancelarSuscripcionUsuario(req.session.userId); 
@@ -266,9 +253,7 @@ app.post('/api/validar-promo', usuarioLogueado, (req, res) => {
   res.status(400).json({ valido: false, mensaje: 'Código inválido.' });
 });
 
-// ==========================================
 // 📍 DESTINOS
-// ==========================================
 app.post('/api/destinos', usuarioLogueado, suscripcionVigente, async (req, res) => {
   try {
     if (!req.body.direccion) return res.status(400).json({ error: 'Falta dirección' });
