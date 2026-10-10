@@ -17,7 +17,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const mpClient = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
-console.log(' Token MP cargado:', process.env.MP_ACCESS_TOKEN ? 'OK' : ' FALTA TOKEN');
+console.log('🔑 Token MP cargado:', process.env.MP_ACCESS_TOKEN ? 'OK' : '❌ FALTA TOKEN');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const codigosVerificacion = new Map();
@@ -32,11 +32,11 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// 🆕 SERVIR ARCHIVOS ESTÁTICOS (RAÍZ Y CARPETA PUBLIC)
+// SERVIR ARCHIVOS ESTÁTICOS
 app.use(express.static(path.join(__dirname)));
 app.use(express.static(path.join(__dirname, 'public')));
 
-//  ENDPOINT ESPECÍFICO PARA FAVICON (Soluciona el problema de Google)
+// ENDPOINT FAVICON
 app.get('/favicon.ico', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'icon-192x192.png'));
 });
@@ -66,35 +66,22 @@ app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
   try {
     const { plan } = req.body;
     let precio, titulo, diasExtra;
-    
-    if (plan === 'mensual') {
-      precio = 14990; titulo = 'RUTAFLEX - Plan Mensual'; diasExtra = 30;
-    } else {
-      precio = 4990; titulo = 'RUTAFLEX - Plan Semanal'; diasExtra = 7;
-    }
+    if (plan === 'mensual') { precio = 14990; titulo = 'RUTAFLEX - Plan Mensual'; diasExtra = 30; } 
+    else { precio = 4990; titulo = 'RUTAFLEX - Plan Semanal'; diasExtra = 7; }
 
     const preference = new Preference(mpClient);
     const result = await preference.create({
       body: {
-        items: [{ 
-          id: `rutaflex_${plan}_${req.session.userId}`, 
-          title: titulo, quantity: 1, currency_id: 'ARS', unit_price: precio 
-        }],
+        items: [{ id: `rutaflex_${plan}_${req.session.userId}`, title: titulo, quantity: 1, currency_id: 'ARS', unit_price: precio }],
         payer: { email: req.session.user.email, name: req.session.nombre },
-        back_urls: {
-          success: 'https://rutaflex-app.onrender.com/',
-          failure: 'https://rutaflex-app.onrender.com/',
-          pending: 'https://rutaflex-app.onrender.com/'
-        },
+        back_urls: { success: 'https://rutaflex-app.onrender.com/', failure: 'https://rutaflex-app.onrender.com/', pending: 'https://rutaflex-app.onrender.com/' },
         auto_return: 'approved',
         notification_url: 'https://rutaflex-app.onrender.com/api/webhook-mp',
         external_reference: req.session.userId.toString()
       }
     });
-    
     console.log(`💳 Preferencia creada para usuario ${req.session.userId}`);
     res.json({ ok: true, init_point: result.init_point });
-    
   } catch (err) {
     console.error('Error creando preferencia:', err);
     res.status(500).json({ error: 'Error al generar link de pago' });
@@ -104,36 +91,18 @@ app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
 app.post('/api/verificar-pago-directo', usuarioLogueado, async (req, res) => {
   try {
     const userId = req.session.userId.toString();
-    console.log(`🔍 Verificando pagos directos para usuario: ${userId}`);
-    
-    const payments = await mpClient.payment.search({ 
-      options: { 
-        external_reference: userId,
-        sort: 'date_created',
-        criteria: 'desc',
-        limit: 5
-      } 
-    });
-    
+    const payments = await mpClient.payment.search({ options: { external_reference: userId, sort: 'date_created', criteria: 'desc', limit: 5 } });
     if (payments.results && payments.results.length > 0) {
       const pagoAprobado = payments.results.find(p => p.status === 'approved');
-      
       if (pagoAprobado) {
-        console.log(`✅ Pago encontrado: ${pagoAprobado.id}`);
-        
         const itemTitle = pagoAprobado.additional_info?.items?.[0]?.title || '';
         const diasExtra = itemTitle.includes('Mensual') ? 30 : 7;
-        
         await actualizarVencimiento(userId, diasExtra);
-        
         req.session.user.fecha_vencimiento = new Date(Date.now() + diasExtra * 24 * 60 * 60 * 1000);
-        
         return res.json({ ok: true, activado: true, dias: diasExtra });
       }
     }
-    
     res.json({ ok: false, activado: false });
-    
   } catch (err) {
     console.error("❌ Error verificando pago directo:", err);
     res.status(500).json({ ok: false, activado: false, error: err.message });
@@ -142,40 +111,27 @@ app.post('/api/verificar-pago-directo', usuarioLogueado, async (req, res) => {
 
 app.post('/api/webhook-mp', async (req, res) => {
   const { type, data } = req.body;
-  console.log(`📩 Webhook recibido: Tipo=${type}, DataID=${data?.id}`);
-
   if (type === 'payment' || type === 'pay') {
     try {
       const paymentId = data.id;
       const mpPayment = await mpClient.payment.get({ id: paymentId });
-      
-      console.log(` Estado del pago ${paymentId}: ${mpPayment.status}`);
-
       if (mpPayment.status === 'approved') {
         const userId = mpPayment.external_reference;
         if (userId) {
           const itemTitle = mpPayment.additional_info?.items?.[0]?.title || '';
           const diasExtra = itemTitle.includes('Mensual') ? 30 : 7;
-          
-          console.log(`️ Activando usuario ${userId} por ${diasExtra} días...`);
           await actualizarVencimiento(userId, diasExtra);
-          console.log(`✅ USUARIO ${userId} ACTIVADO POR WEBHOOK`);
         }
       }
-    } catch (err) {
-      console.error('❌ ERROR EN WEBHOOK:', err.message);
-    }
+    } catch (err) { console.error(' ERROR EN WEBHOOK:', err.message); }
   }
-  
   res.status(200).send('OK');
 });
 
-// 👤 AUTENTICACIÓN Y USUARIO
+// 👤 AUTENTICACIÓN
 app.post('/api/cancelar-suscripcion', usuarioLogueado, async (req, res) => {
-  try { 
-    await cancelarSuscripcionUsuario(req.session.userId); 
-    res.json({ ok: true, mensaje: 'Cancelado' }); 
-  } catch (err) { res.status(500).json({ error: 'Error al cancelar' }); }
+  try { await cancelarSuscripcionUsuario(req.session.userId); res.json({ ok: true, mensaje: 'Cancelado' }); } 
+  catch (err) { res.status(500).json({ error: 'Error al cancelar' }); }
 });
 
 app.post('/api/enviar-codigo-recuperacion', async (req, res) => {
@@ -184,10 +140,8 @@ app.post('/api/enviar-codigo-recuperacion', async (req, res) => {
     if (!email) return res.status(400).json({ error: 'Ingresá tu email' });
     const usuario = await buscarUsuarioPorEmail(email);
     if (!usuario) return res.status(404).json({ error: 'No existe cuenta con ese email' });
-    
     const codigo = Math.floor(100000 + Math.random() * 900000).toString();
     codigosVerificacion.set(email, { codigo, expira: Date.now() + 10 * 60 * 1000 });
-
     const { error } = await resend.emails.send({
       from: 'RUTAFLEX <onboarding@resend.dev>',
       to: email,
@@ -271,9 +225,14 @@ app.delete('/api/destinos/:id', usuarioLogueado, suscripcionVigente, async (req,
   catch (err) { res.status(500).json({ error: 'Error al eliminar' }); }
 });
 
+// ✅ NUEVO: BORRAR TODOS LOS DESTINOS DEL USUARIO
 app.delete('/api/destinos', usuarioLogueado, suscripcionVigente, async (req, res) => {
-  try { await borrarDestinosDeUsuario(req.session.userId); res.json({ ok: true }); } 
-  catch (err) { res.status(500).json({ error: 'Error al eliminar' }); }
+  try { 
+    await borrarDestinosDeUsuario(req.session.userId); 
+    res.json({ ok: true, mensaje: 'Todas las direcciones fueron eliminadas' }); 
+  } catch (err) { 
+    res.status(500).json({ error: 'Error al eliminar todas las direcciones' }); 
+  }
 });
 
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'index.html')); });
