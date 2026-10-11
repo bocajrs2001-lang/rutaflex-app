@@ -32,12 +32,13 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// ✅ SERVIR ARCHIVOS ESTÁTICOS DE LA CARPETA PUBLIC
+// ✅ SERVIR ARCHIVOS ESTÁTICOS DE LA CARPETA PUBLIC (MUY IMPORTANTE)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ✅ ENDPOINT ESPECÍFICO PARA FAVICON (antes de los estáticos)
+// ✅ ENDPOINT ESPECÍFICO PARA FAVICON (debe ir ANTES del static)
 app.get('/favicon.ico', (req, res) => {
   const faviconPath = path.join(__dirname, 'public', 'favicon.ico');
+  console.log(' Buscando favicon en:', faviconPath);
   res.sendFile(faviconPath, (err) => {
     if (err) {
       console.log('❌ Error sirviendo favicon.ico:', err.message);
@@ -86,7 +87,7 @@ app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
         external_reference: req.session.userId.toString()
       }
     });
-    console.log(` Preferencia creada para usuario ${req.session.userId}`);
+    console.log(`💳 Preferencia creada para usuario ${req.session.userId}`);
     res.json({ ok: true, init_point: result.init_point });
   } catch (err) {
     console.error('Error creando preferencia:', err);
@@ -151,7 +152,7 @@ app.post('/api/enviar-codigo-recuperacion', async (req, res) => {
     const { error } = await resend.emails.send({
       from: 'RUTAFLEX <onboarding@resend.dev>',
       to: email,
-      subject: ' Tu código de recuperación',
+      subject: '🔐 Tu código de recuperación',
       html: `<div style="font-family:sans-serif; padding:20px;"><h2>RUTAFLEX</h2><p>Tu código es:</p><h1 style="color:#0A2342; letter-spacing:5px;">${codigo}</h1><p>Expira en 10 min.</p></div>`
     });
     if (error) return res.status(500).json({ error: 'Error al enviar email' });
