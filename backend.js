@@ -32,13 +32,19 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// SERVIR ARCHIVOS ESTÁTICOS
-app.use(express.static(path.join(__dirname)));
+// ✅ SERVIR ARCHIVOS ESTÁTICOS DE LA CARPETA PUBLIC
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ENDPOINT FAVICON
+// ✅ ENDPOINT ESPECÍFICO PARA FAVICON (antes de los estáticos)
 app.get('/favicon.ico', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'icon-192x192.png'));
+  const faviconPath = path.join(__dirname, 'public', 'favicon.ico');
+  res.sendFile(faviconPath, (err) => {
+    if (err) {
+      console.log('❌ Error sirviendo favicon.ico:', err.message);
+      // Fallback: servir el PNG si no existe el .ico
+      res.sendFile(path.join(__dirname, 'public', 'icon-192x192.png'));
+    }
+  });
 });
 
 app.use(session({ 
@@ -80,7 +86,7 @@ app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
         external_reference: req.session.userId.toString()
       }
     });
-    console.log(`💳 Preferencia creada para usuario ${req.session.userId}`);
+    console.log(` Preferencia creada para usuario ${req.session.userId}`);
     res.json({ ok: true, init_point: result.init_point });
   } catch (err) {
     console.error('Error creando preferencia:', err);
@@ -123,7 +129,7 @@ app.post('/api/webhook-mp', async (req, res) => {
           await actualizarVencimiento(userId, diasExtra);
         }
       }
-    } catch (err) { console.error(' ERROR EN WEBHOOK:', err.message); }
+    } catch (err) { console.error('❌ ERROR EN WEBHOOK:', err.message); }
   }
   res.status(200).send('OK');
 });
@@ -145,7 +151,7 @@ app.post('/api/enviar-codigo-recuperacion', async (req, res) => {
     const { error } = await resend.emails.send({
       from: 'RUTAFLEX <onboarding@resend.dev>',
       to: email,
-      subject: '🔐 Tu código de recuperación',
+      subject: ' Tu código de recuperación',
       html: `<div style="font-family:sans-serif; padding:20px;"><h2>RUTAFLEX</h2><p>Tu código es:</p><h1 style="color:#0A2342; letter-spacing:5px;">${codigo}</h1><p>Expira en 10 min.</p></div>`
     });
     if (error) return res.status(500).json({ error: 'Error al enviar email' });
@@ -225,7 +231,6 @@ app.delete('/api/destinos/:id', usuarioLogueado, suscripcionVigente, async (req,
   catch (err) { res.status(500).json({ error: 'Error al eliminar' }); }
 });
 
-// ✅ NUEVO: BORRAR TODOS LOS DESTINOS DEL USUARIO
 app.delete('/api/destinos', usuarioLogueado, suscripcionVigente, async (req, res) => {
   try { 
     await borrarDestinosDeUsuario(req.session.userId); 
