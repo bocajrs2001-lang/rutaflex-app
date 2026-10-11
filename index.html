@@ -4,12 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- FAVICON -->
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192x192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="/icon-512x512.png">
-<link rel="shortcut icon" type="image/png" href="/icon-192x192.png">
-<link rel="apple-touch-icon" sizes="192x192" href="/icon-192x192.png">
-<link rel="apple-touch-icon" sizes="512x512" href="/icon-512x512.png">
+<!-- FAVICON - Múltiples formatos -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 
 <!-- SEO -->
 <meta name="google-site-verification" content="uzyX6zsqHquA4NB7C3qKIhV-1NMKW6EV2nanwHVo_wU" />
@@ -25,7 +27,7 @@
 <meta property="og:description" content="Optimiza tus rutas de entrega. Del más cercano al más lejano. Ahorra nafta y tiempo." />
 <meta property="og:url" content="https://rutaflex-app.onrender.com/" />
 <meta property="og:type" content="website" />
-<meta property="og:image" content="https://rutaflex-app.onrender.com/icon-512x512.png" />
+<meta property="og:image" content="https://rutaflex-app.onrender.com/android-chrome-512x512.png" />
 <meta property="og:image:width" content="512" />
 <meta property="og:image:height" content="512" />
 <meta property="og:locale" content="es_AR" />
@@ -45,12 +47,12 @@
   "operatingSystem": "Web, Android, iOS",
   "offers": { "@type": "Offer", "price": "4990", "priceCurrency": "ARS" },
   "publisher": { "@type": "Organization", "name": "RutaFlex", "email": "rutaflex6@gmail.com" },
-  "logo": { "@type": "ImageObject", "url": "https://rutaflex-app.onrender.com/icon-512x512.png", "width": 512, "height": 512 }
+  "logo": { "@type": "ImageObject", "url": "https://rutaflex-app.onrender.com/android-chrome-512x512.png", "width": 512, "height": 512 }
 }
 </script>
 
 <!-- PWA -->
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="/site.webmanifest">
 <meta name="theme-color" content="#0A2342">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -170,20 +172,20 @@
             <button id="btnIrPerfil" class="w-full text-left px-5 py-4 text-white hover:bg-[#13315c] flex items-center gap-3 font-semibold">👤 Mi Perfil</button>
             <button onclick="window.open('https://wa.me/5491123793596', '_blank')" class="w-full text-left px-5 py-4 text-white hover:bg-[#13315c] flex items-center gap-3 font-semibold">🎧 Soporte</button>
             <div class="h-px bg-white/10 my-1"></div>
-            <button id="btnLogoutDropdown" class="w-full text-left px-5 py-4 text-red-300 hover:bg-red-500/10 flex items-center gap-3 font-semibold">🚪 Cerrar sesión</button>
+            <button id="btnLogoutDropdown" class="w-full text-left px-5 py-4 text-red-300 hover:bg-red-500/10 flex items-center gap-3 font-semibold"> Cerrar sesión</button>
          </div>
       </div>
       <div class="text-right"><div id="userName" class="text-sm font-bold text-white">¡Hola!</div><div id="contadorDias" class="text-xs font-bold mt-1 px-2 py-0.5 rounded-full inline-block"></div></div>
     </header>
 
-    <div id="alertaProximoVencimiento" class="hidden bg-yellow-500 text-[#0A2342] p-3 text-center font-bold animate-pulse mx-4 rounded-b-xl">️ ¡TU PLAN VENCE MAÑANA! Renová ahora.</div>
+    <div id="alertaProximoVencimiento" class="hidden bg-yellow-500 text-[#0A2342] p-3 text-center font-bold animate-pulse mx-4 rounded-b-xl">⚠️ ¡TU PLAN VENCE MAÑANA! Renová ahora.</div>
     <div id="bannerVencido" class="hidden bg-red-600 text-white p-4 text-center font-bold animate-pulse mx-4 rounded-b-xl">🔒 TU PLAN ESTÁ VENCIDO. RENOVÁ PARA USAR EL SERVICIO.</div>
 
     <div class="p-6 bg-white rounded-t-3xl mt-0">
       <div class="text-center mb-6"><span class="inline-block bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full mb-2">✨ 7 DÍAS GRATIS</span><h2 class="font-black text-xl text-[#0A2342]">Activa tu cuenta</h2></div>
       <div class="grid grid-cols-2 gap-3">
-        <button onclick="abrirModalPagos('Semanal', 4990)" class="p-4 rounded-xl text-center font-bold text-white shadow-md" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"><div class="text-2xl">⚡</div><div class="text-xs">SEMANAL</div><div class="text-lg font-black">$4.990</div></button>
-        <button onclick="abrirModalPagos('Mensual', 14990)" class="p-4 rounded-xl text-center font-bold text-white shadow-md relative" style="background: linear-gradient(135deg, #1e40af 0%, #0A2342 100%);"><div class="absolute -top-2 -right-2 bg-yellow-400 text-[#0A2342] text-[10px] font-black px-2 py-1 rounded-full">POPULAR</div><div class="text-2xl">🚀</div><div class="text-xs">MENSUAL</div><div class="text-lg font-black">$14.990</div></button>
+        <button onclick="abrirModalPagos('Semanal', 4990)" class="p-4 rounded-xl text-center font-bold text-white shadow-md" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"><div class="text-2xl"></div><div class="text-xs">SEMANAL</div><div class="text-lg font-black">$4.990</div></button>
+        <button onclick="abrirModalPagos('Mensual', 14990)" class="p-4 rounded-xl text-center font-bold text-white shadow-md relative" style="background: linear-gradient(135deg, #1e40af 0%, #0A2342 100%);"><div class="absolute -top-2 -right-2 bg-yellow-400 text-[#0A2342] text-[10px] font-black px-2 py-1 rounded-full">POPULAR</div><div class="text-2xl"></div><div class="text-xs">MENSUAL</div><div class="text-lg font-black">$14.990</div></button>
       </div>
       <div class="flex gap-2 mt-4"><input id="promo" placeholder="Código promocional" class="flex-1 border border-gray-300 p-2 rounded-xl text-sm font-bold text-[#0A2342]"><button id="btnPromo" class="bg-[#0A2342] text-white px-4 rounded-xl text-sm font-bold">Aplicar</button></div>
       <p id="promoMessage" class="text-xs text-center mt-2 font-bold"></p>
@@ -219,17 +221,16 @@
          <h3 class="font-black text-lg text-[#0A2342]">Tus destinos (<span id="count">0</span>)</h3>
          <div class="flex gap-2">
             <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold">📍 Ordenados</span>
-            <!-- BOTÓN BORRAR TODO -->
             <button id="btnBorrarTodo" class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-bold hover:bg-red-200 transition-colors hidden">🗑️ Borrar todo</button>
          </div>
       </div>
       <ul id="lista" class="space-y-2 text-sm"></ul>
-      <div id="placeholderVacio" class="text-center py-8 text-gray-400 hidden"><p>📍 Agregá tus paradas arriba para armar tu ruta</p><span class="text-xs">Ej: Av. Corrientes 1234</span></div>
-      <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg">🗺️ COMENZAR VIAJE</button>
+      <div id="placeholderVacio" class="text-center py-8 text-gray-400 hidden"><p> Agregá tus paradas arriba para armar tu ruta</p><span class="text-xs">Ej: Av. Corrientes 1234</span></div>
+      <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg">️ COMENZAR VIAJE</button>
       <p class="text-center text-xs mt-2 text-gray-500 mb-4">Se abrirá en Google Maps desde tu ubicación GPS</p>
     </div>
 
-    <div id="stats" class="p-6 m-4 rounded-2xl hidden bg-blue-50 border"><h3 class="font-black text-[#0A2342] text-xl mb-4">¡Ruta completada! 🏆</h3><div class="grid grid-cols-3 gap-2"><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statHoras">0</span>h</div></div><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statKm">0</span>km</div></div><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statEntregas">0</span></div></div></div></div>
+    <div id="stats" class="p-6 m-4 rounded-2xl hidden bg-blue-50 border"><h3 class="font-black text-[#0A2342] text-xl mb-4">¡Ruta completada! </h3><div class="grid grid-cols-3 gap-2"><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statHoras">0</span>h</div></div><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statKm">0</span>km</div></div><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statEntregas">0</span></div></div></div></div>
   </div>
 
   <!-- PERFIL SCREEN -->
@@ -251,7 +252,7 @@
         <div class="bg-white p-2 rounded-[18px] shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100">
            <p class="font-black text-[11px] tracking-widest text-[#0A2342] px-4 pt-3 pb-1 opacity-40 uppercase">Cuenta</p>
            <button onclick="abrirModalPagos('Mensual', 14990)" class="w-full flex justify-between items-center p-4 hover:bg-slate-50 rounded-xl transition-colors">
-              <span class="flex items-center gap-3 text-[#0A2342] font-bold text-[16px]"> <span class="text-[#0A2342]">Mi Plan</span></span>
+              <span class="flex items-center gap-3 text-[#0A2342] font-bold text-[16px]">🔒 <span class="text-[#0A2342]">Mi Plan</span></span>
               <span class="text-gray-400 text-xl font-bold">›</span>
            </button>
            <div class="h-px bg-gray-100 mx-4"></div>
@@ -260,7 +261,7 @@
               <span class="text-gray-400 text-xl font-bold">›</span>
            </button>
         </div>
-        <button id="btnLogoutPerfil" class="w-full bg-[#fff0f0] text-[#d32f2f] font-bold py-4 rounded-[14px] border border-[#ffdddd] hover:bg-[#ffe0e0]"> Cerrar sesión</button>
+        <button id="btnLogoutPerfil" class="w-full bg-[#fff0f0] text-[#d32f2f] font-bold py-4 rounded-[14px] border border-[#ffdddd] hover:bg-[#ffe0e0]">🚪 Cerrar sesión</button>
      </div>
   </div>
 
@@ -285,7 +286,7 @@
       <div class="mt-4 space-y-3">
         <a id="btn-mp-pago" href="#" target="_blank" class="flex items-center gap-4 p-4 rounded-xl border-2 border-[#009EE3] bg-blue-50"><div>💳</div><div class="flex-1"><div class="font-bold">Mercado Pago</div></div></a>
         <div class="p-4 rounded-xl border bg-gray-50">Alias: <span id="modal-alias-texto" class="font-mono font-bold text-blue-600">RUTAFLEX.MP</span> <button onclick="copiarAlias()" class="bg-[#0A2342] text-white text-xs px-3 py-2 rounded-lg ml-2">Copiar</button></div>
-        <a id="btn-wsp-pago" href="#" target="_blank" class="block p-4 rounded-xl bg-green-500 text-white font-bold text-center"> Enviar comprobante</a>
+        <a id="btn-wsp-pago" href="#" target="_blank" class="block p-4 rounded-xl bg-green-500 text-white font-bold text-center">💬 Enviar comprobante</a>
         <button onclick="cerrarModalPagos()" class="w-full p-3 text-gray-500 text-sm">Cerrar</button>
       </div>
     </div>
