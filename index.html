@@ -4,6 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- GOOGLE ANALYTICS 4 -->
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-CVQHE6K2DV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-CVQHE6K2DV');
+
+  // DETECTAR INSTALACIÓN DE PWA
+  window.addEventListener('appinstalled', () => {
+    gtag('event', 'pwa_installed', {
+      'event_category': 'PWA',
+      'event_label': 'RutaFlex Install'
+    });
+    console.log('✅ RutaFlex fue instalada!');
+  });
+</script>
+
 <!-- FAVICON - Múltiples formatos -->
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -172,7 +191,7 @@
             <button id="btnIrPerfil" class="w-full text-left px-5 py-4 text-white hover:bg-[#13315c] flex items-center gap-3 font-semibold">👤 Mi Perfil</button>
             <button onclick="window.open('https://wa.me/5491123793596', '_blank')" class="w-full text-left px-5 py-4 text-white hover:bg-[#13315c] flex items-center gap-3 font-semibold">🎧 Soporte</button>
             <div class="h-px bg-white/10 my-1"></div>
-            <button id="btnLogoutDropdown" class="w-full text-left px-5 py-4 text-red-300 hover:bg-red-500/10 flex items-center gap-3 font-semibold"> Cerrar sesión</button>
+            <button id="btnLogoutDropdown" class="w-full text-left px-5 py-4 text-red-300 hover:bg-red-500/10 flex items-center gap-3 font-semibold">🚪 Cerrar sesión</button>
          </div>
       </div>
       <div class="text-right"><div id="userName" class="text-sm font-bold text-white">¡Hola!</div><div id="contadorDias" class="text-xs font-bold mt-1 px-2 py-0.5 rounded-full inline-block"></div></div>
@@ -184,8 +203,8 @@
     <div class="p-6 bg-white rounded-t-3xl mt-0">
       <div class="text-center mb-6"><span class="inline-block bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full mb-2">✨ 7 DÍAS GRATIS</span><h2 class="font-black text-xl text-[#0A2342]">Activa tu cuenta</h2></div>
       <div class="grid grid-cols-2 gap-3">
-        <button onclick="abrirModalPagos('Semanal', 4990)" class="p-4 rounded-xl text-center font-bold text-white shadow-md" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"><div class="text-2xl"></div><div class="text-xs">SEMANAL</div><div class="text-lg font-black">$4.990</div></button>
-        <button onclick="abrirModalPagos('Mensual', 14990)" class="p-4 rounded-xl text-center font-bold text-white shadow-md relative" style="background: linear-gradient(135deg, #1e40af 0%, #0A2342 100%);"><div class="absolute -top-2 -right-2 bg-yellow-400 text-[#0A2342] text-[10px] font-black px-2 py-1 rounded-full">POPULAR</div><div class="text-2xl"></div><div class="text-xs">MENSUAL</div><div class="text-lg font-black">$14.990</div></button>
+        <button onclick="abrirModalPagos('Semanal', 4990)" class="p-4 rounded-xl text-center font-bold text-white shadow-md" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"><div class="text-2xl">⚡</div><div class="text-xs">SEMANAL</div><div class="text-lg font-black">$4.990</div></button>
+        <button onclick="abrirModalPagos('Mensual', 14990)" class="p-4 rounded-xl text-center font-bold text-white shadow-md relative" style="background: linear-gradient(135deg, #1e40af 0%, #0A2342 100%);"><div class="absolute -top-2 -right-2 bg-yellow-400 text-[#0A2342] text-[10px] font-black px-2 py-1 rounded-full">POPULAR</div><div class="text-2xl">🚀</div><div class="text-xs">MENSUAL</div><div class="text-lg font-black">$14.990</div></button>
       </div>
       <div class="flex gap-2 mt-4"><input id="promo" placeholder="Código promocional" class="flex-1 border border-gray-300 p-2 rounded-xl text-sm font-bold text-[#0A2342]"><button id="btnPromo" class="bg-[#0A2342] text-white px-4 rounded-xl text-sm font-bold">Aplicar</button></div>
       <p id="promoMessage" class="text-xs text-center mt-2 font-bold"></p>
@@ -225,12 +244,12 @@
          </div>
       </div>
       <ul id="lista" class="space-y-2 text-sm"></ul>
-      <div id="placeholderVacio" class="text-center py-8 text-gray-400 hidden"><p> Agregá tus paradas arriba para armar tu ruta</p><span class="text-xs">Ej: Av. Corrientes 1234</span></div>
-      <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg">️ COMENZAR VIAJE</button>
+      <div id="placeholderVacio" class="text-center py-8 text-gray-400 hidden"><p>📍 Agregá tus paradas arriba para armar tu ruta</p><span class="text-xs">Ej: Av. Corrientes 1234</span></div>
+      <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg">🗺️ COMENZAR VIAJE</button>
       <p class="text-center text-xs mt-2 text-gray-500 mb-4">Se abrirá en Google Maps desde tu ubicación GPS</p>
     </div>
 
-    <div id="stats" class="p-6 m-4 rounded-2xl hidden bg-blue-50 border"><h3 class="font-black text-[#0A2342] text-xl mb-4">¡Ruta completada! </h3><div class="grid grid-cols-3 gap-2"><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statHoras">0</span>h</div></div><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statKm">0</span>km</div></div><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statEntregas">0</span></div></div></div></div>
+    <div id="stats" class="p-6 m-4 rounded-2xl hidden bg-blue-50 border"><h3 class="font-black text-[#0A2342] text-xl mb-4">¡Ruta completada! 🏆</h3><div class="grid grid-cols-3 gap-2"><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statHoras">0</span>h</div></div><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statKm">0</span>km</div></div><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statEntregas">0</span></div></div></div></div>
   </div>
 
   <!-- PERFIL SCREEN -->
