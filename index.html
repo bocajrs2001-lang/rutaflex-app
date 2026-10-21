@@ -5,70 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- GOOGLE ANALYTICS 4 -->
-<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-CVQHE6K2DV"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-CVQHE6K2DV');
-
-  // DETECTAR INSTALACIÓN DE PWA
   window.addEventListener('appinstalled', () => {
-    gtag('event', 'pwa_installed', {
-      'event_category': 'PWA',
-      'event_label': 'RutaFlex Install'
-    });
-    console.log('✅ RutaFlex fue instalada!');
+    gtag('event', 'pwa_installed', { 'event_category': 'PWA', 'event_label': 'RutaFlex Install' });
   });
 </script>
 
-<!-- FAVICON - Múltiples formatos -->
+<!-- FAVICON -->
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
 <!-- SEO -->
 <meta name="google-site-verification" content="uzyX6zsqHquA4NB7C3qKIhV-1NMKW6EV2nanwHVo_wU" />
 <title>RutaFlex - El camino inteligente</title>
-<meta name="description" content="RutaFlex es la plataforma para optimizar rutas, gestionar envíos y logística de tu empresa de forma simple y rápida." />
-<meta name="keywords" content="RutaFlex, logistica, rutas, envios, gestion, entregas, delivery, optimización" />
+<meta name="description" content="RutaFlex optimiza tus rutas de entrega. Del más cercano al más lejano. Ahorra nafta y tiempo." />
+<meta name="keywords" content="RutaFlex, logistica, rutas, envios, gestion, entregas, delivery" />
 <meta name="author" content="RutaFlex" />
-<meta name="robots" content="index, follow" />
-
-<!-- OPEN GRAPH -->
 <meta property="og:site_name" content="RutaFlex" />
 <meta property="og:title" content="RutaFlex - El camino inteligente" />
-<meta property="og:description" content="Optimiza tus rutas de entrega. Del más cercano al más lejano. Ahorra nafta y tiempo." />
+<meta property="og:description" content="Optimiza tus rutas de entrega. Del más cercano al más lejano." />
 <meta property="og:url" content="https://rutaflex-app.onrender.com/" />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="https://rutaflex-app.onrender.com/android-chrome-512x512.png" />
-<meta property="og:image:width" content="512" />
-<meta property="og:image:height" content="512" />
-<meta property="og:locale" content="es_AR" />
-
 <link rel="canonical" href="https://rutaflex-app.onrender.com/" />
-
-<!-- JSON-LD -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "RutaFlex",
-  "alternateName": "RutaFlex - El camino inteligente",
-  "url": "https://rutaflex-app.onrender.com/",
-  "description": "Optimiza tu ruta de entrega. Del más cercano al más lejano. Ahorra nafta y tiempo.",
-  "applicationCategory": "BusinessApplication",
-  "operatingSystem": "Web, Android, iOS",
-  "offers": { "@type": "Offer", "price": "4990", "priceCurrency": "ARS" },
-  "publisher": { "@type": "Organization", "name": "RutaFlex", "email": "rutaflex6@gmail.com" },
-  "logo": { "@type": "ImageObject", "url": "https://rutaflex-app.onrender.com/android-chrome-512x512.png", "width": 512, "height": 512 }
-}
-</script>
 
 <!-- PWA -->
 <link rel="manifest" href="/site.webmanifest">
@@ -89,11 +55,7 @@
      <div class="mb-10 w-full max-w-sm mx-auto text-center">
         <div class="flex items-center justify-center mb-6 mx-auto w-36 h-36 rounded-full bg-[#0d2b5e] p-2 shadow-2xl">
            <div class="w-full h-full rounded-full bg-[#5BA9E0] flex items-center justify-center">
-              <svg width="80" height="80" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                 <path d="M 70 30 L 40 30 C 25 30 25 50 40 50 L 60 50 C 75 50 75 70 60 70 L 30 70" fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-                 <circle cx="70" cy="30" r="6" fill="white"/>
-                 <circle cx="30" cy="70" r="6" fill="white"/>
-              </svg>
+              <svg width="80" height="80" viewBox="0 0 100 100"><path d="M 70 30 L 40 30 C 25 30 25 50 40 50 L 60 50 C 75 50 75 70 60 70 L 30 70" fill="none" stroke="white" stroke-width="6" stroke-linecap="round"/><circle cx="70" cy="30" r="6" fill="white"/><circle cx="30" cy="70" r="6" fill="white"/></svg>
            </div>
         </div>
         <h1 class="text-5xl font-black text-[#5BA9E0] tracking-wider mb-2">RUTAFLEX</h1>
@@ -130,14 +92,7 @@
 
   <!-- RECOVER STEPS -->
   <div id="recoverStep1" class="hidden min-h-screen flex flex-col justify-center items-center p-6 bg-gradient-to-br from-[#0A2342] to-[#1e3a8a]">
-     <div class="mb-8 text-center">
-        <div class="flex items-center justify-center mx-auto w-24 h-24 rounded-full bg-[#0d2b5e] p-1.5 mb-4">
-           <div class="w-full h-full rounded-full bg-[#5BA9E0] flex items-center justify-center">
-              <svg width="50" height="50" viewBox="0 0 100 100"><path d="M 70 30 L 40 30 C 25 30 25 50 40 50 L 60 50 C 75 50 75 70 60 70 L 30 70" fill="none" stroke="white" stroke-width="6" stroke-linecap="round"/><circle cx="70" cy="30" r="6" fill="white"/><circle cx="30" cy="70" r="6" fill="white"/></svg>
-           </div>
-        </div>
-        <h1 class="text-4xl font-black text-[#5BA9E0]">RUTAFLEX</h1><p class="text-white/60">Recuperar cuenta</p>
-     </div>
+     <div class="mb-8 text-center"><h1 class="text-4xl font-black text-[#5BA9E0]">RUTAFLEX</h1><p class="text-white/60">Recuperar cuenta</p></div>
      <form id="formRecoverEmail" class="w-full max-w-sm space-y-4">
         <input type="email" id="recoverEmailInput" placeholder="tu@email.com" class="w-full bg-white/10 border border-white/20 text-white px-4 py-3 rounded-xl" required>
         <button type="submit" class="w-full bg-[#5BA9E0] text-[#0A2342] font-black py-3.5 rounded-xl">ENVIAR CÓDIGO</button>
@@ -145,14 +100,7 @@
      </form>
   </div>
   <div id="recoverStep2" class="hidden min-h-screen flex flex-col justify-center items-center p-6 bg-gradient-to-br from-[#0A2342] to-[#1e3a8a]">
-     <div class="mb-8 text-center">
-        <div class="flex items-center justify-center mx-auto w-24 h-24 rounded-full bg-[#0d2b5e] p-1.5 mb-4">
-           <div class="w-full h-full rounded-full bg-[#5BA9E0] flex items-center justify-center">
-              <svg width="50" height="50" viewBox="0 0 100 100"><path d="M 70 30 L 40 30 C 25 30 25 50 40 50 L 60 50 C 75 50 75 70 60 70 L 30 70" fill="none" stroke="white" stroke-width="6" stroke-linecap="round"/><circle cx="70" cy="30" r="6" fill="white"/><circle cx="30" cy="70" r="6" fill="white"/></svg>
-           </div>
-        </div>
-        <h1 class="text-4xl font-black text-[#5BA9E0]">RUTAFLEX</h1><p class="text-white/60">Verificar identidad</p>
-     </div>
+     <div class="mb-8 text-center"><h1 class="text-4xl font-black text-[#5BA9E0]">RUTAFLEX</h1><p class="text-white/60">Verificar identidad</p></div>
      <form id="formRecoverCode" class="w-full max-w-sm space-y-4">
         <input type="text" id="recoverCodeInput" placeholder="123456" maxlength="6" class="w-full bg-white/10 border text-white px-4 py-3 rounded-xl text-center text-2xl" required>
         <button type="submit" class="w-full bg-[#10b981] text-white font-black py-3.5 rounded-xl">VERIFICAR</button>
@@ -160,14 +108,7 @@
      </form>
   </div>
   <div id="recoverStep3" class="hidden min-h-screen flex flex-col justify-center items-center p-6 bg-gradient-to-br from-[#0A2342] to-[#1e3a8a]">
-     <div class="mb-8 text-center">
-        <div class="flex items-center justify-center mx-auto w-24 h-24 rounded-full bg-[#0d2b5e] p-1.5 mb-4">
-           <div class="w-full h-full rounded-full bg-[#5BA9E0] flex items-center justify-center">
-              <svg width="50" height="50" viewBox="0 0 100 100"><path d="M 70 30 L 40 30 C 25 30 25 50 40 50 L 60 50 C 75 50 75 70 60 70 L 30 70" fill="none" stroke="white" stroke-width="6" stroke-linecap="round"/><circle cx="70" cy="30" r="6" fill="white"/><circle cx="30" cy="70" r="6" fill="white"/></svg>
-           </div>
-        </div>
-        <h1 class="text-4xl font-black text-[#5BA9E0]">RUTAFLEX</h1><p class="text-white/60">Nueva contraseña</p>
-     </div>
+     <div class="mb-8 text-center"><h1 class="text-4xl font-black text-[#5BA9E0]">RUTAFLEX</h1><p class="text-white/60">Nueva contraseña</p></div>
      <form id="formNewPassword" class="w-full max-w-sm space-y-4">
         <div class="password-wrapper">
            <input type="password" id="newPasswordInput" placeholder="Nueva contraseña" class="w-full bg-white/10 border text-white px-4 py-3 pr-12 rounded-xl" required>
@@ -215,21 +156,17 @@
       <h3 class="font-bold text-[#0A2342] mt-2 mb-3">Agregar destinos con IA</h3>
       <div class="grid grid-cols-2 gap-3">
         <label class="bg-white border-2 border-dashed border-slate-300 p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] cursor-pointer hover:border-[#5BA9E0] hover:bg-blue-50">
-           <div class="text-3xl mb-1">🖼️</div>
-           <div class="font-bold text-[#5BA9E0] text-[14px]">Imagen / Foto</div>
+           <div class="text-3xl mb-1">🖼️</div><div class="font-bold text-[#5BA9E0] text-[14px]">Imagen / Foto</div>
            <input type="file" id="fileImg" accept="image/*" hidden>
         </label>
         <div class="bg-[#eef2f7] border-2 border-dashed border-slate-300 p-5 rounded-xl text-center opacity-60 flex flex-col items-center justify-center min-h-[95px]">
-           <div class="text-3xl mb-1">📄</div>
-           <div class="font-bold text-[#8da0b8] text-[13px]">PDF (Próximamente)</div>
+           <div class="text-3xl mb-1">📄</div><div class="font-bold text-[#8da0b8] text-[13px]">PDF (Próximamente)</div>
         </div>
         <button onclick="abrirCamara()" class="bg-white border-2 border-dashed border-slate-300 p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] w-full hover:border-[#5BA9E0] hover:bg-blue-50">
-           <div class="text-3xl mb-1">📸</div>
-           <div class="font-bold text-[#5BA9E0] text-[14px]">Cámara</div>
+           <div class="text-3xl mb-1">📸</div><div class="font-bold text-[#5BA9E0] text-[14px]">Cámara</div>
         </button>
         <button onclick="alert('QR Scanner en desarrollo')" class="bg-white border-2 border-dashed border-slate-300 p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] w-full hover:border-[#5BA9E0] hover:bg-blue-50">
-           <div class="text-3xl mb-1">🔳</div>
-           <div class="font-bold text-[#5BA9E0] text-[14px]">Escanear QR</div>
+           <div class="text-3xl mb-1">🔳</div><div class="font-bold text-[#5BA9E0] text-[14px]">Escanear QR</div>
         </button>
       </div>
       <video id="camara" autoplay class="hidden w-full mt-3 rounded-xl border-2 border-[#5BA4D9]"></video>
@@ -246,7 +183,7 @@
       <ul id="lista" class="space-y-2 text-sm"></ul>
       <div id="placeholderVacio" class="text-center py-8 text-gray-400 hidden"><p>📍 Agregá tus paradas arriba para armar tu ruta</p><span class="text-xs">Ej: Av. Corrientes 1234</span></div>
       <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg">🗺️ COMENZAR VIAJE</button>
-      <p class="text-center text-xs mt-2 text-gray-500 mb-4">Se abrirá en Google Maps desde tu ubicación GPS</p>
+      <p class="text-center text-xs mt-2 text-gray-500 mb-4">Se abrirá en Google Maps desde tu ubicación GPS actual</p>
     </div>
 
     <div id="stats" class="p-6 m-4 rounded-2xl hidden bg-blue-50 border"><h3 class="font-black text-[#0A2342] text-xl mb-4">¡Ruta completada! 🏆</h3><div class="grid grid-cols-3 gap-2"><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statHoras">0</span>h</div></div><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statKm">0</span>km</div></div><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statEntregas">0</span></div></div></div></div>
