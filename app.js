@@ -1,7 +1,7 @@
 const CONFIG_RUTAFLEX = { whatsapp:"5491123793596", alias:"RUTAFLEX.MP", linkSemanal:"https://mpago.la/2DjaHdB", linkMensual:"https://mpago.la/2aNpJ1B" };
 let destinos=[], destinosDetectados=[], emailRecuperacion="", estaVencido=false;
 
-window.togglePass=(id,icon)=>{const i=document.getElementById(id);if(!i)return;i.type=i.type==="password"?"text":"password";icon.innerText=i.type==="text"?"🙈":"️"};
+window.togglePass=(id,icon)=>{const i=document.getElementById(id);if(!i)return;i.type=i.type==="password"?"text":"password";icon.innerText=i.type==="text"?"🙈":"👁️"};
 function mostrarNotificacion(m,t='info'){const c=document.getElementById('notificaciones');if(!c)return;const n=document.createElement('div');n.className=`${t==='exito'?'bg-green-600':t==='error'?'bg-red-600':'bg-[#0A2342]'} text-white px-6 py-3 rounded-xl font-bold text-sm text-center shadow-xl`;n.innerText=m;c.appendChild(n);setTimeout(()=>n.remove(),3500)}
 function ocultarTodasLasPantallasExcepto(id){['authScreen','recoverStep1','recoverStep2','recoverStep3','appScreen','perfilScreen','payment-modal'].forEach(s=>document.getElementById(s)?.classList.add('hidden'));document.getElementById(id)?.classList.remove('hidden')}
 
@@ -100,40 +100,11 @@ document.getElementById('btnGuardarEdicion')?.addEventListener('click',async()=>
   const titulos=document.querySelectorAll('.input-titulo'); const dirs=document.querySelectorAll('.input-direccion'); let finales=[];
   for(let i=0;i<dirs.length;i++){let t=titulos[i]?.value.trim()||""; let d=dirs[i]?.value.trim()||""; if(d.length>3) finales.push(t?`${t} - ${d}`:d);}
   if(finales.length===0)return mostrarNotificacion("Ingresá al menos una","error");
-  const btn=document.getElementById('btnGuardarEdicion');btn.innerText=" Guardando...";btn.disabled=true;
+  const btn=document.getElementById('btnGuardarEdicion');btn.innerText="💾 Guardando...";btn.disabled=true;
   try{for(const direccion of finales){await fetch('/api/destinos',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({direccion})})}mostrarNotificacion(`✅ ${finales.length} guardadas`,"exito");document.getElementById('modalEdicion').classList.add('hidden');await cargarDestinos();}catch{mostrarNotificacion("❌ Error al guardar","error")}finally{btn.innerText="✅ Guardar Todo";btn.disabled=false}
 });
 document.getElementById('btnCancelarEdicion')?.addEventListener('click',()=>{document.getElementById('modalEdicion').classList.add('hidden');destinosDetectados=[]});
 document.getElementById('btnCerrarModal')?.addEventListener('click',()=>{document.getElementById('modalEdicion').classList.add('hidden')});
-
-// ✅ BOTÓN BORRAR TODO
-document.getElementById('btnBorrarTodo')?.addEventListener('click', async () => {
-  if(destinos.length === 0) return;
-  if(!confirm(`¿Eliminar TODAS las ${destinos.length} direcciones? Esta acción no se puede deshacer.`)) return;
-  
-  const btn = document.getElementById('btnBorrarTodo');
-  const textoOriginal = btn.innerText;
-  btn.innerText = "🗑️ Borrando...";
-  btn.disabled = true;
-  
-  try {
-    const r = await fetch('/api/destinos', { method: 'DELETE', credentials: 'include' });
-    const data = await r.json();
-    if (r.ok || data.ok) {
-      mostrarNotificacion(`✅ ${destinos.length} direcciones eliminadas`, "exito");
-      destinos = [];
-      renderLista();
-    } else {
-      throw new Error(data.error || 'Error al borrar');
-    }
-  } catch (error) {
-    console.error('Error borrando todos:', error);
-    mostrarNotificacion("❌ Error al borrar todo", "error");
-  } finally {
-    btn.innerText = textoOriginal;
-    btn.disabled = false;
-  }
-});
 
 function renderLista(){
   const l=document.getElementById('lista'),ph=document.getElementById('placeholderVacio'),btnBorrar=document.getElementById('btnBorrarTodo');
@@ -153,15 +124,12 @@ function renderLista(){
     const partes = full.split(' - '); 
     const titulo = partes.length>1? partes[0] : ''; 
     const dir = partes.length>1? partes.slice(1).join(' - ') : full;
-    const distancia = (i + 1) * 1.5;
-    const tiempo = Math.round(distancia * 2.5);
-
+    
     l.innerHTML+=`<li class="bg-white border border-gray-200 border-l-[5px] border-l-[#0A2342] rounded-2xl p-4 flex gap-3 items-center shadow-sm mb-3">
       <span class="bg-[#0A2342] text-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-black flex-shrink-0">${i+1}</span>
       <div class="flex-1 min-w-0">
         <b class="block truncate text-[#0A2342] text-[14px]">${titulo || dir}</b>
         ${titulo?`<span class="block truncate text-gray-500 text-xs mb-1">${dir}</span>`:''}
-        <span class="text-xs text-green-700 font-bold bg-green-100 px-2 py-0.5 rounded-full inline-block">${distancia.toFixed(1)} km • ~${tiempo} min</span>
       </div>
       <button onclick="borrarDestino('${d._id}')" class="text-gray-300 hover:text-red-500 p-2 text-xl">✕</button>
     </li>`;
@@ -172,6 +140,25 @@ function renderLista(){
 
 window.borrarDestino=async(id)=>{if(!confirm('¿Eliminar?'))return;await fetch(`/api/destinos/${id}`,{method:'DELETE',credentials:'include'});await cargarDestinos()};
 
+document.getElementById('btnBorrarTodo')?.addEventListener('click', async () => {
+  if(destinos.length === 0) return;
+  if(!confirm(`¿Eliminar TODAS las ${destinos.length} direcciones? Esta acción no se puede deshacer.`)) return;
+  const btn = document.getElementById('btnBorrarTodo');
+  btn.innerText = "🗑️ Borrando..."; btn.disabled = true;
+  try {
+    const r = await fetch('/api/destinos', { method: 'DELETE', credentials: 'include' });
+    if (r.ok) {
+      mostrarNotificacion(`✅ ${destinos.length} direcciones eliminadas`, "exito");
+      destinos = [];
+      renderLista();
+    }
+  } catch (error) {
+    mostrarNotificacion("❌ Error al borrar todo", "error");
+  } finally {
+    btn.innerText = "🗑️ Borrar todo"; btn.disabled = false;
+  }
+});
+
 document.getElementById('btnCargar')?.addEventListener('click',()=>{
   destinosDetectados = [""];
   mostrarModalEdicion();
@@ -179,58 +166,58 @@ document.getElementById('btnCargar')?.addEventListener('click',()=>{
 });
 document.getElementById('btnAgregarLinea')?.addEventListener('click',()=>{destinosDetectados.push(""); mostrarModalEdicion();});
 
-// BOTÓN VIAJE CON GPS
+// ✅ RUTA OPTIMIZADA DESDE TU UBICACIÓN GPS ACTUAL
 document.getElementById('btnViaje')?.addEventListener('click', async () => {
   if(destinos.length === 0) return;
-  mostrarNotificacion("📍 Obteniendo tu ubicación...", "info");
+  mostrarNotificacion("📍 Obteniendo tu ubicación GPS...", "info");
+  
   if (!navigator.geolocation) {
-    mostrarNotificacion("⚠️ Tu navegador no soporta geolocalización", "error");
-    return;
+    return mostrarNotificacion("⚠️ Tu navegador no soporta geolocalización", "error");
   }
+  
   try {
     const position = await new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
     });
-    const lat = position.coords.latitude;
-    const lng = position.coords.longitude;
-    const origen = `${lat},${lng}`;
+    
+    const origin = `${position.coords.latitude},${position.coords.longitude}`;
     const dirs = destinos.map(d => {
       const full = d.direccion || d.dirección || '';
       const partes = full.split(' - ');
       return encodeURIComponent(partes.length > 1 ? partes.slice(1).join(' - ') : full);
     });
-    const lote1 = dirs.slice(0, 9);
-    const base = "https://www.google.com/maps/dir/?api=1";
-    if(lote1.length > 0) {
-      const url = `${base}&origin=${origen}&destination=${lote1[lote1.length-1]}&waypoints=${lote1.slice(0, -1).join('|')}&travelmode=driving`;
+
+    // Google Maps permite hasta 10 paradas (1 origen + 8 waypoints + 1 destino)
+    // Usamos optimize:true para que Google ordene de la más cercana a la más lejana desde tu ubicación
+    const CHUNK_SIZE = 8; 
+    
+    for (let i = 0; i < dirs.length; i += CHUNK_SIZE) {
+      const chunk = dirs.slice(i, i + CHUNK_SIZE + 1);
+      if (chunk.length === 0) break;
+      
+      const waypoints = chunk.slice(0, -1);
+      const destination = chunk[chunk.length - 1];
+      
+      let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=driving`;
+      if (waypoints.length > 0) {
+        url += `&waypoints=optimize:true|${waypoints.join('|')}`;
+      }
+      
       window.open(url, '_blank');
-      mostrarNotificacion(`🚀 Ruta desde tu ubicación (${destinos.length} paradas)`, "exito");
-      document.getElementById('stats')?.classList.remove('hidden');
-      document.getElementById('statEntregas').innerText = destinos.length;
+      mostrarNotificacion(`🚀 Ruta optimizada desde tu ubicación (${Math.min(i + CHUNK_SIZE + 1, dirs.length)} paradas)`, "exito");
+      
+      if (i + CHUNK_SIZE < dirs.length) {
+        await new Promise(r => setTimeout(r, 1500));
+        if(!confirm(`Tenés ${dirs.length} paradas en total. ¿Abrir el siguiente tramo?`)) break;
+      }
     }
-    if(dirs.length > 9) {
-      setTimeout(() => {
-        if(confirm(`Tenés ${dirs.length} paradas. ¿Abrir tramo 10-${dirs.length}?`)) {
-          const lote2 = dirs.slice(9, 18);
-          const url2 = `${base}&origin=${lote1[lote1.length-1]}&destination=${lote2[lote2.length-1]}&waypoints=${lote2.slice(0, -1).join('|')}&travelmode=driving`;
-          window.open(url2, '_blank');
-        }
-      }, 800);
-    }
+    
+    document.getElementById('stats')?.classList.remove('hidden');
+    document.getElementById('statEntregas').innerText = destinos.length;
+    
   } catch (error) {
     console.error('Error GPS:', error);
-    mostrarNotificacion("️ No se pudo obtener tu ubicación. Usando primera dirección como origen.", "advertencia");
-    const primeraDir = destinos[0].direccion || destinos[0].dirección || '';
-    const partes = primeraDir.split(' - ');
-    const origen = encodeURIComponent(partes.length > 1 ? partes.slice(1).join(' - ') : primeraDir);
-    const dirs = destinos.slice(1).map(d => {
-      const full = d.direccion || d.dirección || '';
-      const p = full.split(' - ');
-      return encodeURIComponent(p.length > 1 ? p.slice(1).join(' - ') : full);
-    });
-    const base = "https://www.google.com/maps/dir/?api=1";
-    const url = `${base}&origin=${origen}&destination=${dirs[dirs.length-1]}&waypoints=${dirs.slice(0, -1).join('|')}&travelmode=driving`;
-    window.open(url, '_blank');
+    mostrarNotificacion("⚠️ No se pudo obtener tu ubicación. Permití el acceso al GPS.", "error");
   }
 });
 
