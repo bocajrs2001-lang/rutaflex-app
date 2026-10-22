@@ -38,7 +38,7 @@
 
 <!-- PWA -->
 <link rel="manifest" href="/site.webmanifest">
-<meta name="theme-color" content="#0A2342">
+<meta name="theme-color" content="#0A1220">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="RutaFlex">
@@ -51,37 +51,37 @@
 <div class="app-container">
   
   <!-- AUTH SCREEN -->
-  <div id="authScreen" class="min-h-screen flex flex-col justify-center items-center p-6 bg-gradient-to-br from-[#0A2342] to-[#1e3a8a]">
+  <div id="authScreen" class="min-h-screen flex flex-col justify-center items-center p-6 bg-gradient-to-br from-[#0A1220] to-[#121E32]">
      <div class="mb-10 w-full max-w-sm mx-auto text-center">
         <div class="flex items-center justify-center mb-6 mx-auto w-36 h-36 rounded-full bg-[#0d2b5e] p-2 shadow-2xl">
-           <div class="w-full h-full rounded-full bg-[#5BA9E0] flex items-center justify-center">
+           <div class="w-full h-full rounded-full bg-[#4A9FE3] flex items-center justify-center">
               <svg width="80" height="80" viewBox="0 0 100 100"><path d="M 70 30 L 40 30 C 25 30 25 50 40 50 L 60 50 C 75 50 75 70 60 70 L 30 70" fill="none" stroke="white" stroke-width="6" stroke-linecap="round"/><circle cx="70" cy="30" r="6" fill="white"/><circle cx="30" cy="70" r="6" fill="white"/></svg>
            </div>
         </div>
-        <h1 class="text-5xl font-black text-[#5BA9E0] tracking-wider mb-2">RUTAFLEX</h1>
+        <h1 class="text-5xl font-black text-[#4A9FE3] tracking-wider mb-2">RUTAFLEX</h1>
         <p class="text-white text-lg font-light opacity-90">El camino inteligente</p>
      </div>
      
      <div class="flex w-full max-w-sm mb-6 bg-white/10 rounded-2xl p-1 backdrop-blur-sm">
-        <button id="tabLogin" class="flex-1 py-3 px-4 rounded-xl font-bold text-[#5BA9E0] bg-white/20 transition-all">Iniciar Sesión</button>
+        <button id="tabLogin" class="flex-1 py-3 px-4 rounded-xl font-bold text-[#4A9FE3] bg-white/20 transition-all">Iniciar Sesión</button>
         <button id="tabRegistro" class="flex-1 py-3 px-4 rounded-xl font-bold text-white/60 hover:text-white transition-all">Crear Cuenta</button>
      </div>
 
      <form id="formLogin" class="space-y-4 w-full max-w-sm">
-        <input type="email" id="loginEmail" placeholder="Email" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-[#5BA9E0]" required>
+        <input type="email" id="loginEmail" placeholder="Email" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-[#4A9FE3]" required>
         <div class="password-wrapper">
-           <input type="password" id="loginPassword" placeholder="Contraseña" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 pr-12 rounded-xl focus:outline-none focus:border-[#5BA9E0]" required>
+           <input type="password" id="loginPassword" placeholder="Contraseña" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 pr-12 rounded-xl focus:outline-none focus:border-[#4A9FE3]" required>
            <span class="toggle-password" onclick="togglePass('loginPassword', this)">👁️</span>
         </div>
-        <button type="submit" class="w-full bg-[#5BA9E0] text-[#0A2342] font-black py-3.5 rounded-xl hover:bg-[#7bc8ff] transition-all shadow-lg">ENTRAR</button>
+        <button type="submit" class="w-full bg-[#4A9FE3] text-[#0A1220] font-black py-3.5 rounded-xl hover:bg-[#00E5FF] transition-all shadow-lg">ENTRAR</button>
         <button type="button" id="btnOlvideContrasena" class="w-full text-white/60 text-sm hover:text-white underline mt-2">¿Olvidaste tu contraseña?</button>
      </form>
 
      <form id="formRegistro" class="space-y-4 w-full max-w-sm hidden">
-        <input type="text" id="regNombre" placeholder="Nombre completo" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-[#5BA9E0]" required>
-        <input type="email" id="regEmail" placeholder="Email" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-[#5BA9E0]" required>
+        <input type="text" id="regNombre" placeholder="Nombre completo" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-[#4A9FE3]" required>
+        <input type="email" id="regEmail" placeholder="Email" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 rounded-xl focus:outline-none focus:border-[#4A9FE3]" required>
         <div class="password-wrapper">
-           <input type="password" id="regPassword" placeholder="Contraseña" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 pr-12 rounded-xl focus:outline-none focus:border-[#5BA9E0]" required>
+           <input type="password" id="regPassword" placeholder="Contraseña" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 py-3 pr-12 rounded-xl focus:outline-none focus:border-[#4A9FE3]" required>
            <span class="toggle-password" onclick="togglePass('regPassword', this)">👁️</span>
         </div>
         <p class="text-xs text-white/50 mt-1 text-left">Mín. 8 car., 1 Mayús, 1 Núm, 1 Símbolo (!@#$)</p>
@@ -91,24 +91,24 @@
   </div>
 
   <!-- RECOVER STEPS -->
-  <div id="recoverStep1" class="hidden min-h-screen flex flex-col justify-center items-center p-6 bg-gradient-to-br from-[#0A2342] to-[#1e3a8a]">
-     <div class="mb-8 text-center"><h1 class="text-4xl font-black text-[#5BA9E0]">RUTAFLEX</h1><p class="text-white/60">Recuperar cuenta</p></div>
+  <div id="recoverStep1" class="hidden min-h-screen flex flex-col justify-center items-center p-6 bg-gradient-to-br from-[#0A1220] to-[#121E32]">
+     <div class="mb-8 text-center"><h1 class="text-4xl font-black text-[#4A9FE3]">RUTAFLEX</h1><p class="text-white/60">Recuperar cuenta</p></div>
      <form id="formRecoverEmail" class="w-full max-w-sm space-y-4">
         <input type="email" id="recoverEmailInput" placeholder="tu@email.com" class="w-full bg-white/10 border border-white/20 text-white px-4 py-3 rounded-xl" required>
-        <button type="submit" class="w-full bg-[#5BA9E0] text-[#0A2342] font-black py-3.5 rounded-xl">ENVIAR CÓDIGO</button>
+        <button type="submit" class="w-full bg-[#4A9FE3] text-[#0A1220] font-black py-3.5 rounded-xl">ENVIAR CÓDIGO</button>
         <button type="button" id="btnVolverLogin1" class="w-full text-white/60 underline">Volver</button>
      </form>
   </div>
-  <div id="recoverStep2" class="hidden min-h-screen flex flex-col justify-center items-center p-6 bg-gradient-to-br from-[#0A2342] to-[#1e3a8a]">
-     <div class="mb-8 text-center"><h1 class="text-4xl font-black text-[#5BA9E0]">RUTAFLEX</h1><p class="text-white/60">Verificar identidad</p></div>
+  <div id="recoverStep2" class="hidden min-h-screen flex flex-col justify-center items-center p-6 bg-gradient-to-br from-[#0A1220] to-[#121E32]">
+     <div class="mb-8 text-center"><h1 class="text-4xl font-black text-[#4A9FE3]">RUTAFLEX</h1><p class="text-white/60">Verificar identidad</p></div>
      <form id="formRecoverCode" class="w-full max-w-sm space-y-4">
         <input type="text" id="recoverCodeInput" placeholder="123456" maxlength="6" class="w-full bg-white/10 border text-white px-4 py-3 rounded-xl text-center text-2xl" required>
         <button type="submit" class="w-full bg-[#10b981] text-white font-black py-3.5 rounded-xl">VERIFICAR</button>
-        <button type="button" id="btnReenviarCodigo" class="w-full text-[#5BA9E0] underline">Reenviar</button>
+        <button type="button" id="btnReenviarCodigo" class="w-full text-[#4A9FE3] underline">Reenviar</button>
      </form>
   </div>
-  <div id="recoverStep3" class="hidden min-h-screen flex flex-col justify-center items-center p-6 bg-gradient-to-br from-[#0A2342] to-[#1e3a8a]">
-     <div class="mb-8 text-center"><h1 class="text-4xl font-black text-[#5BA9E0]">RUTAFLEX</h1><p class="text-white/60">Nueva contraseña</p></div>
+  <div id="recoverStep3" class="hidden min-h-screen flex flex-col justify-center items-center p-6 bg-gradient-to-br from-[#0A1220] to-[#121E32]">
+     <div class="mb-8 text-center"><h1 class="text-4xl font-black text-[#4A9FE3]">RUTAFLEX</h1><p class="text-white/60">Nueva contraseña</p></div>
      <form id="formNewPassword" class="w-full max-w-sm space-y-4">
         <div class="password-wrapper">
            <input type="password" id="newPasswordInput" placeholder="Nueva contraseña" class="w-full bg-white/10 border text-white px-4 py-3 pr-12 rounded-xl" required>
@@ -120,17 +120,17 @@
 
   <!-- APP SCREEN -->
   <div id="appScreen" class="hidden">
-    <header class="p-4 flex justify-between items-center relative bg-gradient-to-br from-[#0A2342] to-[#1e3a8a]">
+    <header class="p-4 flex justify-between items-center relative bg-gradient-to-br from-[#0A1220] to-[#121E32]">
       <div class="flex items-center gap-2 relative">
          <div id="logoMenuBtn" class="w-11 h-11 rounded-full bg-[#0d2b5e] p-0.5 cursor-pointer hover:opacity-80 ring-2 ring-white/20">
-            <div class="w-full h-full rounded-full bg-[#5BA9E0] flex items-center justify-center">
+            <div class="w-full h-full rounded-full bg-[#4A9FE3] flex items-center justify-center">
                <svg width="28" height="28" viewBox="0 0 100 100"><path d="M 70 30 L 40 30 C 25 30 25 50 40 50 L 60 50 C 75 50 75 70 60 70 L 30 70" fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/><circle cx="70" cy="30" r="7" fill="white"/><circle cx="30" cy="70" r="7" fill="white"/></svg>
             </div>
          </div>
-         <h1 class="text-xl font-black text-[#5BA9E0]">RUTAFLEX</h1>
-         <div id="logoDropdown" class="hidden absolute top-12 left-0 w-60 bg-[#0B2545] rounded-2xl shadow-2xl z-50 flex-col overflow-hidden border border-white/10">
-            <button id="btnIrPerfil" class="w-full text-left px-5 py-4 text-white hover:bg-[#13315c] flex items-center gap-3 font-semibold">👤 Mi Perfil</button>
-            <button onclick="window.open('https://wa.me/5491123793596', '_blank')" class="w-full text-left px-5 py-4 text-white hover:bg-[#13315c] flex items-center gap-3 font-semibold">🎧 Soporte</button>
+         <h1 class="text-xl font-black text-[#4A9FE3]">RUTAFLEX</h1>
+         <div id="logoDropdown" class="hidden absolute top-12 left-0 w-60 bg-[#121E32] rounded-2xl shadow-2xl z-50 flex-col overflow-hidden border border-white/10">
+            <button id="btnIrPerfil" class="w-full text-left px-5 py-4 text-white hover:bg-[#1E324F] flex items-center gap-3 font-semibold">👤 Mi Perfil</button>
+            <button onclick="window.open('https://wa.me/5491123793596', '_blank')" class="w-full text-left px-5 py-4 text-white hover:bg-[#1E324F] flex items-center gap-3 font-semibold">🎧 Soporte</button>
             <div class="h-px bg-white/10 my-1"></div>
             <button id="btnLogoutDropdown" class="w-full text-left px-5 py-4 text-red-300 hover:bg-red-500/10 flex items-center gap-3 font-semibold">🚪 Cerrar sesión</button>
          </div>
@@ -138,112 +138,172 @@
       <div class="text-right"><div id="userName" class="text-sm font-bold text-white">¡Hola!</div><div id="contadorDias" class="text-xs font-bold mt-1 px-2 py-0.5 rounded-full inline-block"></div></div>
     </header>
 
-    <div id="alertaProximoVencimiento" class="hidden bg-yellow-500 text-[#0A2342] p-3 text-center font-bold animate-pulse mx-4 rounded-b-xl">⚠️ ¡TU PLAN VENCE MAÑANA! Renová ahora.</div>
+    <div id="alertaProximoVencimiento" class="hidden bg-yellow-500 text-[#0A1220] p-3 text-center font-bold animate-pulse mx-4 rounded-b-xl">⚠️ ¡TU PLAN VENCE MAÑANA! Renová ahora.</div>
     <div id="bannerVencido" class="hidden bg-red-600 text-white p-4 text-center font-bold animate-pulse mx-4 rounded-b-xl">🔒 TU PLAN ESTÁ VENCIDO. RENOVÁ PARA USAR EL SERVICIO.</div>
 
-    <div class="p-6 bg-white rounded-t-3xl mt-0">
-      <div class="text-center mb-6"><span class="inline-block bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full mb-2">✨ 7 DÍAS GRATIS</span><h2 class="font-black text-xl text-[#0A2342]">Activa tu cuenta</h2></div>
+    <div class="p-6 bg-[#121E32] rounded-t-3xl mt-0">
+      <div class="text-center mb-6"><span class="inline-block bg-[#00E5FF]/20 text-[#00E5FF] text-xs font-bold px-3 py-1 rounded-full mb-2">✨ 7 DÍAS GRATIS</span><h2 class="font-black text-xl text-white">Activa tu cuenta</h2></div>
       <div class="grid grid-cols-2 gap-3">
         <button onclick="abrirModalPagos('Semanal', 4990)" class="p-4 rounded-xl text-center font-bold text-white shadow-md" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"><div class="text-2xl">⚡</div><div class="text-xs">SEMANAL</div><div class="text-lg font-black">$4.990</div></button>
-        <button onclick="abrirModalPagos('Mensual', 14990)" class="p-4 rounded-xl text-center font-bold text-white shadow-md relative" style="background: linear-gradient(135deg, #1e40af 0%, #0A2342 100%);"><div class="absolute -top-2 -right-2 bg-yellow-400 text-[#0A2342] text-[10px] font-black px-2 py-1 rounded-full">POPULAR</div><div class="text-2xl">🚀</div><div class="text-xs">MENSUAL</div><div class="text-lg font-black">$14.990</div></button>
+        <button onclick="abrirModalPagos('Mensual', 14990)" class="p-4 rounded-xl text-center font-bold text-white shadow-md relative" style="background: linear-gradient(135deg, #1e40af 0%, #0A1220 100%);"><div class="absolute -top-2 -right-2 bg-[#00E5FF] text-[#0A1220] text-[10px] font-black px-2 py-1 rounded-full">POPULAR</div><div class="text-2xl">🚀</div><div class="text-xs">MENSUAL</div><div class="text-lg font-black">$14.990</div></button>
       </div>
-      <div class="flex gap-2 mt-4"><input id="promo" placeholder="Código promocional" class="flex-1 border border-gray-300 p-2 rounded-xl text-sm font-bold text-[#0A2342]"><button id="btnPromo" class="bg-[#0A2342] text-white px-4 rounded-xl text-sm font-bold">Aplicar</button></div>
-      <p id="promoMessage" class="text-xs text-center mt-2 font-bold"></p>
+      <div class="flex gap-2 mt-4"><input id="promo" placeholder="Código promocional" class="flex-1 border border-[#1E324F] bg-[#0A1220] text-white p-2 rounded-xl text-sm font-bold"><button id="btnPromo" class="bg-[#4A9FE3] text-[#0A1220] px-4 rounded-xl text-sm font-bold">Aplicar</button></div>
+      <p id="promoMessage" class="text-xs text-center mt-2 font-bold text-gray-400"></p>
     </div>
 
-    <div id="seccionDestinos" class="p-4 border-t border-gray-100 bg-white">
-      <button id="btnCargar" class="w-full bg-[#10b981] text-white font-black py-4 rounded-2xl text-xl shadow-lg mb-4">+ CARGAR DESTINOS</button>
-      <h3 class="font-bold text-[#0A2342] mt-2 mb-3">Agregar destinos con IA</h3>
+    <div id="seccionDestinos" class="p-4 border-t border-[#1E324F] bg-[#121E32]">
+      <!-- NUEVO BOTÓN PEGAR TEXTO -->
+      <button id="btnPegarTexto" class="w-full bg-[#00E5FF] text-[#0A1220] font-black py-4 rounded-2xl text-lg shadow-lg mb-4 hover:bg-[#00c8e0] transition-all flex items-center justify-center gap-2">
+         📋 PEGAR TEXTO DE WHATSAPP / MAIL / EXCEL
+      </button>
+
+      <h3 class="font-bold text-white mt-2 mb-3">Agregar destinos con IA</h3>
       <div class="grid grid-cols-2 gap-3">
-        <label class="bg-white border-2 border-dashed border-slate-300 p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] cursor-pointer hover:border-[#5BA9E0] hover:bg-blue-50">
-           <div class="text-3xl mb-1">🖼️</div><div class="font-bold text-[#5BA9E0] text-[14px]">Imagen / Foto</div>
+        <label class="bg-[#0A1220] border-2 border-dashed border-[#1E324F] p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] cursor-pointer hover:border-[#4A9FE3] hover:bg-[#1E324F] transition-all">
+           <div class="text-3xl mb-1">🖼️</div>
+           <div class="font-bold text-[#4A9FE3] text-[14px]">Imagen / Foto</div>
            <input type="file" id="fileImg" accept="image/*" hidden>
         </label>
-        <div class="bg-[#eef2f7] border-2 border-dashed border-slate-300 p-5 rounded-xl text-center opacity-60 flex flex-col items-center justify-center min-h-[95px]">
-           <div class="text-3xl mb-1">📄</div><div class="font-bold text-[#8da0b8] text-[13px]">PDF (Próximamente)</div>
+        <div class="bg-[#0A1220] border-2 border-dashed border-[#1E324F] p-5 rounded-xl text-center opacity-60 flex flex-col items-center justify-center min-h-[95px]">
+           <div class="text-3xl mb-1">📄</div>
+           <div class="font-bold text-gray-400 text-[13px]">PDF (Próximamente)</div>
         </div>
-        <button onclick="abrirCamara()" class="bg-white border-2 border-dashed border-slate-300 p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] w-full hover:border-[#5BA9E0] hover:bg-blue-50">
-           <div class="text-3xl mb-1">📸</div><div class="font-bold text-[#5BA9E0] text-[14px]">Cámara</div>
+        <button onclick="abrirCamara()" class="bg-[#0A1220] border-2 border-dashed border-[#1E324F] p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] w-full hover:border-[#4A9FE3] hover:bg-[#1E324F] transition-all">
+           <div class="text-3xl mb-1">📸</div>
+           <div class="font-bold text-[#4A9FE3] text-[14px]">Cámara</div>
         </button>
-        <button onclick="alert('QR Scanner en desarrollo')" class="bg-white border-2 border-dashed border-slate-300 p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] w-full hover:border-[#5BA9E0] hover:bg-blue-50">
-           <div class="text-3xl mb-1">🔳</div><div class="font-bold text-[#5BA9E0] text-[14px]">Escanear QR</div>
+        <button onclick="alert('QR Scanner en desarrollo')" class="bg-[#0A1220] border-2 border-dashed border-[#1E324F] p-5 rounded-xl text-center flex flex-col items-center justify-center min-h-[95px] w-full hover:border-[#4A9FE3] hover:bg-[#1E324F] transition-all">
+           <div class="text-3xl mb-1">🔳</div>
+           <div class="font-bold text-[#4A9FE3] text-[14px]">Escanear QR</div>
         </button>
       </div>
-      <video id="camara" autoplay class="hidden w-full mt-3 rounded-xl border-2 border-[#5BA4D9]"></video>
+      <video id="camara" autoplay class="hidden w-full mt-3 rounded-xl border-2 border-[#4A9FE3]"></video>
     </div>
 
-    <div id="listaContainer" class="p-4 border-t border-gray-100 bg-[#f8fafc]">
+    <div id="listaContainer" class="p-4 border-t border-[#1E324F] bg-[#0A1220]">
       <div class="flex justify-between items-center mb-3">
-         <h3 class="font-black text-lg text-[#0A2342]">Tus destinos (<span id="count">0</span>)</h3>
+         <h3 class="font-black text-lg text-white">Tus destinos (<span id="count">0</span>)</h3>
          <div class="flex gap-2">
-            <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold">📍 Ordenados</span>
-            <button id="btnBorrarTodo" class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-bold hover:bg-red-200 transition-colors hidden">🗑️ Borrar todo</button>
+            <span class="text-xs bg-[#00E5FF]/20 text-[#00E5FF] px-2 py-1 rounded-full font-bold">📍 Ordenados</span>
+            <button id="btnBorrarTodo" class="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded-full font-bold hover:bg-red-500/30 transition-colors hidden">🗑️ Borrar todo</button>
          </div>
       </div>
       <ul id="lista" class="space-y-2 text-sm"></ul>
       <div id="placeholderVacio" class="text-center py-8 text-gray-400 hidden"><p>📍 Agregá tus paradas arriba para armar tu ruta</p><span class="text-xs">Ej: Av. Corrientes 1234</span></div>
-      <button id="btnViaje" class="w-full bg-[#0A2342] text-white font-black py-4 rounded-2xl mt-4 hidden shadow-lg">🗺️ COMENZAR VIAJE</button>
-      <p class="text-center text-xs mt-2 text-gray-500 mb-4">Se abrirá en Google Maps desde tu ubicación GPS actual</p>
+      <button id="btnViaje" class="w-full bg-[#4A9FE3] text-[#0A1220] font-black py-4 rounded-2xl mt-4 hidden shadow-lg hover:bg-[#00E5FF] transition-all">🗺️ COMENZAR VIAJE</button>
+      <p class="text-center text-xs mt-2 text-gray-400 mb-4">Se abrirá en Google Maps desde tu ubicación GPS actual</p>
     </div>
 
-    <div id="stats" class="p-6 m-4 rounded-2xl hidden bg-blue-50 border"><h3 class="font-black text-[#0A2342] text-xl mb-4">¡Ruta completada! 🏆</h3><div class="grid grid-cols-3 gap-2"><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statHoras">0</span>h</div></div><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statKm">0</span>km</div></div><div class="text-center p-3 bg-white rounded-xl"><div class="font-black"><span id="statEntregas">0</span></div></div></div></div>
+    <div id="stats" class="p-6 m-4 rounded-2xl hidden bg-[#121E32] border border-[#1E324F]"><h3 class="font-black text-white text-xl mb-4">¡Ruta completada! 🏆</h3><div class="grid grid-cols-3 gap-2"><div class="text-center p-3 bg-[#0A1220] rounded-xl"><div class="font-black text-[#00E5FF]"><span id="statHoras">0</span>h</div></div><div class="text-center p-3 bg-[#0A1220] rounded-xl"><div class="font-black text-[#00E5FF]"><span id="statKm">0</span>km</div></div><div class="text-center p-3 bg-[#0A1220] rounded-xl"><div class="font-black text-[#00E5FF]"><span id="statEntregas">0</span></div></div></div></div>
+  </div>
+
+  <!-- PANTALLA PEGAR TEXTO (NUEVA) -->
+  <div id="pegarTextoScreen" class="hidden min-h-screen bg-[#0A1220] text-white p-4">
+     <button id="btnVolverPegarTexto" class="text-white text-2xl mb-4 hover:text-[#00E5FF] transition-colors">← Volver a la App</button>
+     
+     <div class="bg-[#121E32] rounded-2xl p-4 flex items-center gap-3 mb-6 border border-[#1E324F]">
+        <div class="w-12 h-12 rounded-full bg-[#4A9FE3] flex items-center justify-center flex-shrink-0">
+           <svg width="28" height="28" viewBox="0 0 100 100"><path d="M 70 30 L 40 30 C 25 30 25 50 40 50 L 60 50 C 75 50 75 70 60 70 L 30 70" fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/><circle cx="70" cy="30" r="7" fill="white"/><circle cx="30" cy="70" r="7" fill="white"/></svg>
+        </div>
+        <h1 class="text-2xl font-black text-white">RutaFlex</h1>
+     </div>
+
+     <!-- PASO 1: PEGAR -->
+     <div id="pegarTextoStep1">
+        <h2 class="text-2xl font-black mb-2 text-[#00E5FF]">Pega tus direcciones</h2>
+        <p class="text-gray-400 text-sm mb-4">Aunque estén mezcladas con saludos, precios o teléfonos. Nosotros lo limpiamos y validamos.</p>
+        <textarea id="textoDirecciones" placeholder="Ej: Hola capo, mañana paso por Av. Corrientes 1234, luego a Libertador 4500. Gracias! $5000" class="w-full h-[300px] bg-[#121E32] border border-[#1E324F] rounded-2xl p-4 text-white outline-none focus:border-[#00E5FF] transition-colors resize-none"></textarea>
+        <button id="btnProcesarTexto" class="w-full mt-4 bg-[#00E5FF] text-[#0A1220] font-black py-4 rounded-2xl text-lg hover:bg-[#00c8e0] transition-all shadow-lg">ARMAR MI RUTA OPTIMIZADA</button>
+     </div>
+
+     <!-- PASO 2: CARGANDO -->
+     <div id="pegarTextoLoading" class="hidden text-center py-20">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-[#00E5FF] mx-auto mb-4"></div>
+        <p class="text-[#00E5FF] font-bold text-lg">Analizando y validando direcciones...</p>
+        <p class="text-gray-400 text-sm mt-2">Esto puede tardar unos segundos</p>
+     </div>
+
+     <!-- PASO 3: RESULTADO -->
+     <div id="pegarTextoResult" class="hidden">
+        <h2 class="font-black text-xl mb-1 text-[#00E5FF]">Resultado: <span id="countValidas">0</span> paradas válidas</h2>
+        <p class="text-gray-400 text-sm mb-4"><span id="countDescartadas">0</span> descartadas por no ser direcciones reales.</p>
+        
+        <div id="listaPegadas" class="space-y-2 mb-4 max-h-[40vh] overflow-y-auto pr-1"></div>
+        
+        <div class="grid grid-cols-2 gap-3 mt-4">
+           <a id="btnMapsPegadas" href="#" target="_blank" class="bg-[#00E5FF] text-[#0A1220] font-black py-4 rounded-xl text-center text-sm hover:bg-[#00c8e0] transition-all flex items-center justify-center gap-2">🗺️ GOOGLE MAPS</a>
+           <a id="btnWazePegadas" href="#" target="_blank" class="border-2 border-[#00E5FF] text-[#00E5FF] font-black py-4 rounded-xl text-center text-sm hover:bg-[#00E5FF]/10 transition-all flex items-center justify-center gap-2">🚗 WAZE</a>
+        </div>
+        <button id="btnReiniciarPegar" class="w-full mt-3 bg-[#121E32] text-white font-bold py-3 rounded-xl hover:bg-[#1E324F] transition-all border border-[#1E324F]">Procesar otro texto</button>
+     </div>
   </div>
 
   <!-- PERFIL SCREEN -->
-  <div id="perfilScreen" class="hidden min-h-screen bg-[#f6f8fa]">
-     <div class="bg-[#0A2342] pb-8 pt-6 px-6 text-center text-white relative rounded-b-[28px]">
-        <button id="btnVolverDePerfil" class="absolute top-6 left-5 text-white text-[22px] font-bold">←</button>
+  <div id="perfilScreen" class="hidden min-h-screen bg-[#0A1220]">
+     <div class="bg-[#121E32] pb-8 pt-6 px-6 text-center text-white relative rounded-b-[28px] border-b border-[#1E324F]">
+        <button id="btnVolverDePerfil" class="absolute top-6 left-5 text-white text-[22px] font-bold hover:text-[#00E5FF]">←</button>
         <h3 class="font-bold text-[11px] tracking-[1.5px] opacity-50 mb-4">PERFIL</h3>
-        <div id="perfilAvatarWrapper" class="w-[110px] h-[110px] mx-auto rounded-full bg-[#0d2b5e] p-1.5 mb-4" style="border-color: rgba(255,255,255,0.2)">
-           <div class="w-full h-full rounded-full bg-[#7bc8ff] flex items-center justify-center">
+        <div id="perfilAvatarWrapper" class="w-[110px] h-[110px] mx-auto rounded-full bg-[#0d2b5e] p-1.5 mb-4 border-2 border-[#4A9FE3]">
+           <div class="w-full h-full rounded-full bg-[#4A9FE3] flex items-center justify-center">
               <svg width="60" height="60" viewBox="0 0 100 100"><path d="M 70 30 L 40 30 C 25 30 25 50 40 50 L 60 50 C 75 50 75 70 60 70 L 30 70" fill="none" stroke="white" stroke-width="6" stroke-linecap="round"/><circle cx="70" cy="30" r="7" fill="white"/><circle cx="30" cy="70" r="7" fill="white"/></svg>
            </div>
         </div>
-        <h2 id="perfilNombre" class="text-[22px] font-extrabold">Usuario</h2>
-        <p id="perfilEmail" class="text-white/60 text-[14px] mt-1">email@ejemplo.com</p>
+        <h2 id="perfilNombre" class="text-[22px] font-extrabold text-white">Usuario</h2>
+        <p id="perfilEmail" class="text-gray-400 text-[14px] mt-1">email@ejemplo.com</p>
         <span id="perfilEstado" class="inline-block mt-4 px-5 py-1.5 rounded-full text-[12px] font-black bg-green-500 text-white">✅ ACTIVO</span>
-        <button id="btnRenovarPerfil" class="hidden mt-5 w-full bg-white text-[#0A2342] font-black py-3.5 rounded-xl shadow-lg">🔒 Renovar mi plan - Desde $4.990</button>
+        <button id="btnRenovarPerfil" class="hidden mt-5 w-full bg-[#00E5FF] text-[#0A1220] font-black py-3.5 rounded-xl shadow-lg">🔒 Renovar mi plan - Desde $4.990</button>
      </div>
      <div class="p-4 space-y-3 mt-2">
-        <div class="bg-white p-2 rounded-[18px] shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100">
-           <p class="font-black text-[11px] tracking-widest text-[#0A2342] px-4 pt-3 pb-1 opacity-40 uppercase">Cuenta</p>
-           <button onclick="abrirModalPagos('Mensual', 14990)" class="w-full flex justify-between items-center p-4 hover:bg-slate-50 rounded-xl transition-colors">
-              <span class="flex items-center gap-3 text-[#0A2342] font-bold text-[16px]">🔒 <span class="text-[#0A2342]">Mi Plan</span></span>
+        <div class="bg-[#121E32] p-2 rounded-[18px] shadow-lg border border-[#1E324F]">
+           <p class="font-black text-[11px] tracking-widest text-gray-400 px-4 pt-3 pb-1 uppercase">Cuenta</p>
+           <button onclick="abrirModalPagos('Mensual', 14990)" class="w-full flex justify-between items-center p-4 hover:bg-[#1E324F] rounded-xl transition-colors">
+              <span class="flex items-center gap-3 text-white font-bold text-[16px]">🔒 <span>Mi Plan</span></span>
               <span class="text-gray-400 text-xl font-bold">›</span>
            </button>
-           <div class="h-px bg-gray-100 mx-4"></div>
-           <button onclick="window.open('https://wa.me/5491123793596', '_blank')" class="w-full flex justify-between items-center p-4 hover:bg-slate-50 rounded-xl transition-colors">
-              <span class="flex items-center gap-3 text-[#0A2342] font-bold text-[16px]">🎧 <span class="text-[#0A2342]">Soporte</span></span>
+           <div class="h-px bg-[#1E324F] mx-4"></div>
+           <button onclick="window.open('https://wa.me/5491123793596', '_blank')" class="w-full flex justify-between items-center p-4 hover:bg-[#1E324F] rounded-xl transition-colors">
+              <span class="flex items-center gap-3 text-white font-bold text-[16px]">🎧 <span>Soporte</span></span>
               <span class="text-gray-400 text-xl font-bold">›</span>
            </button>
         </div>
-        <button id="btnLogoutPerfil" class="w-full bg-[#fff0f0] text-[#d32f2f] font-bold py-4 rounded-[14px] border border-[#ffdddd] hover:bg-[#ffe0e0]">🚪 Cerrar sesión</button>
+        <button id="btnLogoutPerfil" class="w-full bg-red-500/10 text-red-400 font-bold py-4 rounded-[14px] border border-red-500/20 hover:bg-red-500/20 transition-all">🚪 Cerrar sesión</button>
      </div>
   </div>
 
   <!-- MODAL EDICION -->
-  <div id="modalEdicion" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl w-full max-w-md max-h-[85vh] flex flex-col">
-      <div class="p-4 bg-[#0A2342] rounded-t-2xl flex justify-between items-center"><h3 class="text-white font-black">🤖 Revisar direcciones</h3><button id="btnCerrarModal" class="text-white text-2xl">&times;</button></div>
+  <div id="modalEdicion" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+    <div class="bg-[#121E32] rounded-2xl w-full max-w-md max-h-[85vh] flex flex-col border border-[#1E324F]">
+      <div class="p-4 bg-[#0A1220] rounded-t-2xl flex justify-between items-center border-b border-[#1E324F]"><h3 class="text-white font-black">🤖 Revisar direcciones</h3><button id="btnCerrarModal" class="text-white text-2xl hover:text-[#00E5FF]">&times;</button></div>
       <div id="contenedorInputs" class="p-4 space-y-2 flex-1 overflow-y-auto"></div>
-      <div class="p-4 flex gap-2 bg-gray-50 rounded-b-2xl">
-         <button id="btnAgregarLinea" class="flex-1 bg-blue-100 text-[#0A2342] py-3 rounded-xl font-bold hover:bg-blue-200">+ Agregar</button>
-         <button id="btnCancelarEdicion" class="flex-1 bg-gray-200 py-3 rounded-xl font-bold">Cancelar</button>
-         <button id="btnGuardarEdicion" class="flex-1 bg-[#10b981] text-white py-3 rounded-xl font-bold">✅ Guardar</button>
+      <div class="p-4 flex gap-2 bg-[#0A1220] rounded-b-2xl border-t border-[#1E324F]">
+         <button id="btnAgregarLinea" class="flex-1 bg-[#1E324F] text-white py-3 rounded-xl font-bold hover:bg-[#2a456b] transition-all">+ Agregar</button>
+         <button id="btnCancelarEdicion" class="flex-1 bg-gray-700 text-white py-3 rounded-xl font-bold hover:bg-gray-600 transition-all">Cancelar</button>
+         <button id="btnGuardarEdicion" class="flex-1 bg-[#00E5FF] text-[#0A1220] py-3 rounded-xl font-bold hover:bg-[#00c8e0] transition-all">✅ Guardar</button>
       </div>
     </div>
   </div>
 
   <!-- MODAL PAGO -->
-  <div id="payment-modal" class="hidden fixed inset-0 bg-black/80 flex items-end sm:items-center justify-center z-[60] p-4">
-    <div class="bg-white rounded-3xl w-full max-w-md p-6">
-      <h3 class="text-2xl font-black text-center">Elegí cómo pagar</h3>
-      <p id="modal-plan-texto" class="text-center font-bold text-blue-600 mt-2"></p>
+  <div id="payment-modal" class="hidden fixed inset-0 bg-black/80 flex items-end sm:items-center justify-center z-[60] p-4 backdrop-blur-sm">
+    <div class="bg-[#121E32] rounded-3xl w-full max-w-md p-6 border border-[#1E324F]">
+      <h3 class="text-2xl font-black text-center text-white">Elegí cómo pagar</h3>
+      <p id="modal-plan-texto" class="text-center font-bold text-[#00E5FF] mt-2"></p>
       <div class="mt-4 space-y-3">
-        <a id="btn-mp-pago" href="#" target="_blank" class="flex items-center gap-4 p-4 rounded-xl border-2 border-[#009EE3] bg-blue-50"><div>💳</div><div class="flex-1"><div class="font-bold">Mercado Pago</div></div></a>
-        <div class="p-4 rounded-xl border bg-gray-50">Alias: <span id="modal-alias-texto" class="font-mono font-bold text-blue-600">RUTAFLEX.MP</span> <button onclick="copiarAlias()" class="bg-[#0A2342] text-white text-xs px-3 py-2 rounded-lg ml-2">Copiar</button></div>
-        <a id="btn-wsp-pago" href="#" target="_blank" class="block p-4 rounded-xl bg-green-500 text-white font-bold text-center">💬 Enviar comprobante</a>
-        <button onclick="cerrarModalPagos()" class="w-full p-3 text-gray-500 text-sm">Cerrar</button>
+        <a id="btn-mp-pago" href="#" target="_blank" class="flex items-center gap-4 p-4 rounded-xl border-2 border-[#009EE3] bg-[#009EE3]/10 hover:bg-[#009EE3]/20 transition-all">
+           <div class="text-2xl">💳</div>
+           <div class="flex-1"><div class="font-bold text-white">Mercado Pago</div><div class="text-xs text-gray-400">Tarjeta, QR, dinero en cuenta</div></div>
+        </a>
+        <div class="p-4 rounded-xl border border-[#1E324F] bg-[#0A1220]">
+           <div class="flex items-center justify-between">
+              <div>
+                 <div class="text-xs text-gray-400 mb-1">Alias:</div>
+                 <span id="modal-alias-texto" class="font-mono font-bold text-[#00E5FF] text-lg">RUTAFLEX.MP</span>
+              </div>
+              <button onclick="copiarAlias()" class="bg-[#4A9FE3] text-[#0A1220] text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#00E5FF] transition-all">Copiar</button>
+           </div>
+        </div>
+        <a id="btn-wsp-pago" href="#" target="_blank" class="block p-4 rounded-xl bg-green-600 text-white font-bold text-center hover:bg-green-500 transition-all">💬 Enviar comprobante por WhatsApp</a>
+        <button onclick="cerrarModalPagos()" class="w-full p-3 text-gray-400 text-sm hover:text-white transition-all">Cerrar</button>
       </div>
     </div>
   </div>
