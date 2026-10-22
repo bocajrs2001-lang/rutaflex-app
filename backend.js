@@ -30,10 +30,13 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// ✅ SERVIR ARCHIVOS ESTÁTICOS (FAVICON, MANIFEST, ETC)
+// ✅ 1. SERVIR ARCHIVOS ESTÁTICOS DE LA RAÍZ (app.js, style.css, index.html)
+app.use(express.static(path.join(__dirname)));
+
+// ✅ 2. SERVIR ARCHIVOS ESTÁTICOS DE LA CARPETA PUBLIC (favicon, manifest, etc.)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ✅ ENDPOINT ESPECÍFICO PARA FAVICON
+// ✅ 3. ENDPOINT ESPECÍFICO PARA FAVICON (por si acaso)
 app.get('/favicon.ico', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'favicon.ico'), (err) => {
     if (err) res.sendFile(path.join(__dirname, 'public', 'android-chrome-192x192.png'));
@@ -128,7 +131,7 @@ app.post('/api/enviar-codigo-recuperacion', async (req, res) => {
       from: 'RUTAFLEX <onboarding@resend.dev>',
       to: email,
       subject: '🔐 Tu código de recuperación',
-      html: `<div style="font-family:sans-serif; padding:20px;"><h2>RUTAFLEX</h2><p>Tu código es:</p><h1 style="color:#0A2342; letter-spacing:5px;">${codigo}</h1><p>Expira en 10 min.</p></div>`
+      html: `<div style="font-family:sans-serif; padding:20px;"><h2>RUTAFLEX</h2><p>Tu código es:</p><h1 style="color:#0A1220; letter-spacing:5px;">${codigo}</h1><p>Expira en 10 min.</p></div>`
     });
     res.json({ ok: true, mensaje: 'Código enviado' });
   } catch (err) { res.status(500).json({ error: 'Error del servidor' }); }
@@ -215,5 +218,7 @@ app.delete('/api/destinos', usuarioLogueado, suscripcionVigente, async (req, res
   } catch (err) { res.status(500).json({ error: 'Error al eliminar' }); }
 });
 
+// Ruta por defecto para el frontend
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'index.html')); });
+
 app.listen(PORT, () => { console.log(`✅ Backend RUTAFLEX corriendo en puerto ${PORT}`); });
