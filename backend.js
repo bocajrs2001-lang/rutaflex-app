@@ -17,8 +17,6 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const mpClient = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
-console.log('🔑 Token MP cargado:', process.env.MP_ACCESS_TOKEN ? 'OK' : '❌ FALTA TOKEN');
-
 const resend = new Resend(process.env.RESEND_API_KEY);
 const codigosVerificacion = new Map();
 
@@ -32,19 +30,13 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// ✅ SERVIR ARCHIVOS ESTÁTICOS DE LA CARPETA PUBLIC (MUY IMPORTANTE)
+// ✅ SERVIR ARCHIVOS ESTÁTICOS (FAVICON, MANIFEST, ETC)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ✅ ENDPOINT ESPECÍFICO PARA FAVICON (debe ir ANTES del static)
+// ✅ ENDPOINT ESPECÍFICO PARA FAVICON
 app.get('/favicon.ico', (req, res) => {
-  const faviconPath = path.join(__dirname, 'public', 'favicon.ico');
-  console.log(' Buscando favicon en:', faviconPath);
-  res.sendFile(faviconPath, (err) => {
-    if (err) {
-      console.log('❌ Error sirviendo favicon.ico:', err.message);
-      // Fallback: servir el PNG si no existe el .ico
-      res.sendFile(path.join(__dirname, 'public', 'icon-192x192.png'));
-    }
+  res.sendFile(path.join(__dirname, 'public', 'favicon.ico'), (err) => {
+    if (err) res.sendFile(path.join(__dirname, 'public', 'android-chrome-192x192.png'));
   });
 });
 
@@ -68,7 +60,7 @@ function suscripcionVigente(req, res, next) {
   next();
 }
 
-// 💳 RUTAS DE MERCADO PAGO
+// 💳 MERCADO PAGO
 app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
   try {
     const { plan } = req.body;
@@ -87,12 +79,8 @@ app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
         external_reference: req.session.userId.toString()
       }
     });
-    console.log(`💳 Preferencia creada para usuario ${req.session.userId}`);
     res.json({ ok: true, init_point: result.init_point });
-  } catch (err) {
-    console.error('Error creando preferencia:', err);
-    res.status(500).json({ error: 'Error al generar link de pago' });
-  }
+  } catch (err) { res.status(500).json({ error: 'Error al generar link de pago' }); }
 });
 
 app.post('/api/verificar-pago-directo', usuarioLogueado, async (req, res) => {
@@ -110,25 +98,17 @@ app.post('/api/verificar-pago-directo', usuarioLogueado, async (req, res) => {
       }
     }
     res.json({ ok: false, activado: false });
-  } catch (err) {
-    console.error("❌ Error verificando pago directo:", err);
-    res.status(500).json({ ok: false, activado: false, error: err.message });
-  }
+  } catch (err) { res.status(500).json({ ok: false, activado: false, error: err.message }); }
 });
 
 app.post('/api/webhook-mp', async (req, res) => {
   const { type, data } = req.body;
   if (type === 'payment' || type === 'pay') {
     try {
-      const paymentId = data.id;
-      const mpPayment = await mpClient.payment.get({ id: paymentId });
-      if (mpPayment.status === 'approved') {
-        const userId = mpPayment.external_reference;
-        if (userId) {
-          const itemTitle = mpPayment.additional_info?.items?.[0]?.title || '';
-          const diasExtra = itemTitle.includes('Mensual') ? 30 : 7;
-          await actualizarVencimiento(userId, diasExtra);
-        }
+      const mpPayment = await mpClient.payment.get({ id: data.id });
+      if (mpPayment.status === 'approved' && mpPayment.external_reference) {
+        const itemTitle = mpPayment.additional_info?.items?.[0]?.title || '';
+        await actualizarVencimiento(mpPayment.external_reference, itemTitle.includes('Mensual') ? 30 : 7);
       }
     } catch (err) { console.error('❌ ERROR EN WEBHOOK:', err.message); }
   }
@@ -136,11 +116,6 @@ app.post('/api/webhook-mp', async (req, res) => {
 });
 
 // 👤 AUTENTICACIÓN
-app.post('/api/cancelar-suscripcion', usuarioLogueado, async (req, res) => {
-  try { await cancelarSuscripcionUsuario(req.session.userId); res.json({ ok: true, mensaje: 'Cancelado' }); } 
-  catch (err) { res.status(500).json({ error: 'Error al cancelar' }); }
-});
-
 app.post('/api/enviar-codigo-recuperacion', async (req, res) => {
   try {
     const { email } = req.body;
@@ -149,13 +124,12 @@ app.post('/api/enviar-codigo-recuperacion', async (req, res) => {
     if (!usuario) return res.status(404).json({ error: 'No existe cuenta con ese email' });
     const codigo = Math.floor(100000 + Math.random() * 900000).toString();
     codigosVerificacion.set(email, { codigo, expira: Date.now() + 10 * 60 * 1000 });
-    const { error } = await resend.emails.send({
+    await resend.emails.send({
       from: 'RUTAFLEX <onboarding@resend.dev>',
       to: email,
       subject: '🔐 Tu código de recuperación',
       html: `<div style="font-family:sans-serif; padding:20px;"><h2>RUTAFLEX</h2><p>Tu código es:</p><h1 style="color:#0A2342; letter-spacing:5px;">${codigo}</h1><p>Expira en 10 min.</p></div>`
     });
-    if (error) return res.status(500).json({ error: 'Error al enviar email' });
     res.json({ ok: true, mensaje: 'Código enviado' });
   } catch (err) { res.status(500).json({ error: 'Error del servidor' }); }
 });
@@ -163,9 +137,10 @@ app.post('/api/enviar-codigo-recuperacion', async (req, res) => {
 app.post('/api/verificar-codigo', (req, res) => {
   const { email, codigo } = req.body;
   const datos = codigosVerificacion.get(email);
-  if (!datos) return res.status(400).json({ error: 'Solicitá un código nuevo' });
-  if (datos.codigo !== codigo) return res.status(400).json({ error: 'Código incorrecto' });
-  if (Date.now() > datos.expira) { codigosVerificacion.delete(email); return res.status(400).json({ error: 'Código expirado' }); }
+  if (!datos || datos.codigo !== codigo || Date.now() > datos.expira) {
+    codigosVerificacion.delete(email);
+    return res.status(400).json({ error: 'Código incorrecto o expirado' });
+  }
   codigosVerificacion.delete(email);
   res.json({ ok: true });
 });
@@ -201,16 +176,17 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.get('/api/yo', (req, res) => {
-  if (req.session && req.session.user) {
-    res.json({ ok: true, nombre: req.session.nombre, fecha_vencimiento: req.session.user.fecha_vencimiento });
-  } else res.json({ ok: false });
+  if (req.session && req.session.user) res.json({ ok: true, nombre: req.session.nombre, fecha_vencimiento: req.session.user.fecha_vencimiento });
+  else res.json({ ok: false });
 });
 
 app.post('/api/logout', (req, res) => { req.session.destroy(); res.json({ ok: true }); });
-
+app.post('/api/cancelar-suscripcion', usuarioLogueado, async (req, res) => {
+  try { await cancelarSuscripcionUsuario(req.session.userId); res.json({ ok: true }); } 
+  catch (err) { res.status(500).json({ error: 'Error al cancelar' }); }
+});
 app.post('/api/validar-promo', usuarioLogueado, (req, res) => {
-  const { codigo } = req.body;
-  if (codigo === 'RUTA94FLEX') return res.json({ valido: true, mensaje: '¡Código VIP aplicado!' });
+  if (req.body.codigo === 'RUTA94FLEX') return res.json({ valido: true, mensaje: '¡Código VIP aplicado!' });
   res.status(400).json({ valido: false, mensaje: 'Código inválido.' });
 });
 
@@ -236,9 +212,7 @@ app.delete('/api/destinos', usuarioLogueado, suscripcionVigente, async (req, res
   try { 
     await borrarDestinosDeUsuario(req.session.userId); 
     res.json({ ok: true, mensaje: 'Todas las direcciones fueron eliminadas' }); 
-  } catch (err) { 
-    res.status(500).json({ error: 'Error al eliminar todas las direcciones' }); 
-  }
+  } catch (err) { res.status(500).json({ error: 'Error al eliminar' }); }
 });
 
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'index.html')); });
