@@ -1,19 +1,23 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body { 
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-  background: #0A1220; 
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #050A14; 
   min-height: 100vh; 
   color: #ffffff; 
+  overflow-x: hidden;
 }
 
 .app-container { 
   max-width: 480px; 
   margin: 0 auto; 
-  background: #0A1220; 
   min-height: 100vh; 
   position: relative;
 }
+
+/* Scrollbar oscuro */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 10px; }
 
 /* Inputs */
 input[type="email"],
@@ -29,12 +33,6 @@ textarea::placeholder {
   -webkit-text-fill-color: rgba(255,255,255,0.4) !important;
 }
 
-/* Header */
-header { 
-  color: white; 
-  padding: 1rem; 
-}
-
 /* Bottom Nav */
 .bottom-nav {
   position: fixed;
@@ -43,8 +41,6 @@ header {
   transform: translateX(-50%);
   width: 100%;
   max-width: 480px;
-  background: #0A1220;
-  border-top: 1px solid #1E324F;
   z-index: 50;
 }
 
@@ -59,18 +55,16 @@ header {
 #seccionDestinos { 
   margin-top: 0 !important; 
   padding: 1.5rem 1rem !important; 
-  background: #121E32; 
 }
 
 #listaContainer { 
   margin-top: 0 !important; 
   padding: 1.5rem 1rem !important; 
-  background: #0A1220; 
 }
 
 /* Botones */
 #btnCargar { 
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); 
+  box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3); 
   transition: all 0.3s ease; 
 }
 
@@ -80,8 +74,8 @@ header {
 
 /* Utilidades */
 .hidden { display: none !important; }
-.accent { color: #4A9FE3; }
-.bg-accent { background-color: #4A9FE3; }
+.accent { color: #00E5FF; }
+.bg-accent { background-color: #00E5FF; }
 
 .password-wrapper { position: relative; width: 100%; }
 .toggle-password { 
@@ -96,12 +90,6 @@ header {
 }
 .toggle-password:hover { color: white; }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #0A1220; }
-::-webkit-scrollbar-thumb { background: #1E324F; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #4A9FE3; }
-
 /* Responsive */
 @media (max-width: 640px) { 
   .app-container { max-width: 100%; } 
@@ -109,7 +97,7 @@ header {
 
 html { scroll-behavior: smooth; }
 button:focus, input:focus, textarea:focus { 
-  outline: 2px solid #4A9FE3; 
+  outline: 2px solid #00E5FF; 
   outline-offset: 2px; 
 }
 
