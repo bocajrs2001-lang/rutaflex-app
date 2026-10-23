@@ -1,26 +1,32 @@
 <svg width="512" height="512" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <radialGradient id="bg" cx="50%" cy="50%" r="70%">
-      <stop offset="0%" stop-color="#4A9FE3"/>
-      <stop offset="100%" stop-color="#1E3A5F"/>
+    <radialGradient id="bg" cx="40%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#2A8BC0"/>
+      <stop offset="50%" stop-color="#1A5A8A"/>
+      <stop offset="100%" stop-color="#123A66"/>
     </radialGradient>
   </defs>
-  <!-- FONDO -->
-  <rect width="200" height="200" rx="32" fill="url(#bg)"/>
   
-  <!-- LOGO RUTA - Color #A5F3FF -->
-  <g fill="none" stroke="#A5F3FF" stroke-width="13" stroke-linecap="round" stroke-linejoin="round">
-    <!-- Ruta en S -->
-    <path d="M 145 55 H 85 C 62 55 62 85 85 85 H 115 C 138 85 138 115 115 115 H 55" />
-  </g>
+  <!-- FONDO CIRCULAR CON DEGRADADO -->
+  <circle cx="100" cy="100" r="100" fill="url(#bg)"/>
   
-  <!-- Círculos de los extremos -->
-  <g stroke="#A5F3FF" stroke-width="13" fill="none">
-    <circle cx="145" cy="55" r="20"/>
-    <circle cx="55" cy="115" r="20"/>
-  </g>
+  <!-- S SINUOSA -->
+  <path d="M 150 56 L 70 56 
+           C 40 56 40 100 70 100
+           L 130 100
+           C 160 100 160 144 130 144
+           L 50 144"
+        stroke="#A8F0FF"
+        stroke-width="14"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        fill="none"/>
   
-  <!-- Relleno de los círculos -->
-  <circle cx="145" cy="55" r="9" fill="#4A9FE3"/>
-  <circle cx="55" cy="115" r="9" fill="#4A9FE3"/>
+  <!-- NODO SUPERIOR DERECHO -->
+  <circle cx="150" cy="56" r="22" fill="#A8F0FF"/>
+  <circle cx="150" cy="56" r="9" fill="#1A5A8A"/>
+  
+  <!-- NODO INFERIOR IZQUIERDO -->
+  <circle cx="50" cy="144" r="22" fill="#A8F0FF"/>
+  <circle cx="50" cy="144" r="9" fill="#1A5A8A"/>
 </svg>
