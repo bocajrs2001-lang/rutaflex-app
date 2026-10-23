@@ -39,6 +39,7 @@
   .bottom-nav { padding-bottom: env(safe-area-inset-bottom, 12px); }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .logo-glow { filter: drop-shadow(0 0 12px rgba(159,232,255,0.4)); }
 </style>
 </head>
 <body class="bg-[#0A1220] text-white">
@@ -47,12 +48,17 @@
   <!-- ==================== AUTH SCREEN ==================== -->
   <div id="authScreen" class="min-h-screen flex flex-col justify-center items-center p-6 bg-[#0A1220]">
      <div class="mb-10 w-full max-w-sm mx-auto text-center">
-        <div class="flex items-center justify-center mb-6 mx-auto w-36 h-36 rounded-full bg-gradient-to-br from-[#1e3a8a] to-[#0d1b2a] p-1 shadow-2xl shadow-[#4A9FE3]/30">
-           <div class="w-full h-full rounded-full bg-gradient-to-br from-[#4A9FE3] to-[#1e3a8a] flex items-center justify-center">
-              <svg width="80" height="80" viewBox="0 0 100 100">
-                <path d="M 30 65 Q 30 50 45 50 Q 55 50 55 35 Q 55 20 70 20" fill="none" stroke="#9FE8FF" stroke-width="8" stroke-linecap="round"/>
-                <circle cx="30" cy="65" r="7" fill="#9FE8FF"/>
-                <circle cx="70" cy="20" r="7" fill="#9FE8FF"/>
+        <!-- LOGO ORIGINAL AUTH -->
+        <div class="flex items-center justify-center mb-6 mx-auto w-40 h-40 rounded-full bg-gradient-to-br from-[#0d2b5e] to-[#070E1E] p-1 shadow-2xl shadow-[#4A9FE3]/40">
+           <div class="w-full h-full rounded-full bg-[#5BA9E0] flex items-center justify-center logo-glow">
+              <svg width="90" height="90" viewBox="0 0 100 100">
+                <!-- S sinuosa redondeada -->
+                <path d="M 65 32 C 65 22, 55 22, 50 28 C 45 34, 45 44, 50 50 C 55 56, 55 66, 50 72 C 45 78, 35 78, 35 68" 
+                      fill="none" stroke="#B0F0FF" stroke-width="7" stroke-linecap="round"/>
+                <!-- Nodo superior derecho (anillo) -->
+                <circle cx="65" cy="32" r="9" fill="#5BA9E0" stroke="#B0F0FF" stroke-width="5"/>
+                <!-- Nodo inferior izquierdo (anillo) -->
+                <circle cx="35" cy="68" r="9" fill="#5BA9E0" stroke="#B0F0FF" stroke-width="5"/>
               </svg>
            </div>
         </div>
@@ -69,7 +75,7 @@
         <input type="email" id="loginEmail" placeholder="Email" class="w-full bg-[#1E324F]/30 border border-[#1E324F] text-white placeholder-gray-500 px-4 py-3.5 rounded-xl focus:outline-none focus:border-[#4A9FE3]" required>
         <div class="password-wrapper">
            <input type="password" id="loginPassword" placeholder="Contraseña" class="w-full bg-[#1E324F]/30 border border-[#1E324F] text-white placeholder-gray-500 px-4 py-3.5 pr-12 rounded-xl focus:outline-none focus:border-[#4A9FE3]" required>
-           <span class="toggle-password" onclick="togglePass('loginPassword', this)">👁️</span>
+           <span class="toggle-password" onclick="togglePass('loginPassword', this)">️</span>
         </div>
         <button type="submit" class="w-full bg-[#4A9FE3] text-white font-black py-3.5 rounded-xl hover:bg-[#5BA9E0] transition-all shadow-lg shadow-[#4A9FE3]/30">ENTRAR</button>
         <button type="button" id="btnOlvideContrasena" class="w-full text-gray-400 text-sm hover:text-white underline mt-2">¿Olvidaste tu contraseña?</button>
@@ -97,11 +103,13 @@
       
       <div class="relative z-10 px-5 pt-6 pb-8">
         <div class="flex items-center gap-3 mb-6">
-           <div class="w-14 h-14 rounded-full bg-gradient-to-br from-[#4A9FE3] to-[#1e3a8a] flex items-center justify-center shadow-lg shadow-[#4A9FE3]/30">
-              <svg width="32" height="32" viewBox="0 0 100 100">
-                <path d="M 30 65 Q 30 50 45 50 Q 55 50 55 35 Q 55 20 70 20" fill="none" stroke="#9FE8FF" stroke-width="8" stroke-linecap="round"/>
-                <circle cx="30" cy="65" r="7" fill="#9FE8FF"/>
-                <circle cx="70" cy="20" r="7" fill="#9FE8FF"/>
+           <!-- LOGO HEADER ORIGINAL -->
+           <div class="w-14 h-14 rounded-full bg-[#5BA9E0] flex items-center justify-center shadow-lg shadow-[#4A9FE3]/40 logo-glow">
+              <svg width="34" height="34" viewBox="0 0 100 100">
+                <path d="M 65 32 C 65 22, 55 22, 50 28 C 45 34, 45 44, 50 50 C 55 56, 55 66, 50 72 C 45 78, 35 78, 35 68" 
+                      fill="none" stroke="#B0F0FF" stroke-width="7" stroke-linecap="round"/>
+                <circle cx="65" cy="32" r="9" fill="#5BA9E0" stroke="#B0F0FF" stroke-width="5"/>
+                <circle cx="35" cy="68" r="9" fill="#5BA9E0" stroke="#B0F0FF" stroke-width="5"/>
               </svg>
            </div>
            <h1 class="text-3xl font-black text-white">RutaFlex</h1>
@@ -193,11 +201,13 @@
   <!-- ==================== PANTALLA PEGAR TEXTO ==================== -->
   <div id="pegarTextoScreen" class="hidden min-h-screen bg-[#0A1220] text-white pb-safe">
      <div class="bg-[#121E32] border-b border-[#1E324F] p-5 flex items-center gap-3">
-        <div class="w-14 h-14 rounded-full bg-gradient-to-br from-[#4A9FE3] to-[#1e3a8a] flex items-center justify-center shadow-lg">
-           <svg width="32" height="32" viewBox="0 0 100 100">
-              <path d="M 30 65 Q 30 50 45 50 Q 55 50 55 35 Q 55 20 70 20" fill="none" stroke="#9FE8FF" stroke-width="8" stroke-linecap="round"/>
-              <circle cx="30" cy="65" r="7" fill="#9FE8FF"/>
-              <circle cx="70" cy="20" r="7" fill="#9FE8FF"/>
+        <!-- LOGO PEGAR TEXTO -->
+        <div class="w-14 h-14 rounded-full bg-[#5BA9E0] flex items-center justify-center shadow-lg logo-glow">
+           <svg width="34" height="34" viewBox="0 0 100 100">
+              <path d="M 65 32 C 65 22, 55 22, 50 28 C 45 34, 45 44, 50 50 C 55 56, 55 66, 50 72 C 45 78, 35 78, 35 68" 
+                    fill="none" stroke="#B0F0FF" stroke-width="7" stroke-linecap="round"/>
+              <circle cx="65" cy="32" r="9" fill="#5BA9E0" stroke="#B0F0FF" stroke-width="5"/>
+              <circle cx="35" cy="68" r="9" fill="#5BA9E0" stroke="#B0F0FF" stroke-width="5"/>
            </svg>
         </div>
         <h1 class="text-3xl font-black text-white">RutaFlex</h1>
@@ -232,12 +242,14 @@
         </div>
 
         <div id="pegarTextoResult" class="hidden space-y-4">
+           <!-- HEADER RESULTADO CON LOGO ORIGINAL -->
            <div class="flex items-center gap-3 mb-2">
-              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#4A9FE3] to-[#1e3a8a] flex items-center justify-center">
-                 <svg width="24" height="24" viewBox="0 0 100 100">
-                    <path d="M 30 65 Q 30 50 45 50 Q 55 50 55 35 Q 55 20 70 20" fill="none" stroke="#9FE8FF" stroke-width="8" stroke-linecap="round"/>
-                    <circle cx="30" cy="65" r="7" fill="#9FE8FF"/>
-                    <circle cx="70" cy="20" r="7" fill="#9FE8FF"/>
+              <div class="w-14 h-14 rounded-full bg-[#5BA9E0] flex items-center justify-center shadow-lg logo-glow">
+                 <svg width="34" height="34" viewBox="0 0 100 100">
+                    <path d="M 65 32 C 65 22, 55 22, 50 28 C 45 34, 45 44, 50 50 C 55 56, 55 66, 50 72 C 45 78, 35 78, 35 68" 
+                          fill="none" stroke="#B0F0FF" stroke-width="7" stroke-linecap="round"/>
+                    <circle cx="65" cy="32" r="9" fill="#5BA9E0" stroke="#B0F0FF" stroke-width="5"/>
+                    <circle cx="35" cy="68" r="9" fill="#5BA9E0" stroke="#B0F0FF" stroke-width="5"/>
                  </svg>
               </div>
               <div>
@@ -303,12 +315,14 @@
   <div id="perfilScreen" class="hidden min-h-screen bg-[#0A1220] pb-safe">
      <div class="bg-[#121E32] pb-8 pt-6 px-6 text-center text-white relative rounded-b-[32px] border-b border-[#1E324F]">
         <h3 class="font-bold text-[11px] tracking-[1.5px] opacity-50 mb-4">MI PERFIL</h3>
-        <div id="perfilAvatarWrapper" class="w-[100px] h-[100px] mx-auto rounded-full bg-gradient-to-br from-[#4A9FE3] to-[#1e3a8a] p-1 mb-4 shadow-lg shadow-[#4A9FE3]/30">
-           <div class="w-full h-full rounded-full bg-[#121E32] flex items-center justify-center">
-              <svg width="50" height="50" viewBox="0 0 100 100">
-                 <path d="M 30 65 Q 30 50 45 50 Q 55 50 55 35 Q 55 20 70 20" fill="none" stroke="#9FE8FF" stroke-width="8" stroke-linecap="round"/>
-                 <circle cx="30" cy="65" r="7" fill="#9FE8FF"/>
-                 <circle cx="70" cy="20" r="7" fill="#9FE8FF"/>
+        <!-- LOGO PERFIL ORIGINAL -->
+        <div id="perfilAvatarWrapper" class="w-[110px] h-[110px] mx-auto rounded-full bg-[#0d2b5e] p-1.5 mb-4 shadow-lg shadow-[#4A9FE3]/40 logo-glow">
+           <div class="w-full h-full rounded-full bg-[#5BA9E0] flex items-center justify-center">
+              <svg width="60" height="60" viewBox="0 0 100 100">
+                 <path d="M 65 32 C 65 22, 55 22, 50 28 C 45 34, 45 44, 50 50 C 55 56, 55 66, 50 72 C 45 78, 35 78, 35 68" 
+                       fill="none" stroke="#B0F0FF" stroke-width="7" stroke-linecap="round"/>
+                 <circle cx="65" cy="32" r="9" fill="#5BA9E0" stroke="#B0F0FF" stroke-width="5"/>
+                 <circle cx="35" cy="68" r="9" fill="#5BA9E0" stroke="#B0F0FF" stroke-width="5"/>
               </svg>
            </div>
         </div>
@@ -325,7 +339,7 @@
            </div>
            <div class="grid grid-cols-2 gap-3 mb-4">
               <button onclick="abrirModalPagos('Semanal', 4990)" class="p-4 rounded-xl text-center font-bold text-white shadow-md border border-green-500/30" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                 <div class="text-2xl mb-1">⚡</div><div class="text-xs">SEMANAL</div><div class="text-lg font-black">$4.990</div>
+                 <div class="text-2xl mb-1"></div><div class="text-xs">SEMANAL</div><div class="text-lg font-black">$4.990</div>
               </button>
               <button onclick="abrirModalPagos('Mensual', 14990)" class="p-4 rounded-xl text-center font-bold text-white shadow-md relative border border-[#4A9FE3]/30" style="background: linear-gradient(135deg, #1e40af 0%, #0A1220 100%);">
                  <div class="absolute -top-2 -right-2 bg-[#00E5FF] text-[#0A1220] text-[10px] font-black px-2 py-1 rounded-full">POPULAR</div>
@@ -385,7 +399,7 @@
               <button onclick="copiarAlias()" class="bg-[#4A9FE3] text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#5BA9E0] transition-all">Copiar</button>
            </div>
         </div>
-        <a id="btn-wsp-pago" href="#" target="_blank" class="block p-4 rounded-xl bg-green-600 text-white font-bold text-center hover:bg-green-500 transition-all">💬 Enviar comprobante por WhatsApp</a>
+        <a id="btn-wsp-pago" href="#" target="_blank" class="block p-4 rounded-xl bg-green-600 text-white font-bold text-center hover:bg-green-500 transition-all"> Enviar comprobante por WhatsApp</a>
         <button onclick="cerrarModalPagos()" class="w-full p-3 text-gray-400 text-sm hover:text-white transition-all">Cerrar</button>
       </div>
     </div>
