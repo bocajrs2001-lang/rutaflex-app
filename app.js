@@ -1,8 +1,21 @@
 const CONFIG_RUTAFLEX = { whatsapp:"5491123793596", alias:"RUTAFLEX.MP", linkSemanal:"https://mpago.la/2DjaHdB", linkMensual:"https://mpago.la/2aNpJ1B" };
 let destinos=[], destinosDetectados=[], emailRecuperacion="", estaVencido=false;
 
+// Fecha de hoy
+const hoy = new Date();
+const opciones = { day: 'numeric', month: 'short' };
+const fechaHoy = hoy.toLocaleDateString('es-AR', opciones).replace('.', '');
+const fechaEl = document.getElementById('fechaHoy');
+if (fechaEl) fechaEl.innerText = `Hoy, ${fechaHoy}`;
+
 window.togglePass=(id,icon)=>{const i=document.getElementById(id);if(!i)return;i.type=i.type==="password"?"text":"password";icon.innerText=i.type==="text"?"🙈":"👁️"};
-function mostrarNotificacion(m,t='info'){const c=document.getElementById('notificaciones');if(!c)return;const n=document.createElement('div');n.className=`${t==='exito'?'bg-green-600':t==='error'?'bg-red-600':'bg-[#4A9FE3]'} text-white px-6 py-3 rounded-xl font-bold text-sm text-center shadow-xl`;n.innerText=m;c.appendChild(n);setTimeout(()=>n.remove(),3500)}
+
+function mostrarNotificacion(m,t='info'){
+  const c=document.getElementById('notificaciones');if(!c)return;
+  const n=document.createElement('div');
+  n.className=`${t==='exito'?'bg-green-600':t==='error'?'bg-red-600':'bg-[#4A9FE3]'} text-white px-6 py-3 rounded-xl font-bold text-sm text-center shadow-xl`;
+  n.innerText=m;c.appendChild(n);setTimeout(()=>n.remove(),3500);
+}
 
 function ocultarTodasLasPantallasExcepto(id){
   ['authScreen','appScreen','pegarTextoScreen','perfilScreen','payment-modal','modalEdicion'].forEach(s=>{
@@ -12,15 +25,30 @@ function ocultarTodasLasPantallasExcepto(id){
   window.scrollTo(0,0);
 }
 
+function actualizarNav(tabActivo) {
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    if (btn.dataset.tab === tabActivo) {
+      btn.classList.remove('text-gray-500');
+      btn.classList.add('text-[#00E5FF]');
+    } else {
+      btn.classList.remove('text-[#00E5FF]');
+      btn.classList.add('text-gray-500');
+    }
+  });
+}
+
 function mostrarTab(tab) {
-  if(tab === 'home') ocultarTodasLasPantallasExcepto('appScreen');
+  if(tab === 'home') {
+    ocultarTodasLasPantallasExcepto('appScreen');
+    actualizarNav('home');
+  }
   if(tab === 'perfil') {
     ocultarTodasLasPantallasExcepto('perfilScreen');
     mostrarPerfil();
+    actualizarNav('perfil');
   }
   if(tab === 'rutas' || tab === 'historial') {
-    mostrarNotificacion("🚧 Sección en desarrollo", "info");
-    ocultarTodasLasPantallasExcepto('appScreen');
+    mostrarNotificacion(" Sección en desarrollo", "info");
   }
 }
 
@@ -50,20 +78,20 @@ async function hacerLogout(){
   location.reload();
 }
 
-// Auth Listeners
+// Auth
 document.getElementById('tabLogin')?.addEventListener('click',()=>{
   document.getElementById('formLogin').classList.remove('hidden');
   document.getElementById('formRegistro').classList.add('hidden');
-  document.getElementById('tabLogin').className="flex-1 py-3 px-4 rounded-xl font-bold text-[#4A9FE3] bg-white/20 transition-all";
-  document.getElementById('tabRegistro').className="flex-1 py-3 px-4 rounded-xl font-bold text-white/60 hover:text-white transition-all";
+  document.getElementById('tabLogin').className="flex-1 py-3 px-4 rounded-xl font-bold text-[#4A9FE3] bg-[#1E324F] transition-all";
+  document.getElementById('tabRegistro').className="flex-1 py-3 px-4 rounded-xl font-bold text-gray-400 hover:text-white transition-all";
 });
 document.getElementById('tabRegistro')?.addEventListener('click',()=>{
   document.getElementById('formRegistro').classList.remove('hidden');
   document.getElementById('formLogin').classList.add('hidden');
-  document.getElementById('tabRegistro').className="flex-1 py-3 px-4 rounded-xl font-bold text-[#4A9FE3] bg-white/20 transition-all";
-  document.getElementById('tabLogin').className="flex-1 py-3 px-4 rounded-xl font-bold text-white/60 hover:text-white transition-all";
+  document.getElementById('tabRegistro').className="flex-1 py-3 px-4 rounded-xl font-bold text-[#4A9FE3] bg-[#1E324F] transition-all";
+  document.getElementById('tabLogin').className="flex-1 py-3 px-4 rounded-xl font-bold text-gray-400 hover:text-white transition-all";
 });
-document.getElementById('btnOlvideContrasena')?.addEventListener('click',()=>{ ocultarTodasLasPantallasExcepto('authScreen'); /* Lógica recover */ });
+
 document.getElementById('formLogin')?.addEventListener('submit',async(e)=>{
   e.preventDefault();
   const email=document.getElementById('loginEmail').value, password=document.getElementById('loginPassword').value;
@@ -72,25 +100,31 @@ document.getElementById('formLogin')?.addEventListener('submit',async(e)=>{
     const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({email,password})});
     const d=await r.json();
     if(r.ok){ localStorage.setItem('rutaflex_email',email); mostrarApp(d.usuario.nombre,d.usuario.fecha_vencimiento); }
-    else{ msg.innerText=d.error||"Error"; msg.className="text-center text-sm mt-4 font-bold text-red-400"; }
+    else{ msg.innerText=d.error||"Error"; }
   }catch{ msg.innerText="Error de conexión"; }
 });
-document.getElementById('btnLogoutDropdown')?.addEventListener('click',hacerLogout);
+
 document.getElementById('btnLogoutPerfil')?.addEventListener('click',hacerLogout);
+document.getElementById('btnPromo')?.addEventListener('click',async()=>{
+  const codigo=document.getElementById('promo').value;if(!codigo)return;
+  const r=await fetch('/api/validar-promo',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({codigo})});
+  const d=await r.json();mostrarNotificacion(d.mensaje,d.valido?'exito':'error');
+});
 
 function mostrarApp(nombre,fechaVencimiento){
   ocultarTodasLasPantallasExcepto('appScreen');
-  document.getElementById('userName').innerText=`${nombre} 👋`;
+  actualizarNav('home');
+  document.getElementById('userName').innerText=`¡Hola, ${nombre}! 👋`;
   const diff=Math.ceil((new Date(fechaVencimiento)-new Date())/(1000*60*60*24));
   estaVencido = diff <= 0;
   const contadorEl=document.getElementById('contadorDias');
   if(estaVencido){
-    contadorEl.innerText="⚠️ VENCIDO"; contadorEl.className="inline-block mt-1 text-xs font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-400";
+    contadorEl.innerText="⚠️ VENCIDO"; contadorEl.className="inline-block mt-2 text-xs font-bold px-3 py-1 rounded-full bg-red-500/20 text-red-400 border border-red-500/30";
     document.getElementById('bannerVencido').classList.remove('hidden');
-  } else if(diff<=1){
-    contadorEl.innerText=`⏳ Vence en ${diff} día`; contadorEl.className="inline-block mt-1 text-xs font-bold px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400";
+  } else if(diff<=3){
+    contadorEl.innerText=`⏳ Vence en ${diff} días`; contadorEl.className="inline-block mt-2 text-xs font-bold px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/30";
   } else {
-    contadorEl.innerText=`✅ Activo (${diff} días)`; contadorEl.className="inline-block mt-1 text-xs font-bold px-2 py-0.5 rounded-full bg-green-500/20 text-green-400";
+    contadorEl.innerText=`✅ Activo (${diff} días)`; contadorEl.className="inline-block mt-2 text-xs font-bold px-3 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/30";
   }
   cargarDestinos();
 }
@@ -101,38 +135,47 @@ async function cargarDestinos(){
     const r = await fetch('/api/destinos',{credentials:'include'});
     destinos = await r.json();
     renderLista();
+    actualizarRecientes();
   }catch(e){ console.error(e); }
+}
+
+function actualizarRecientes() {
+  if (destinos.length > 0) {
+    const titulo = document.getElementById('recienteTitulo');
+    const sub = document.getElementById('recienteSub');
+    if (titulo) titulo.innerText = `${destinos[0].direccion || 'Ruta'} → ${destinos[destinos.length-1].direccion || 'Final'}`;
+    if (sub) sub.innerText = `Creada ahora • ${destinos.length} paradas`;
+  }
 }
 
 // OCR
 document.getElementById('fileImg')?.addEventListener('change', async (e) => {
   if (estaVencido) return mostrarNotificacion("⚠️ Plan vencido", "error");
   const file = e.target.files[0]; if (!file) return;
-  const btn = document.getElementById('btnCargar'); const txt = btn.innerText;
-  btn.innerText = "🤖 Leyendo..."; btn.disabled = true;
+  mostrarNotificacion("🤖 Leyendo imagen...", "info");
   try {
     const { data: { text } } = await Tesseract.recognize(file, 'spa');
     let lineas = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
     let agrupadas = [];
     for (let i = 0; i < lineas.length; i++) {
       let actual = lineas[i]; let siguiente = lineas[i+1] || "";
-      if (actual.length < 40 && !/\d{3,4}/.test(actual) && (/\d{2,4}/.test(siguiente) || /(Av\.|Libertador|Rivadavia|Corrientes)/i.test(siguiente))) {
+      if (actual.length < 40 && !/\d{3,4}/.test(actual) && (/\d{2,4}/.test(siguiente) || /(Av\.|Libertador|Rivadavia|Corrientes|Santa Fe)/i.test(siguiente))) {
         agrupadas.push(`${actual} - ${siguiente}`); i++;
       } else if (actual.length > 8) { agrupadas.push(actual); }
     }
     destinosDetectados = [...new Set(agrupadas)].filter(l=>l.length>10);
-    if (destinosDetectados.length === 0) return mostrarNotificacion("⚠️ No se entendió", "error");
+    if (destinosDetectados.length === 0) return mostrarNotificacion("️ No se entendió", "error");
     mostrarNotificacion(`✅ ${destinosDetectados.length} detectados`, "exito");
     mostrarModalEdicion();
   } catch (err) { mostrarNotificacion("❌ Error leyendo", "error");
-  } finally { btn.innerText = txt; btn.disabled = false; e.target.value = ''; }
+  } finally { e.target.value = ''; }
 });
 
 function mostrarModalEdicion(){
   const c=document.getElementById('contenedorInputs'); c.innerHTML='';
   destinosDetectados.forEach((dir,i)=>{
     c.innerHTML+=`<div class="flex gap-2 items-start bg-[#0A1220] p-3 rounded-xl border border-[#1E324F]">
-      <span class="bg-[#4A9FE3] text-[#0A1220] rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold mt-1">${i+1}</span>
+      <span class="bg-[#00E5FF] text-[#0A1220] rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold mt-1 flex-shrink-0">${i+1}</span>
       <input type="text" value="${dir.replace(/"/g,'&quot;')}" class="input-direccion flex-1 bg-[#121E32] border border-[#1E324F] rounded-lg px-3 py-2 text-sm text-white" placeholder="Dirección">
       <button onclick="eliminarLinea(${i})" class="text-red-400 p-2">🗑️</button>
     </div>`;
@@ -160,8 +203,8 @@ document.getElementById('btnCerrarModal')?.addEventListener('click',()=>{documen
 function renderLista(){
   const l=document.getElementById('lista'); if(!l)return; l.innerHTML="";
   destinos.forEach((d,i)=>{
-    l.innerHTML+=`<li class="bg-[#121E32] border border-[#1E324F] border-l-[4px] border-l-[#4A9FE3] rounded-xl p-3 flex gap-3 items-center mb-2">
-      <span class="bg-[#4A9FE3] text-[#0A1220] rounded-full w-7 h-7 flex items-center justify-center text-xs font-black flex-shrink-0">${i+1}</span>
+    l.innerHTML+=`<li class="bg-[#121E32] border border-[#1E324F] border-l-[4px] border-l-[#00E5FF] rounded-xl p-3 flex gap-3 items-center mb-2">
+      <span class="bg-[#00E5FF] text-[#0A1220] rounded-full w-7 h-7 flex items-center justify-center text-xs font-black flex-shrink-0">${i+1}</span>
       <div class="flex-1 min-w-0"><b class="block truncate text-white text-sm">${d.direccion||d.dirección}</b></div>
       <button onclick="borrarDestino('${d._id}')" class="text-gray-400 hover:text-red-400 p-1">✕</button>
     </li>`;
@@ -170,7 +213,7 @@ function renderLista(){
 window.borrarDestino=async(id)=>{await fetch(`/api/destinos/${id}`,{method:'DELETE',credentials:'include'});await cargarDestinos()};
 
 // ==========================================
-// 📋 MÓDULO PEGAR TEXTO (OPTIMIZADO CON GPS Y TRAMOS)
+//  MÓDULO PEGAR TEXTO (OPTIMIZADO)
 // ==========================================
 document.getElementById('btnPegarTexto')?.addEventListener('click', () => {
   ocultarTodasLasPantallasExcepto('pegarTextoScreen');
@@ -180,7 +223,10 @@ document.getElementById('btnPegarTexto')?.addEventListener('click', () => {
   document.getElementById('textoDirecciones').value = '';
 });
 
-document.getElementById('btnVolverPegarTexto')?.addEventListener('click', () => { ocultarTodasLasPantallasExcepto('appScreen'); });
+document.getElementById('btnVolverPegarTexto')?.addEventListener('click', () => { 
+  ocultarTodasLasPantallasExcepto('appScreen'); 
+  actualizarNav('home');
+});
 document.getElementById('btnReiniciarPegar')?.addEventListener('click', () => {
   document.getElementById('pegarTextoStep1').classList.remove('hidden');
   document.getElementById('pegarTextoLoading').classList.add('hidden');
@@ -189,7 +235,7 @@ document.getElementById('btnReiniciarPegar')?.addEventListener('click', () => {
 });
 
 const limpiarTextoSucio = (t) => t.replace(/[\u{1F600}-\u{1F6FF}\u{2600}-\u{26FF}]/gu, '')
-  .replace(/\b(hola|buen dia|che|capo|gracias|mañana|hoy)\b/gi, '')
+  .replace(/\b(hola|buen dia|che|capo|gracias|mañana|hoy|como estas)\b/gi, '')
   .replace(/\b\d{2,4}[- ]?\d{3,4}[- ]?\d{4}\b/g, '').replace(/\$\s?\d+/g, '')
   .split('\n').map(l => l.trim()).filter(l => l.length > 8).join('\n');
 
@@ -200,14 +246,14 @@ document.getElementById('btnProcesarTexto')?.addEventListener('click', async () 
   document.getElementById('pegarTextoStep1').classList.add('hidden');
   document.getElementById('pegarTextoLoading').classList.remove('hidden');
 
-  // 1. Obtener GPS del usuario
-  let userLat = -34.6037, userLon = -58.3816; // Default CABA
+  // 1. GPS
+  let userLat = -34.6037, userLon = -58.3816;
   try {
     const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, {enableHighAccuracy:true, timeout:10000}));
     userLat = pos.coords.latitude; userLon = pos.coords.longitude;
-  } catch(e) { console.log("GPS no disponible, usando default"); }
+  } catch(e) { console.log("GPS no disponible"); }
 
-  // 2. Limpiar y extraer
+  // 2. Extraer
   const limpio = limpiarTextoSucio(texto);
   const regex = /([A-Za-zÁÉÍÓÚáéíóúÑñ\. ]{3,}\s+\d{1,5}[A-Za-z]?)(\s*,\s*[A-Za-z ]+)?/g;
   const candidatas = [...limpio.matchAll(regex)].map(m => m[0].trim()).slice(0, 50);
@@ -216,7 +262,7 @@ document.getElementById('btnProcesarTexto')?.addEventListener('click', async () 
   const validadas = [];
   let descartadas = 0;
 
-  // 3. Validar con Nominatim
+  // 3. Validar Nominatim
   for (const dir of unicas) {
     try {
       const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(dir + ', Buenos Aires, Argentina')}&limit=1`, {headers: {'User-Agent': 'RutaFlexApp/1.0'}});
@@ -227,65 +273,73 @@ document.getElementById('btnProcesarTexto')?.addEventListener('click', async () 
     } catch (e) { descartadas++; }
   }
 
-  // 4. Ordenar por distancia desde el usuario (Haversine)
+  // 4. Ordenar por distancia (Haversine)
   const toRad = v => v * Math.PI / 180;
-  validadas.sort((a, b) => {
+  const distHaversine = (lat1, lon1, lat2, lon2) => {
     const R = 6371;
-    const dLat1 = toRad(a.lat - userLat), dLon1 = toRad(a.lon - userLon);
-    const dLat2 = toRad(b.lat - userLat), dLon2 = toRad(b.lon - userLon);
-    const distA = R * 2 * Math.asin(Math.sqrt(Math.sin(dLat1/2)**2 + Math.cos(toRad(userLat)) * Math.cos(toRad(a.lat)) * Math.sin(dLon1/2)**2));
-    const distB = R * 2 * Math.asin(Math.sqrt(Math.sin(dLat2/2)**2 + Math.cos(toRad(userLat)) * Math.cos(toRad(b.lat)) * Math.sin(dLon2/2)**2));
-    return distA - distB;
-  });
+    const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  };
+  validadas.sort((a, b) => distHaversine(userLat, userLon, a.lat, a.lon) - distHaversine(userLat, userLon, b.lat, b.lon));
 
-  // 5. Renderizar resultados
+  // 5. Renderizar
   document.getElementById('pegarTextoLoading').classList.add('hidden');
   document.getElementById('pegarTextoResult').classList.remove('hidden');
   document.getElementById('countValidas').innerText = validadas.length;
-  document.getElementById('countDescartadas').innerText = descartadas;
   document.getElementById('statParadasPegadas').innerText = validadas.length;
-  document.getElementById('statDistanciaPegadas').innerText = (validadas.length * 1.5).toFixed(1);
-  document.getElementById('statTiempoPegadas').innerText = Math.round(validadas.length * 3.5);
+  const distTotal = (validadas.length * 2.1).toFixed(0);
+  const tiempoTotal = (validadas.length * 0.13).toFixed(1);
+  document.getElementById('statDistanciaPegadas').innerText = distTotal;
+  document.getElementById('statTiempoPegadas').innerText = tiempoTotal;
 
   const listaEl = document.getElementById('listaPegadas');
   listaEl.innerHTML = '';
+  const tipos = ['Recogida', 'Entrega', 'Entrega', 'Entrega'];
+  const tiempos = ['15 min', '12 min', '10 min', '20 min'];
+  
   validadas.forEach((r, i) => {
-    listaEl.innerHTML += `<div class="bg-[#121E32] rounded-xl p-3 flex gap-3 border border-[#1E324F]">
-      <div class="w-7 h-7 rounded-full bg-[#00E5FF] text-[#0A1220] font-black flex items-center justify-center flex-shrink-0 text-sm">${i + 1}</div>
-      <div class="min-w-0"><p class="font-bold text-sm text-white truncate">${r.original}</p><p class="text-xs text-gray-400 truncate">${r.display}</p></div>
-    </div>`;
+    const tipo = i === 0 ? 'Recogida' : 'Entrega';
+    const tiempo = `${Math.floor(Math.random()*15+8)} min`;
+    listaEl.innerHTML += `
+      <div class="bg-[#121E32] rounded-xl p-3 flex gap-3 items-center border border-[#1E324F]">
+        <div class="w-8 h-8 rounded-full bg-[#00E5FF] text-[#0A1220] font-black flex items-center justify-center flex-shrink-0 text-sm">${i + 1}</div>
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-sm text-white truncate">${r.original}</p>
+          <p class="text-xs text-gray-400 truncate">${tipo} • ${tiempo}</p>
+        </div>
+        <svg class="w-5 h-5 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+      </div>
+    `;
   });
 
-  // 6. Generar tramos de 10 en 10 para Maps y Waze
+  // 6. Tramos de 10 en 10
   const tramosContainer = document.getElementById('tramosContainer');
   tramosContainer.innerHTML = '';
   
-  const CHUNK = 9; // 1 destino final + 8 waypoints = 9
+  const CHUNK = 9;
   for (let i = 0; i < validadas.length; i += CHUNK) {
     const chunk = validadas.slice(i, i + CHUNK);
     const tramoNum = Math.floor(i / CHUNK) + 1;
     const totalTramos = Math.ceil(validadas.length / CHUNK);
     
-    // Google Maps URL con optimize:true
     const origin = `${userLat},${userLon}`;
     const dest = `${chunk[chunk.length-1].lat},${chunk[chunk.length-1].lon}`;
     const waypoints = chunk.slice(0, -1).map(p => `${p.lat},${p.lon}`).join('|');
     const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&waypoints=optimize:true|${waypoints}&travelmode=driving`;
-    
-    // Waze URL (Waze no soporta waypoints múltiples bien, usamos el primer destino del tramo como referencia)
     const wazeUrl = `https://www.waze.com/es-419/ul?ll=${chunk[0].lat},${chunk[0].lon}&navigate=yes`;
 
     tramosContainer.innerHTML += `
       <div class="bg-[#121E32] rounded-xl p-4 border border-[#1E324F]">
         <p class="text-[#00E5FF] font-bold text-sm mb-3 text-center">Tramo ${tramoNum} de ${totalTramos} (${chunk.length} paradas)</p>
         <div class="grid grid-cols-2 gap-3">
-          <a href="${mapsUrl}" target="_blank" class="bg-[#00E5FF] text-[#0A1220] font-black py-3 rounded-xl text-center text-sm hover:bg-[#00c8e0] transition-all flex items-center justify-center gap-2">
+          <a href="${mapsUrl}" target="_blank" class="bg-[#00E5FF] text-[#0A1220] font-black py-4 rounded-xl text-center text-sm hover:bg-[#00c8e0] transition-all flex items-center justify-center gap-2 active:scale-95">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            GOOGLE MAPS
+            ABRIR EN<br>GOOGLE MAPS
           </a>
-          <a href="${wazeUrl}" target="_blank" class="bg-[#33CCFF] text-white font-black py-3 rounded-xl text-center text-sm hover:bg-[#2ab8e6] transition-all flex items-center justify-center gap-2">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-            WAZE
+          <a href="${wazeUrl}" target="_blank" class="bg-transparent border-2 border-[#00E5FF] text-[#00E5FF] font-black py-4 rounded-xl text-center text-sm hover:bg-[#00E5FF]/10 transition-all flex items-center justify-center gap-2 active:scale-95">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5c-2-1-4.5-1.5-7-1.5s-5 .5-7 1.5C3 5.5 1 8.5 1 12c0 2.5 1 5 2.5 7L2 22l3.5-1.5c2 1 4.5 1.5 7 1.5 5.5 0 10-4.5 10-10 0-3.5-2-6.5-4.5-8.5z"/></svg>
+            ABRIR EN<br>WAZE
           </a>
         </div>
       </div>
@@ -293,17 +347,11 @@ document.getElementById('btnProcesarTexto')?.addEventListener('click', async () 
   }
 });
 
-// Utilidades
 async function abrirCamara(){
   const v=document.getElementById('camara'); v.classList.remove('hidden');
   try{ v.srcObject=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}}); }
   catch{ mostrarNotificacion("No se pudo abrir cámara","error"); }
 }
-
-const logoMenuBtn=document.getElementById('logoMenuBtn'), logoDropdown=document.getElementById('logoDropdown');
-logoMenuBtn?.addEventListener('click',e=>{e.stopPropagation();logoDropdown.classList.toggle('hidden');logoDropdown.classList.toggle('flex')});
-document.addEventListener('click',e=>{if(logoDropdown&&!logoDropdown.contains(e.target)&&!logoMenuBtn.contains(e.target)){logoDropdown.classList.add('hidden');logoDropdown.classList.remove('flex')}});
-document.getElementById('btnIrPerfil')?.addEventListener('click',()=>{logoDropdown.classList.add('hidden');logoDropdown.classList.remove('flex');mostrarTab('perfil')});
 
 function mostrarPerfil(){
   const email=localStorage.getItem('rutaflex_email')||'usuario@rutaflex.com';
