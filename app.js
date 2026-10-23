@@ -1,19 +1,18 @@
 const CONFIG_RUTAFLEX = { whatsapp:"5491123793596", alias:"RUTAFLEX.MP", linkSemanal:"https://mpago.la/2DjaHdB", linkMensual:"https://mpago.la/2aNpJ1B" };
 let destinos=[], destinosDetectados=[], emailRecuperacion="", estaVencido=false;
 
-// Fecha de hoy
 const hoy = new Date();
 const opciones = { day: 'numeric', month: 'short' };
 const fechaHoy = hoy.toLocaleDateString('es-AR', opciones).replace('.', '');
 const fechaEl = document.getElementById('fechaHoy');
 if (fechaEl) fechaEl.innerText = `Hoy, ${fechaHoy}`;
 
-window.togglePass=(id,icon)=>{const i=document.getElementById(id);if(!i)return;i.type=i.type==="password"?"text":"password";icon.innerText=i.type==="text"?"🙈":"️"};
+window.togglePass=(id,icon)=>{const i=document.getElementById(id);if(!i)return;i.type=i.type==="password"?"text":"password";icon.innerText=i.type==="text"?"":"👁️"};
 
 function mostrarNotificacion(m,t='info'){
   const c=document.getElementById('notificaciones');if(!c)return;
   const n=document.createElement('div');
-  n.className=`${t==='exito'?'bg-green-600':t==='error'?'bg-red-600':'bg-[#4A9FE3]'} text-white px-6 py-3 rounded-xl font-bold text-sm text-center shadow-xl`;
+  n.className=`${t==='exito'?'bg-green-600':t==='error'?'bg-red-600':'bg-[#00E5FF]'} text-white px-6 py-3 rounded-xl font-bold text-sm text-center shadow-xl`;
   n.innerText=m;c.appendChild(n);setTimeout(()=>n.remove(),3500);
 }
 
@@ -28,16 +27,15 @@ function ocultarTodasLasPantallasExcepto(id){
 function actualizarNav(tabActivo) {
   document.querySelectorAll('.nav-btn').forEach(btn => {
     if (btn.dataset.tab === tabActivo) {
-      btn.classList.remove('text-gray-500');
-      btn.classList.add('text-[#00E5FF]');
+      btn.classList.remove('text-white/30');
+      btn.classList.add('text-white');
     } else {
-      btn.classList.remove('text-[#00E5FF]');
-      btn.classList.add('text-gray-500');
+      btn.classList.remove('text-white');
+      btn.classList.add('text-white/30');
     }
   });
 }
 
-// ✅ FUNCIÓN DE NAVEGACIÓN CON HISTORIAL
 function mostrarTab(tab, pushState = true) {
   if(tab === 'home') {
     ocultarTodasLasPantallasExcepto('appScreen');
@@ -50,17 +48,15 @@ function mostrarTab(tab, pushState = true) {
     actualizarNav('perfil');
     if (pushState) history.pushState({tab: 'perfil'}, '', '#perfil');
   }
-  if(tab === 'rutas' || tab === 'historial') {
+  if(tab === 'historial') {
     mostrarNotificacion("🚧 Sección en desarrollo", "info");
   }
 }
 
-// ✅ DETECTAR BOTÓN ATRÁS DEL NAVEGADOR
 window.addEventListener('popstate', (event) => {
   if (event.state && event.state.tab) {
     mostrarTab(event.state.tab, false);
   } else {
-    // Si no hay estado, volver al home
     mostrarTab('home', false);
   }
 });
@@ -91,18 +87,17 @@ async function hacerLogout(){
   location.reload();
 }
 
-// Auth
 document.getElementById('tabLogin')?.addEventListener('click',()=>{
   document.getElementById('formLogin').classList.remove('hidden');
   document.getElementById('formRegistro').classList.add('hidden');
-  document.getElementById('tabLogin').className="flex-1 py-3 px-4 rounded-xl font-bold text-[#4A9FE3] bg-[#1E324F] transition-all";
-  document.getElementById('tabRegistro').className="flex-1 py-3 px-4 rounded-xl font-bold text-gray-400 hover:text-white transition-all";
+  document.getElementById('tabLogin').className="flex-1 py-3 px-4 rounded-xl font-bold text-[#00E5FF] bg-white/10 transition-all";
+  document.getElementById('tabRegistro').className="flex-1 py-3 px-4 rounded-xl font-bold text-white/60 hover:text-white transition-all";
 });
 document.getElementById('tabRegistro')?.addEventListener('click',()=>{
   document.getElementById('formRegistro').classList.remove('hidden');
   document.getElementById('formLogin').classList.add('hidden');
-  document.getElementById('tabRegistro').className="flex-1 py-3 px-4 rounded-xl font-bold text-[#4A9FE3] bg-[#1E324F] transition-all";
-  document.getElementById('tabLogin').className="flex-1 py-3 px-4 rounded-xl font-bold text-gray-400 hover:text-white transition-all";
+  document.getElementById('tabRegistro').className="flex-1 py-3 px-4 rounded-xl font-bold text-[#00E5FF] bg-white/10 transition-all";
+  document.getElementById('tabLogin').className="flex-1 py-3 px-4 rounded-xl font-bold text-white/60 hover:text-white transition-all";
 });
 
 document.getElementById('formLogin')?.addEventListener('submit',async(e)=>{
@@ -128,17 +123,17 @@ function mostrarApp(nombre,fechaVencimiento){
   ocultarTodasLasPantallasExcepto('appScreen');
   actualizarNav('home');
   history.replaceState({tab: 'home'}, '', '#home');
-  document.getElementById('userName').innerText=`¡Hola, ${nombre}! `;
+  document.getElementById('userName').innerText=`¡Hola, ${nombre}!`;
   const diff=Math.ceil((new Date(fechaVencimiento)-new Date())/(1000*60*60*24));
   estaVencido = diff <= 0;
   const contadorEl=document.getElementById('contadorDias');
   if(estaVencido){
-    contadorEl.innerText="⚠️ VENCIDO"; contadorEl.className="inline-block mt-2 text-xs font-bold px-3 py-1 rounded-full bg-red-500/20 text-red-400 border border-red-500/30";
+    contadorEl.innerHTML="⚠️ VENCIDO"; contadorEl.className="mt-4 inline-flex items-center gap-1.5 bg-red-500/15 border border-red-500/30 text-red-400 px-3.5 py-1.5 rounded-full text-[13px] font-bold";
     document.getElementById('bannerVencido').classList.remove('hidden');
   } else if(diff<=3){
-    contadorEl.innerText=`⏳ Vence en ${diff} días`; contadorEl.className="inline-block mt-2 text-xs font-bold px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/30";
+    contadorEl.innerHTML=`⏳ Vence en ${diff} días`; contadorEl.className="mt-4 inline-flex items-center gap-1.5 bg-yellow-500/15 border border-yellow-500/30 text-yellow-400 px-3.5 py-1.5 rounded-full text-[13px] font-bold";
   } else {
-    contadorEl.innerText=`✅ Activo (${diff} días)`; contadorEl.className="inline-block mt-2 text-xs font-bold px-3 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/30";
+    contadorEl.innerHTML=`✅ Activo (${diff} días)`; contadorEl.className="mt-4 inline-flex items-center gap-1.5 bg-[#00C950]/15 border border-[#00C950]/30 text-[#00D084] px-3.5 py-1.5 rounded-full text-[13px] font-bold";
   }
   cargarDestinos();
 }
@@ -162,9 +157,8 @@ function actualizarRecientes() {
   }
 }
 
-// OCR
 document.getElementById('fileImg')?.addEventListener('change', async (e) => {
-  if (estaVencido) return mostrarNotificacion("⚠️ Plan vencido", "error");
+  if (estaVencido) return mostrarNotificacion("️ Plan vencido", "error");
   const file = e.target.files[0]; if (!file) return;
   mostrarNotificacion("🤖 Leyendo imagen...", "info");
   try {
@@ -181,16 +175,16 @@ document.getElementById('fileImg')?.addEventListener('change', async (e) => {
     if (destinosDetectados.length === 0) return mostrarNotificacion("⚠️ No se entendió", "error");
     mostrarNotificacion(`✅ ${destinosDetectados.length} detectados`, "exito");
     mostrarModalEdicion();
-  } catch (err) { mostrarNotificacion("❌ Error leyendo", "error");
+  } catch (err) { mostrarNotificacion(" Error leyendo", "error");
   } finally { e.target.value = ''; }
 });
 
 function mostrarModalEdicion(){
   const c=document.getElementById('contenedorInputs'); c.innerHTML='';
   destinosDetectados.forEach((dir,i)=>{
-    c.innerHTML+=`<div class="flex gap-2 items-start bg-[#0A1220] p-3 rounded-xl border border-[#1E324F]">
+    c.innerHTML+=`<div class="flex gap-2 items-start bg-[#0A1220]/80 backdrop-blur-xl p-3 rounded-xl border border-white/10">
       <span class="bg-[#00E5FF] text-[#0A1220] rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold mt-1 flex-shrink-0">${i+1}</span>
-      <input type="text" value="${dir.replace(/"/g,'&quot;')}" class="input-direccion flex-1 bg-[#121E32] border border-[#1E324F] rounded-lg px-3 py-2 text-sm text-white" placeholder="Dirección">
+      <input type="text" value="${dir.replace(/"/g,'&quot;')}" class="input-direccion flex-1 bg-[#111C31]/80 border border-white/10 rounded-lg px-3 py-2 text-sm text-white" placeholder="Dirección">
       <button onclick="eliminarLinea(${i})" class="text-red-400 p-2">🗑️</button>
     </div>`;
   });
@@ -217,18 +211,15 @@ document.getElementById('btnCerrarModal')?.addEventListener('click',()=>{documen
 function renderLista(){
   const l=document.getElementById('lista'); if(!l)return; l.innerHTML="";
   destinos.forEach((d,i)=>{
-    l.innerHTML+=`<li class="bg-[#121E32] border border-[#1E324F] border-l-[4px] border-l-[#00E5FF] rounded-xl p-3 flex gap-3 items-center mb-2">
+    l.innerHTML+=`<li class="bg-[#111C31]/80 backdrop-blur-xl border border-white/10 border-l-[4px] border-l-[#00E5FF] rounded-xl p-3 flex gap-3 items-center mb-2">
       <span class="bg-[#00E5FF] text-[#0A1220] rounded-full w-7 h-7 flex items-center justify-center text-xs font-black flex-shrink-0">${i+1}</span>
       <div class="flex-1 min-w-0"><b class="block truncate text-white text-sm">${d.direccion||d.dirección}</b></div>
-      <button onclick="borrarDestino('${d._id}')" class="text-gray-400 hover:text-red-400 p-1">✕</button>
+      <button onclick="borrarDestino('${d._id}')" class="text-white/40 hover:text-red-400 p-1">✕</button>
     </li>`;
   });
 }
 window.borrarDestino=async(id)=>{await fetch(`/api/destinos/${id}`,{method:'DELETE',credentials:'include'});await cargarDestinos()};
 
-// ==========================================
-// 📋 MÓDULO PEGAR TEXTO (OPTIMIZADO)
-// ==========================================
 document.getElementById('btnPegarTexto')?.addEventListener('click', () => {
   ocultarTodasLasPantallasExcepto('pegarTextoScreen');
   history.pushState({tab: 'pegar'}, '', '#pegar');
@@ -262,14 +253,12 @@ document.getElementById('btnProcesarTexto')?.addEventListener('click', async () 
   document.getElementById('pegarTextoStep1').classList.add('hidden');
   document.getElementById('pegarTextoLoading').classList.remove('hidden');
 
-  // 1. GPS
   let userLat = -34.6037, userLon = -58.3816;
   try {
     const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, {enableHighAccuracy:true, timeout:10000}));
     userLat = pos.coords.latitude; userLon = pos.coords.longitude;
   } catch(e) { console.log("GPS no disponible"); }
 
-  // 2. Extraer
   const limpio = limpiarTextoSucio(texto);
   const regex = /([A-Za-zÁÉÍÓÚáéíóúÑñ\. ]{3,}\s+\d{1,5}[A-Za-z]?)(\s*,\s*[A-Za-z ]+)?/g;
   const candidatas = [...limpio.matchAll(regex)].map(m => m[0].trim()).slice(0, 50);
@@ -278,7 +267,6 @@ document.getElementById('btnProcesarTexto')?.addEventListener('click', async () 
   const validadas = [];
   let descartadas = 0;
 
-  // 3. Validar Nominatim
   for (const dir of unicas) {
     try {
       const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(dir + ', Buenos Aires, Argentina')}&limit=1`, {headers: {'User-Agent': 'RutaFlexApp/1.0'}});
@@ -289,7 +277,6 @@ document.getElementById('btnProcesarTexto')?.addEventListener('click', async () 
     } catch (e) { descartadas++; }
   }
 
-  // 4. Ordenar por distancia (Haversine)
   const toRad = v => v * Math.PI / 180;
   const distHaversine = (lat1, lon1, lat2, lon2) => {
     const R = 6371;
@@ -299,10 +286,8 @@ document.getElementById('btnProcesarTexto')?.addEventListener('click', async () 
   };
   validadas.sort((a, b) => distHaversine(userLat, userLon, a.lat, a.lon) - distHaversine(userLat, userLon, b.lat, b.lon));
 
-  // 5. Renderizar
   document.getElementById('pegarTextoLoading').classList.add('hidden');
   document.getElementById('pegarTextoResult').classList.remove('hidden');
-  document.getElementById('countValidas').innerText = validadas.length;
   document.getElementById('statParadasPegadas').innerText = validadas.length;
   const distTotal = (validadas.length * 2.1).toFixed(0);
   const tiempoTotal = (validadas.length * 0.13).toFixed(1);
@@ -316,18 +301,17 @@ document.getElementById('btnProcesarTexto')?.addEventListener('click', async () 
     const tipo = i === 0 ? 'Recogida' : 'Entrega';
     const tiempo = `${Math.floor(Math.random()*15+8)} min`;
     listaEl.innerHTML += `
-      <div class="bg-[#121E32] rounded-xl p-3 flex gap-3 items-center border border-[#1E324F]">
+      <div class="bg-[#111C31]/80 backdrop-blur-xl rounded-xl p-3 flex gap-3 items-center border border-white/10">
         <div class="w-8 h-8 rounded-full bg-[#00E5FF] text-[#0A1220] font-black flex items-center justify-center flex-shrink-0 text-sm">${i + 1}</div>
         <div class="flex-1 min-w-0">
           <p class="font-bold text-sm text-white truncate">${r.original}</p>
-          <p class="text-xs text-gray-400 truncate">${tipo} • ${tiempo}</p>
+          <p class="text-xs text-white/60 truncate">${tipo} • ${tiempo}</p>
         </div>
-        <svg class="w-5 h-5 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        <svg class="w-5 h-5 text-white/40 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
       </div>
     `;
   });
 
-  // 6. Tramos de 10 en 10
   const tramosContainer = document.getElementById('tramosContainer');
   tramosContainer.innerHTML = '';
   
@@ -344,14 +328,14 @@ document.getElementById('btnProcesarTexto')?.addEventListener('click', async () 
     const wazeUrl = `https://www.waze.com/es-419/ul?ll=${chunk[0].lat},${chunk[0].lon}&navigate=yes`;
 
     tramosContainer.innerHTML += `
-      <div class="bg-[#121E32] rounded-xl p-4 border border-[#1E324F]">
+      <div class="bg-[#111C31]/80 backdrop-blur-xl rounded-xl p-4 border border-white/10">
         <p class="text-[#00E5FF] font-bold text-sm mb-3 text-center">Tramo ${tramoNum} de ${totalTramos} (${chunk.length} paradas)</p>
         <div class="grid grid-cols-2 gap-3">
-          <a href="${mapsUrl}" target="_blank" class="bg-[#00E5FF] text-[#0A1220] font-black py-4 rounded-xl text-center text-sm hover:bg-[#00c8e0] transition-all flex items-center justify-center gap-2 active:scale-95">
+          <a href="${mapsUrl}" target="_blank" class="bg-[#00E5FF] text-[#0A1220] font-black py-4 rounded-xl text-center text-sm hover:bg-[#00c8e0] transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
             ABRIR EN<br>GOOGLE MAPS
           </a>
-          <a href="${wazeUrl}" target="_blank" class="bg-transparent border-2 border-[#00E5FF] text-[#00E5FF] font-black py-4 rounded-xl text-center text-sm hover:bg-[#00E5FF]/10 transition-all flex items-center justify-center gap-2 active:scale-95">
+          <a href="${wazeUrl}" target="_blank" class="bg-transparent border-2 border-[#00E5FF] text-[#00E5FF] font-black py-4 rounded-xl text-center text-sm hover:bg-[#00E5FF]/10 transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5c-2-1-4.5-1.5-7-1.5s-5 .5-7 1.5C3 5.5 1 8.5 1 12c0 2.5 1 5 2.5 7L2 22l3.5-1.5c2 1 4.5 1.5 7 1.5 5.5 0 10-4.5 10-10 0-3.5-2-6.5-4.5-8.5z"/></svg>
             ABRIR EN<br>WAZE
           </a>
