@@ -8,7 +8,7 @@ const fechaHoy = hoy.toLocaleDateString('es-AR', opciones).replace('.', '');
 const fechaEl = document.getElementById('fechaHoy');
 if (fechaEl) fechaEl.innerText = `Hoy, ${fechaHoy}`;
 
-window.togglePass=(id,icon)=>{const i=document.getElementById(id);if(!i)return;i.type=i.type==="password"?"text":"password";icon.innerText=i.type==="text"?"🙈":"👁️"};
+window.togglePass=(id,icon)=>{const i=document.getElementById(id);if(!i)return;i.type=i.type==="password"?"text":"password";icon.innerText=i.type==="text"?"🙈":"️"};
 
 function mostrarNotificacion(m,t='info'){
   const c=document.getElementById('notificaciones');if(!c)return;
@@ -37,20 +37,33 @@ function actualizarNav(tabActivo) {
   });
 }
 
-function mostrarTab(tab) {
+// ✅ FUNCIÓN DE NAVEGACIÓN CON HISTORIAL
+function mostrarTab(tab, pushState = true) {
   if(tab === 'home') {
     ocultarTodasLasPantallasExcepto('appScreen');
     actualizarNav('home');
+    if (pushState) history.pushState({tab: 'home'}, '', '#home');
   }
   if(tab === 'perfil') {
     ocultarTodasLasPantallasExcepto('perfilScreen');
     mostrarPerfil();
     actualizarNav('perfil');
+    if (pushState) history.pushState({tab: 'perfil'}, '', '#perfil');
   }
   if(tab === 'rutas' || tab === 'historial') {
-    mostrarNotificacion(" Sección en desarrollo", "info");
+    mostrarNotificacion("🚧 Sección en desarrollo", "info");
   }
 }
+
+// ✅ DETECTAR BOTÓN ATRÁS DEL NAVEGADOR
+window.addEventListener('popstate', (event) => {
+  if (event.state && event.state.tab) {
+    mostrarTab(event.state.tab, false);
+  } else {
+    // Si no hay estado, volver al home
+    mostrarTab('home', false);
+  }
+});
 
 window.abrirModalPagos=(plan,precio)=>{
   document.getElementById('modal-plan-texto').innerText=`Plan ${plan} - $${precio}`;
@@ -114,7 +127,8 @@ document.getElementById('btnPromo')?.addEventListener('click',async()=>{
 function mostrarApp(nombre,fechaVencimiento){
   ocultarTodasLasPantallasExcepto('appScreen');
   actualizarNav('home');
-  document.getElementById('userName').innerText=`¡Hola, ${nombre}! 👋`;
+  history.replaceState({tab: 'home'}, '', '#home');
+  document.getElementById('userName').innerText=`¡Hola, ${nombre}! `;
   const diff=Math.ceil((new Date(fechaVencimiento)-new Date())/(1000*60*60*24));
   estaVencido = diff <= 0;
   const contadorEl=document.getElementById('contadorDias');
@@ -164,7 +178,7 @@ document.getElementById('fileImg')?.addEventListener('change', async (e) => {
       } else if (actual.length > 8) { agrupadas.push(actual); }
     }
     destinosDetectados = [...new Set(agrupadas)].filter(l=>l.length>10);
-    if (destinosDetectados.length === 0) return mostrarNotificacion("️ No se entendió", "error");
+    if (destinosDetectados.length === 0) return mostrarNotificacion("⚠️ No se entendió", "error");
     mostrarNotificacion(`✅ ${destinosDetectados.length} detectados`, "exito");
     mostrarModalEdicion();
   } catch (err) { mostrarNotificacion("❌ Error leyendo", "error");
@@ -213,10 +227,11 @@ function renderLista(){
 window.borrarDestino=async(id)=>{await fetch(`/api/destinos/${id}`,{method:'DELETE',credentials:'include'});await cargarDestinos()};
 
 // ==========================================
-//  MÓDULO PEGAR TEXTO (OPTIMIZADO)
+// 📋 MÓDULO PEGAR TEXTO (OPTIMIZADO)
 // ==========================================
 document.getElementById('btnPegarTexto')?.addEventListener('click', () => {
   ocultarTodasLasPantallasExcepto('pegarTextoScreen');
+  history.pushState({tab: 'pegar'}, '', '#pegar');
   document.getElementById('pegarTextoStep1').classList.remove('hidden');
   document.getElementById('pegarTextoLoading').classList.add('hidden');
   document.getElementById('pegarTextoResult').classList.add('hidden');
@@ -226,6 +241,7 @@ document.getElementById('btnPegarTexto')?.addEventListener('click', () => {
 document.getElementById('btnVolverPegarTexto')?.addEventListener('click', () => { 
   ocultarTodasLasPantallasExcepto('appScreen'); 
   actualizarNav('home');
+  history.pushState({tab: 'home'}, '', '#home');
 });
 document.getElementById('btnReiniciarPegar')?.addEventListener('click', () => {
   document.getElementById('pegarTextoStep1').classList.remove('hidden');
@@ -295,8 +311,6 @@ document.getElementById('btnProcesarTexto')?.addEventListener('click', async () 
 
   const listaEl = document.getElementById('listaPegadas');
   listaEl.innerHTML = '';
-  const tipos = ['Recogida', 'Entrega', 'Entrega', 'Entrega'];
-  const tiempos = ['15 min', '12 min', '10 min', '20 min'];
   
   validadas.forEach((r, i) => {
     const tipo = i === 0 ? 'Recogida' : 'Entrega';
