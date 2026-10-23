@@ -39,7 +39,7 @@
   .bottom-nav { padding-bottom: env(safe-area-inset-bottom, 12px); }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-  .logo-glow { filter: drop-shadow(0 0 12px rgba(159,232,255,0.4)); }
+  .logo-glow { filter: drop-shadow(0 0 15px rgba(159,232,255,0.5)); }
 </style>
 </head>
 <body class="bg-[#0A1220] text-white">
@@ -48,16 +48,16 @@
   <!-- ==================== AUTH SCREEN ==================== -->
   <div id="authScreen" class="min-h-screen flex flex-col justify-center items-center p-6 bg-[#0A1220]">
      <div class="mb-10 w-full max-w-sm mx-auto text-center">
-        <!-- LOGO ORIGINAL AUTH -->
+        <!-- LOGO ORIGINAL: S sinuosa con anillos cyan -->
         <div class="flex items-center justify-center mb-6 mx-auto w-40 h-40 rounded-full bg-gradient-to-br from-[#0d2b5e] to-[#070E1E] p-1 shadow-2xl shadow-[#4A9FE3]/40">
            <div class="w-full h-full rounded-full bg-[#5BA9E0] flex items-center justify-center logo-glow">
               <svg width="90" height="90" viewBox="0 0 100 100">
-                <!-- S sinuosa redondeada -->
+                <!-- S sinuosa redondeada tipo circuito -->
                 <path d="M 65 32 C 65 22, 55 22, 50 28 C 45 34, 45 44, 50 50 C 55 56, 55 66, 50 72 C 45 78, 35 78, 35 68" 
                       fill="none" stroke="#B0F0FF" stroke-width="7" stroke-linecap="round"/>
-                <!-- Nodo superior derecho (anillo) -->
+                <!-- Anillo superior derecho (círculo con agujero) -->
                 <circle cx="65" cy="32" r="9" fill="#5BA9E0" stroke="#B0F0FF" stroke-width="5"/>
-                <!-- Nodo inferior izquierdo (anillo) -->
+                <!-- Anillo inferior izquierdo (círculo con agujero) -->
                 <circle cx="35" cy="68" r="9" fill="#5BA9E0" stroke="#B0F0FF" stroke-width="5"/>
               </svg>
            </div>
@@ -103,7 +103,7 @@
       
       <div class="relative z-10 px-5 pt-6 pb-8">
         <div class="flex items-center gap-3 mb-6">
-           <!-- LOGO HEADER ORIGINAL -->
+           <!-- LOGO HEADER: S sinuosa con anillos -->
            <div class="w-14 h-14 rounded-full bg-[#5BA9E0] flex items-center justify-center shadow-lg shadow-[#4A9FE3]/40 logo-glow">
               <svg width="34" height="34" viewBox="0 0 100 100">
                 <path d="M 65 32 C 65 22, 55 22, 50 28 C 45 34, 45 44, 50 50 C 55 56, 55 66, 50 72 C 45 78, 35 78, 35 68" 
@@ -201,7 +201,6 @@
   <!-- ==================== PANTALLA PEGAR TEXTO ==================== -->
   <div id="pegarTextoScreen" class="hidden min-h-screen bg-[#0A1220] text-white pb-safe">
      <div class="bg-[#121E32] border-b border-[#1E324F] p-5 flex items-center gap-3">
-        <!-- LOGO PEGAR TEXTO -->
         <div class="w-14 h-14 rounded-full bg-[#5BA9E0] flex items-center justify-center shadow-lg logo-glow">
            <svg width="34" height="34" viewBox="0 0 100 100">
               <path d="M 65 32 C 65 22, 55 22, 50 28 C 45 34, 45 44, 50 50 C 55 56, 55 66, 50 72 C 45 78, 35 78, 35 68" 
@@ -242,7 +241,6 @@
         </div>
 
         <div id="pegarTextoResult" class="hidden space-y-4">
-           <!-- HEADER RESULTADO CON LOGO ORIGINAL -->
            <div class="flex items-center gap-3 mb-2">
               <div class="w-14 h-14 rounded-full bg-[#5BA9E0] flex items-center justify-center shadow-lg logo-glow">
                  <svg width="34" height="34" viewBox="0 0 100 100">
@@ -339,7 +337,7 @@
            </div>
            <div class="grid grid-cols-2 gap-3 mb-4">
               <button onclick="abrirModalPagos('Semanal', 4990)" class="p-4 rounded-xl text-center font-bold text-white shadow-md border border-green-500/30" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                 <div class="text-2xl mb-1"></div><div class="text-xs">SEMANAL</div><div class="text-lg font-black">$4.990</div>
+                 <div class="text-2xl mb-1">⚡</div><div class="text-xs">SEMANAL</div><div class="text-lg font-black">$4.990</div>
               </button>
               <button onclick="abrirModalPagos('Mensual', 14990)" class="p-4 rounded-xl text-center font-bold text-white shadow-md relative border border-[#4A9FE3]/30" style="background: linear-gradient(135deg, #1e40af 0%, #0A1220 100%);">
                  <div class="absolute -top-2 -right-2 bg-[#00E5FF] text-[#0A1220] text-[10px] font-black px-2 py-1 rounded-full">POPULAR</div>
@@ -399,7 +397,7 @@
               <button onclick="copiarAlias()" class="bg-[#4A9FE3] text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#5BA9E0] transition-all">Copiar</button>
            </div>
         </div>
-        <a id="btn-wsp-pago" href="#" target="_blank" class="block p-4 rounded-xl bg-green-600 text-white font-bold text-center hover:bg-green-500 transition-all"> Enviar comprobante por WhatsApp</a>
+        <a id="btn-wsp-pago" href="#" target="_blank" class="block p-4 rounded-xl bg-green-600 text-white font-bold text-center hover:bg-green-500 transition-all">💬 Enviar comprobante por WhatsApp</a>
         <button onclick="cerrarModalPagos()" class="w-full p-3 text-gray-400 text-sm hover:text-white transition-all">Cerrar</button>
       </div>
     </div>
