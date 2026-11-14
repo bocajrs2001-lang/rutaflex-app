@@ -1,95 +1,267 @@
 const CONFIG_RUTAFLEX = { whatsapp:"5491123793596", alias:"RUTAFLEX.MP", linkSemanal:"https://mpago.la/2DjaHdB", linkMensual:"https://mpago.la/2aNpJ1B" };
 let destinos=[], destinosDetectados=[], emailRecuperacion="", estaVencido=false;
 
-window.togglePass=(id,icon)=>{const i=document.getElementById(id);if(!i)return;i.type=i.type==="password"?"text":"password";icon.innerText=i.type==="text"?"🙈":"👁️"};
-function mostrarNotificacion(m,t='info'){const c=document.getElementById('notificaciones');if(!c)return;const n=document.createElement('div');n.className=`${t==='exito'?'bg-green-600':t==='error'?'bg-red-600':'bg-[#0A2342]'} text-white px-6 py-3 rounded-xl font-bold text-sm text-center shadow-xl`;n.innerText=m;c.appendChild(n);setTimeout(()=>n.remove(),3500)}
-function ocultarTodasLasPantallasExcepto(id){['authScreen','recoverStep1','recoverStep2','recoverStep3','appScreen','perfilScreen','payment-modal'].forEach(s=>document.getElementById(s)?.classList.add('hidden'));document.getElementById(id)?.classList.remove('hidden')}
+// Fecha de hoy
+const hoy = new Date();
+const opciones = { day: 'numeric', month: 'short' };
+const fechaHoy = hoy.toLocaleDateString('es-AR', opciones).replace('.', '');
+const fechaEl = document.getElementById('fechaHoy');
+if (fechaEl) fechaEl.innerText = `Hoy, ${fechaHoy}`;
 
-window.abrirModalPagos=(plan,precio)=>{document.getElementById('modal-plan-texto').innerText=`Plan ${plan} - $${precio}`;document.getElementById('modal-alias-texto').innerText=CONFIG_RUTAFLEX.alias;document.getElementById('btn-wsp-pago').href=`https://wa.me/${CONFIG_RUTAFLEX.whatsapp}?text=${encodeURIComponent(`Hola RutaFlex! Comprobante Plan ${plan} $${precio}`)}`;document.getElementById('btn-mp-pago').href=plan==='Semanal'?CONFIG_RUTAFLEX.linkSemanal:CONFIG_RUTAFLEX.linkMensual;document.getElementById('payment-modal').classList.remove('hidden')};
+window.togglePass=(id,icon)=>{const i=document.getElementById(id);if(!i)return;i.type=i.type==="password"?"text":"password";icon.innerText=i.type==="text"?"🙈":"👁️"};
+
+function mostrarNotificacion(m,t='info'){
+  const c=document.getElementById('notificaciones');if(!c)return;
+  const n=document.createElement('div');
+  n.className=`${t==='exito'?'bg-green-600':t==='error'?'bg-red-600':'bg-[#00E5FF]'} text-white px-6 py-3 rounded-xl font-bold text-sm text-center shadow-xl`;
+  n.innerText=m;c.appendChild(n);setTimeout(()=>n.remove(),3500);
+}
+
+function ocultarTodasLasPantallasExcepto(id){
+  ['authScreen','appScreen','pegarTextoScreen','perfilScreen','payment-modal','modalEdicion'].forEach(s=>{
+    const el=document.getElementById(s); if(el) el.classList.add('hidden');
+  });
+  document.getElementById(id)?.classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+
+function actualizarNav(tabActivo) {
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    if (btn.dataset.tab === tabActivo) {
+      btn.classList.remove('text-white/30');
+      btn.classList.add('text-white');
+    } else {
+      btn.classList.remove('text-white');
+      btn.classList.add('text-white/30');
+    }
+  });
+}
+
+function mostrarTab(tab, pushState = true) {
+  if(tab === 'home') {
+    ocultarTodasLasPantallasExcepto('appScreen');
+    actualizarNav('home');
+    if (pushState) history.pushState({tab: 'home'}, '', '#home');
+  }
+  if(tab === 'perfil') {
+    ocultarTodasLasPantallasExcepto('perfilScreen');
+    mostrarPerfil();
+    actualizarNav('perfil');
+    if (pushState) history.pushState({tab: 'perfil'}, '', '#perfil');
+  }
+  if(tab === 'historial') {
+    mostrarNotificacion("🚧 Sección en desarrollo", "info");
+  }
+}
+
+window.addEventListener('popstate', (event) => {
+  if (event.state && event.state.tab) {
+    mostrarTab(event.state.tab, false);
+  } else {
+    mostrarTab('home', false);
+  }
+});
+
+window.abrirModalPagos=(plan,precio)=>{
+  document.getElementById('modal-plan-texto').innerText=`Plan ${plan} - $${precio}`;
+  document.getElementById('modal-alias-texto').innerText=CONFIG_RUTAFLEX.alias;
+  document.getElementById('btn-wsp-pago').href=`https://wa.me/${CONFIG_RUTAFLEX.whatsapp}?text=${encodeURIComponent(`Hola RutaFlex! Comprobante Plan ${plan} $${precio}`)}`;
+  document.getElementById('btn-mp-pago').href=plan==='Semanal'?CONFIG_RUTAFLEX.linkSemanal:CONFIG_RUTAFLEX.linkMensual;
+  document.getElementById('payment-modal').classList.remove('hidden');
+};
 window.cerrarModalPagos=()=>document.getElementById('payment-modal').classList.add('hidden');
 window.copiarAlias=()=>{navigator.clipboard.writeText(CONFIG_RUTAFLEX.alias).then(()=>mostrarNotificacion("✅ Alias copiado","exito"))};
 
-window.addEventListener('load',async()=>{const e=localStorage.getItem('rutaflex_email');if(e&&document.getElementById('loginEmail'))document.getElementById('loginEmail').value=e;try{const r=await fetch('/api/yo',{credentials:'include'});const d=await r.json();if(d.ok)mostrarApp(d.nombre,d.fecha_vencimiento)}catch{}});
-async function hacerLogout(){await fetch('/api/logout',{method:'POST',credentials:'include'});localStorage.removeItem('rutaflex_email');location.reload()}
+window.addEventListener('load',async()=>{
+  const e=localStorage.getItem('rutaflex_email');
+  if(e&&document.getElementById('loginEmail')) document.getElementById('loginEmail').value=e;
+  try{
+    const r=await fetch('/api/yo',{credentials:'include'});
+    const d=await r.json();
+    if(d.ok) mostrarApp(d.nombre,d.fecha_vencimiento);
+  }catch{}
+});
 
-document.getElementById('tabLogin')?.addEventListener('click',()=>{ocultarTodasLasPantallasExcepto('authScreen');document.getElementById('formLogin').classList.remove('hidden');document.getElementById('formRegistro').classList.add('hidden')});
-document.getElementById('tabRegistro')?.addEventListener('click',()=>{ocultarTodasLasPantallasExcepto('authScreen');document.getElementById('formRegistro').classList.remove('hidden');document.getElementById('formLogin').classList.add('hidden')});
-document.getElementById('btnOlvideContrasena')?.addEventListener('click',()=>ocultarTodasLasPantallasExcepto('recoverStep1'));
-document.getElementById('btnVolverLogin1')?.addEventListener('click',()=>ocultarTodasLasPantallasExcepto('authScreen'));
-document.getElementById('formRecoverEmail')?.addEventListener('submit',async(e)=>{e.preventDefault();const email=document.getElementById('recoverEmailInput').value;await fetch('/api/enviar-codigo-recuperacion',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});emailRecuperacion=email;ocultarTodasLasPantallasExcepto('recoverStep2')});
-document.getElementById('formRecoverCode')?.addEventListener('submit',async(e)=>{e.preventDefault();const codigo=document.getElementById('recoverCodeInput').value;const r=await fetch('/api/verificar-codigo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:emailRecuperacion,codigo})});if(r.ok)ocultarTodasLasPantallasExcepto('recoverStep3')});
-document.getElementById('formNewPassword')?.addEventListener('submit',async(e)=>{e.preventDefault();const nuevaPassword=document.getElementById('newPasswordInput').value;const r=await fetch('/api/cambiar-contrasena-final',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:emailRecuperacion,nuevaPassword})});if(r.ok){mostrarNotificacion("✅ Contraseña cambiada","exito");ocultarTodasLasPantallasExcepto('authScreen')}});
-document.getElementById('formRegistro')?.addEventListener('submit',async(e)=>{e.preventDefault();const nombre=document.getElementById('regNombre').value,email=document.getElementById('regEmail').value,password=document.getElementById('regPassword').value;const r=await fetch('/api/registro',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({nombre,email,password})});const d=await r.json();if(r.ok){localStorage.setItem('rutaflex_email',email);mostrarApp(d.usuario.nombre,d.usuario.fecha_vencimiento)}else{document.getElementById('authMessage').innerText=d.error}});
-document.getElementById('formLogin')?.addEventListener('submit',async(e)=>{e.preventDefault();const email=document.getElementById('loginEmail').value,password=document.getElementById('loginPassword').value;const msg=document.getElementById('authMessage');msg.innerText="Conectando...";const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({email,password})});const d=await r.json();if(r.ok){localStorage.setItem('rutaflex_email',email);mostrarApp(d.usuario.nombre,d.usuario.fecha_vencimiento)}else{msg.innerText=d.error||"Error"}});
-document.getElementById('btnLogoutDropdown')?.addEventListener('click',hacerLogout);
+async function hacerLogout(){
+  await fetch('/api/logout',{method:'POST',credentials:'include'});
+  localStorage.removeItem('rutaflex_email');
+  location.reload();
+}
+
+document.getElementById('tabLogin')?.addEventListener('click',()=>{
+  document.getElementById('formLogin').classList.remove('hidden');
+  document.getElementById('formRegistro').classList.add('hidden');
+  document.getElementById('tabLogin').className="flex-1 py-3 px-4 rounded-xl font-bold text-[#00E5FF] bg-white/10 transition-all";
+  document.getElementById('tabRegistro').className="flex-1 py-3 px-4 rounded-xl font-bold text-white/60 hover:text-white transition-all";
+});
+document.getElementById('tabRegistro')?.addEventListener('click',()=>{
+  document.getElementById('formRegistro').classList.remove('hidden');
+  document.getElementById('formLogin').classList.add('hidden');
+  document.getElementById('tabRegistro').className="flex-1 py-3 px-4 rounded-xl font-bold text-[#00E5FF] bg-white/10 transition-all";
+  document.getElementById('tabLogin').className="flex-1 py-3 px-4 rounded-xl font-bold text-white/60 hover:text-white transition-all";
+});
+
+document.getElementById('formLogin')?.addEventListener('submit',async(e)=>{
+  e.preventDefault();
+  const email=document.getElementById('loginEmail').value, password=document.getElementById('loginPassword').value;
+  const msg=document.getElementById('authMessage'); msg.innerText="Conectando...";
+  try{
+    const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({email,password})});
+    const d=await r.json();
+    if(r.ok){ localStorage.setItem('rutaflex_email',email); mostrarApp(d.usuario.nombre,d.usuario.fecha_vencimiento); }
+    else{ msg.innerText=d.error||"Error"; }
+  }catch{ msg.innerText="Error de conexión"; }
+});
+
 document.getElementById('btnLogoutPerfil')?.addEventListener('click',hacerLogout);
-document.getElementById('btnPromo')?.addEventListener('click',async()=>{const codigo=document.getElementById('promo').value;if(!codigo)return;const r=await fetch('/api/validar-promo',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({codigo})});const d=await r.json();mostrarNotificacion(d.mensaje,d.valido?'exito':'error')});
+document.getElementById('btnPromo')?.addEventListener('click',async()=>{
+  const codigo=document.getElementById('promo').value;if(!codigo)return;
+  const r=await fetch('/api/validar-promo',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({codigo})});
+  const d=await r.json();mostrarNotificacion(d.mensaje,d.valido?'exito':'error');
+});
 
 function mostrarApp(nombre,fechaVencimiento){
-  ocultarTodasLasPantallasExcepto('appScreen');document.getElementById('userName').innerText=`¡Hola, ${nombre}! 👋`;
-  const contadorEl=document.getElementById('contadorDias'),banner=document.getElementById('bannerVencido'),alerta=document.getElementById('alertaProximoVencimiento'),seccion=document.getElementById('seccionDestinos'),listaC=document.getElementById('listaContainer');
-  const hoy=new Date(),venc=new Date(fechaVencimiento),diff=Math.ceil((venc-hoy)/(1000*60*60*24));
-  banner.classList.add('hidden');if(alerta)alerta.classList.add('hidden');seccion.style.pointerEvents="auto";seccion.style.filter="none";listaC.style.pointerEvents="auto";listaC.style.filter="none";estaVencido=false;
-  if(!fechaVencimiento||diff<=0){estaVencido=true;contadorEl.innerText="⚠️ VENCIDO";contadorEl.className="text-xs font-bold mt-1 px-2 py-1 rounded-full bg-red-600 text-white";banner.classList.remove('hidden');seccion.style.pointerEvents="none";listaC.style.pointerEvents="none";destinos=[];renderLista()}else if(diff<=1){contadorEl.innerText=`⏳ Vence en ${diff} día`;contadorEl.className="text-xs font-bold mt-1 px-2 py-1 rounded-full bg-yellow-500 text-[#0A2342]";if(alerta)alerta.classList.remove('hidden');cargarDestinos()}else{contadorEl.innerText=`✅ Activo (${diff} días)`;contadorEl.className="text-xs font-bold mt-1 px-2 py-1 rounded-full bg-green-500 text-white";cargarDestinos()}
+  ocultarTodasLasPantallasExcepto('appScreen');
+  actualizarNav('home');
+  history.replaceState({tab: 'home'}, '', '#home');
+  document.getElementById('userName').innerText=`¡Hola, ${nombre}!`;
+  const diff=Math.ceil((new Date(fechaVencimiento)-new Date())/(1000*60*60*24));
+  estaVencido = diff <= 0;
+  const contadorEl=document.getElementById('contadorDias');
+  if(estaVencido){
+    contadorEl.innerHTML="⚠️ VENCIDO"; contadorEl.className="mt-4 inline-flex items-center gap-1.5 bg-red-500/15 border border-red-500/30 text-red-400 px-3.5 py-1.5 rounded-full text-[13px] font-bold";
+    document.getElementById('bannerVencido').classList.remove('hidden');
+  } else if(diff<=3){
+    contadorEl.innerHTML=`⏳ Vence en ${diff} días`; contadorEl.className="mt-4 inline-flex items-center gap-1.5 bg-yellow-500/15 border border-yellow-500/30 text-yellow-400 px-3.5 py-1.5 rounded-full text-[13px] font-bold";
+  } else {
+    contadorEl.innerHTML=`✅ Activo (${diff} días)`; contadorEl.className="mt-4 inline-flex items-center gap-1.5 bg-[#00C950]/15 border border-[#00C950]/30 text-[#00D084] px-3.5 py-1.5 rounded-full text-[13px] font-bold";
+  }
+  cargarDestinos();
 }
 
 async function cargarDestinos(){
   if(estaVencido) return;
   try{
     const r = await fetch('/api/destinos',{credentials:'include'});
-    let crudos = await r.json();
-    let merged = [];
-    for(let i=0; i<crudos.length; i++){
-      let actual = crudos[i].direccion || crudos[i].dirección || "";
-      let siguiente = crudos[i+1]?.direccion || crudos[i+1]?.dirección || "";
-      let actualEsLabel = actual.length < 45 && !/\d{3,4}/.test(actual) && /^(\(?\[?\d+[\]\)\.\-]?|\(?\d+\)?)?\s*[A-Za-z]/.test(actual);
-      let siguienteEsDir = /\d{2,4}/.test(siguiente) && siguiente.length > 8;
-      if(actualEsLabel && siguienteEsDir){
-        let nombre = actual.replace(/^(\(?\[?\d+[\]\)\.\-]?|\(?\d+\)?)\s*/,'').replace(/[\(\)\[\]]/g,'').trim();
-        merged.push({...crudos[i], direccion: `${nombre} - ${siguiente}`});
-        i++;
-      } else { merged.push(crudos[i]); }
-    }
-    destinos = merged;
+    destinos = await r.json();
     renderLista();
-  }catch(e){ console.error(e); mostrarNotificacion("❌ Error al cargar destinos","error"); }
+    actualizarRecientes();
+  }catch(e){ console.error(e); }
 }
 
+function actualizarRecientes() {
+  if (destinos.length > 0) {
+    const titulo = document.getElementById('recienteTitulo');
+    const sub = document.getElementById('recienteSub');
+    if (titulo) titulo.innerText = `${destinos[0].direccion || 'Ruta'} → ${destinos[destinos.length-1].direccion || 'Final'}`;
+    if (sub) sub.innerText = `Creada ahora • ${destinos.length} paradas`;
+  }
+}
+
+// ==========================================
+// 🖼️ LECTURA DE IMAGEN MEJORADA CON TESSERACT
+// ==========================================
 document.getElementById('fileImg')?.addEventListener('change', async (e) => {
   if (estaVencido) return mostrarNotificacion("⚠️ Plan vencido", "error");
-  const file = e.target.files[0]; if (!file) return;
-  const btn = document.getElementById('btnCargar'); const txt = btn.innerText;
-  btn.innerText = "🤖 Leyendo..."; btn.disabled = true;
+  const file = e.target.files[0]; 
+  if (!file) return;
+  
+  // Validar tipo de archivo
+  if (!file.type.startsWith('image/')) {
+    return mostrarNotificacion("⚠️ El archivo debe ser una imagen", "error");
+  }
+  
+  // Validar tamaño (máximo 10MB)
+  if (file.size > 10 * 1024 * 1024) {
+    return mostrarNotificacion("⚠️ La imagen es muy grande (máx 10MB)", "error");
+  }
+
+  // Mostrar notificación de carga
+  mostrarNotificacion("🤖 Leyendo imagen...", "info");
+  
   try {
-    const { data: { text } } = await Tesseract.recognize(file, 'spa');
+    // Verificar que Tesseract esté cargado
+    if (typeof Tesseract === 'undefined') {
+      throw new Error('Tesseract.js no está cargado. Recargá la página.');
+    }
+    
+    // Crear worker con configuración robusta
+    const worker = await Tesseract.createWorker('spa', 1, {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          const progress = Math.round(m.progress * 100);
+          console.log(`Progreso OCR: ${progress}%`);
+        }
+      }
+    });
+    
+    // Procesar la imagen
+    const { data: { text } } = await worker.recognize(file);
+    await worker.terminate();
+    
+    if (!text || text.trim().length < 5) {
+      throw new Error('No se pudo leer texto de la imagen. Probá con una foto más clara.');
+    }
+    
+    console.log('Texto detectado:', text);
+    
+    // Procesar el texto detectado
     let lineas = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
     let agrupadas = [];
+    
     for (let i = 0; i < lineas.length; i++) {
-      let actual = lineas[i]; let siguiente = lineas[i+1] || "";
-      let pareceLabel = actual.length < 40 && !/\d{3,4}/.test(actual);
-      let siguienteEsDireccion = /\d{2,4}/.test(siguiente) || /(Av\.|Avda|Libertador|Rivadavia|Sarmiento|Corrientes|Santa Fe|Cabildo)/i.test(siguiente);
-      if (pareceLabel && siguienteEsDireccion && siguiente.length > 8) {
-        let nombreLimpio = actual.replace(/^(\(?\[?\d+[\]\)\.\-]?|\(?\d+\)?)\s*/,'').replace(/[\(\)\[\]]/g,'').trim();
-        if(nombreLimpio.length<2) nombreLimpio = actual.replace(/[\(\)\[\]\d]/g,'').trim();
-        agrupadas.push(`${nombreLimpio} - ${siguiente}`); i++;
-      } else if (actual.length > 8) { agrupadas.push(actual); }
+      let actual = lineas[i]; 
+      let siguiente = lineas[i+1] || "";
+      
+      // Detectar si es un label + dirección
+      if (actual.length < 40 && !/\d{3,4}/.test(actual) && 
+          (/\d{2,4}/.test(siguiente) || /(Av\.|Avda|Libertador|Rivadavia|Corrientes|Santa Fe|Calle|San|Juan|Belgrano|Maipú|Florida)/i.test(siguiente))) {
+        agrupadas.push(`${actual} - ${siguiente}`); 
+        i++;
+      } else if (actual.length > 8 && /\d/.test(actual)) { 
+        agrupadas.push(actual); 
+      }
     }
-    agrupadas = [...new Set(agrupadas)].map(l=>l.replace(/\s{2,}/g,' ').trim()).filter(l=>l.length>10);
-    if (agrupadas.length === 0) return mostrarNotificacion("⚠️ No se entendió. Probá foto más de frente", "error");
-    destinosDetectados = agrupadas;
-    mostrarNotificacion(`✅ ${agrupadas.length} destinos detectados`, "exito");
+    
+    // Eliminar duplicados y filtrar
+    destinosDetectados = [...new Set(agrupadas)].filter(l=>l.length>10);
+    
+    if (destinosDetectados.length === 0) {
+      throw new Error('No se detectaron direcciones válidas. Probá con una foto más nítida y de frente.');
+    }
+    
+    mostrarNotificacion(`✅ ${destinosDetectados.length} direcciones detectadas`, "exito");
     mostrarModalEdicion();
-  } catch (err) { console.error(err); mostrarNotificacion("❌ Error leyendo imagen", "error");
-  } finally { btn.innerText = txt; btn.disabled = false; e.target.value = ''; }
+    
+  } catch (err) {
+    console.error('Error OCR:', err);
+    let mensaje = "❌ Error leyendo la imagen";
+    
+    if (err.message.includes('Tesseract')) {
+      mensaje = "⚠️ Error de conexión. Recargá la página e intentá de nuevo.";
+    } else if (err.message.includes('No se pudo leer')) {
+      mensaje = "⚠️ No se detectó texto. Usá una foto más clara.";
+    } else if (err.message.includes('No se detectaron')) {
+      mensaje = "⚠️ No se encontraron direcciones. Verificá que la imagen tenga direcciones escritas.";
+    }
+    
+    mostrarNotificacion(mensaje, "error");
+  } finally { 
+    e.target.value = ''; 
+  }
 });
 
 function mostrarModalEdicion(){
-  const c=document.getElementById('contenedorInputs');c.innerHTML='';
-  if(destinosDetectados.length===0){c.innerHTML='<p class="text-center py-4 text-gray-400">Sin direcciones</p>';}
-  else{
+  const c=document.getElementById('contenedorInputs'); c.innerHTML='';
+  if (destinosDetectados.length === 0) {
+    c.innerHTML='<p class="text-center py-4 text-gray-400">Sin direcciones</p>';
+  } else {
     destinosDetectados.forEach((dir,i)=>{
-      let partes = dir.split(' - '); let titulo = partes.length > 1? partes[0] : `Destino ${i+1}`; let direccion = partes.length > 1? partes.slice(1).join(' - ') : dir;
-      c.innerHTML+=`<div class="flex gap-2 items-start bg-gray-50 p-3 rounded-xl border"><span class="bg-[#0A2342] text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold mt-1">${i+1}</span><div class="flex-1"><input type="text" value="${titulo.replace(/"/g,'&quot;')}" class="input-titulo w-full bg-white border rounded-lg px-3 py-2 text-sm font-bold text-[#0A2342] mb-1" placeholder="Nombre"><input type="text" value="${direccion.replace(/"/g,'&quot;')}" class="input-direccion w-full bg-white border rounded-lg px-3 py-2 text-sm text-[#0A2342]" placeholder="Dirección"></div><button onclick="eliminarLinea(${i})" class="text-red-500 p-2">🗑️</button></div>`;
+      c.innerHTML+=`<div class="flex gap-2 items-start bg-[#0A1220]/80 backdrop-blur-xl p-3 rounded-xl border border-white/10">
+        <span class="bg-[#00E5FF] text-[#0A1220] rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold mt-1 flex-shrink-0">${i+1}</span>
+        <input type="text" value="${dir.replace(/"/g,'&quot;')}" class="input-direccion flex-1 bg-[#111C31]/80 border border-white/10 rounded-lg px-3 py-2 text-sm text-white" placeholder="Dirección">
+        <button onclick="eliminarLinea(${i})" class="text-red-400 p-2">🗑️</button>
+      </div>`;
     });
   }
   document.getElementById('modalEdicion').classList.remove('hidden');
@@ -97,146 +269,168 @@ function mostrarModalEdicion(){
 window.eliminarLinea=i=>{destinosDetectados.splice(i,1);mostrarModalEdicion()};
 
 document.getElementById('btnGuardarEdicion')?.addEventListener('click',async()=>{
-  const titulos=document.querySelectorAll('.input-titulo'); const dirs=document.querySelectorAll('.input-direccion'); let finales=[];
-  for(let i=0;i<dirs.length;i++){let t=titulos[i]?.value.trim()||""; let d=dirs[i]?.value.trim()||""; if(d.length>3) finales.push(t?`${t} - ${d}`:d);}
-  if(finales.length===0)return mostrarNotificacion("Ingresá al menos una","error");
-  const btn=document.getElementById('btnGuardarEdicion');btn.innerText="💾 Guardando...";btn.disabled=true;
-  try{for(const direccion of finales){await fetch('/api/destinos',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({direccion})})}mostrarNotificacion(`✅ ${finales.length} guardadas`,"exito");document.getElementById('modalEdicion').classList.add('hidden');await cargarDestinos();}catch{mostrarNotificacion("❌ Error al guardar","error")}finally{btn.innerText="✅ Guardar Todo";btn.disabled=false}
+  const dirs=document.querySelectorAll('.input-direccion'); 
+  const finales=[...dirs].map(d=>d.value.trim()).filter(d=>d.length>3);
+  if(finales.length===0) return mostrarNotificacion("Ingresá al menos una","error");
+  const btn=document.getElementById('btnGuardarEdicion'); btn.innerText="💾 Guardando..."; btn.disabled=true;
+  try{
+    for(const d of finales) await fetch('/api/destinos',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({direccion:d})});
+    mostrarNotificacion(`✅ ${finales.length} guardadas`,"exito");
+    document.getElementById('modalEdicion').classList.add('hidden');
+    await cargarDestinos();
+  }catch{ mostrarNotificacion("❌ Error","error"); }
+  finally{ btn.innerText="✅ Guardar"; btn.disabled=false; }
 });
-document.getElementById('btnCancelarEdicion')?.addEventListener('click',()=>{document.getElementById('modalEdicion').classList.add('hidden');destinosDetectados=[]});
-document.getElementById('btnCerrarModal')?.addEventListener('click',()=>{document.getElementById('modalEdicion').classList.add('hidden')});
+document.getElementById('btnCancelarEdicion')?.addEventListener('click',()=>{document.getElementById('modalEdicion').classList.add('hidden');});
+document.getElementById('btnCerrarModal')?.addEventListener('click',()=>{document.getElementById('modalEdicion').classList.add('hidden');});
 
 function renderLista(){
-  const l=document.getElementById('lista'),ph=document.getElementById('placeholderVacio'),btnBorrar=document.getElementById('btnBorrarTodo');
-  if(!l)return;l.innerHTML="";
-  if(destinos.length===0){
-    ph.style.display='flex';
-    document.getElementById('count').innerText=0;
-    document.getElementById('btnViaje').classList.add('hidden');
-    if(btnBorrar) btnBorrar.classList.add('hidden');
-    return;
-  }
-  ph.style.display='none';
-  if(btnBorrar) btnBorrar.classList.remove('hidden');
-  
+  const l=document.getElementById('lista'); if(!l)return; l.innerHTML="";
   destinos.forEach((d,i)=>{
-    const full = d.direccion||d.dirección||''; 
-    const partes = full.split(' - '); 
-    const titulo = partes.length>1? partes[0] : ''; 
-    const dir = partes.length>1? partes.slice(1).join(' - ') : full;
-    
-    l.innerHTML+=`<li class="bg-white border border-gray-200 border-l-[5px] border-l-[#0A2342] rounded-2xl p-4 flex gap-3 items-center shadow-sm mb-3">
-      <span class="bg-[#0A2342] text-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-black flex-shrink-0">${i+1}</span>
-      <div class="flex-1 min-w-0">
-        <b class="block truncate text-[#0A2342] text-[14px]">${titulo || dir}</b>
-        ${titulo?`<span class="block truncate text-gray-500 text-xs mb-1">${dir}</span>`:''}
-      </div>
-      <button onclick="borrarDestino('${d._id}')" class="text-gray-300 hover:text-red-500 p-2 text-xl">✕</button>
+    l.innerHTML+=`<li class="bg-[#111C31]/80 backdrop-blur-xl border border-white/10 border-l-[4px] border-l-[#00E5FF] rounded-xl p-3 flex gap-3 items-center mb-2">
+      <span class="bg-[#00E5FF] text-[#0A1220] rounded-full w-7 h-7 flex items-center justify-center text-xs font-black flex-shrink-0">${i+1}</span>
+      <div class="flex-1 min-w-0"><b class="block truncate text-white text-sm">${d.direccion||d.dirección}</b></div>
+      <button onclick="borrarDestino('${d._id}')" class="text-white/40 hover:text-red-400 p-1">✕</button>
     </li>`;
   });
-  document.getElementById('count').innerText=destinos.length;
-  document.getElementById('btnViaje').classList.remove('hidden');
+}
+window.borrarDestino=async(id)=>{await fetch(`/api/destinos/${id}`,{method:'DELETE',credentials:'include'});await cargarDestinos()};
+
+document.getElementById('btnPegarTexto')?.addEventListener('click', () => {
+  ocultarTodasLasPantallasExcepto('pegarTextoScreen');
+  history.pushState({tab: 'pegar'}, '', '#pegar');
+  document.getElementById('pegarTextoStep1').classList.remove('hidden');
+  document.getElementById('pegarTextoLoading').classList.add('hidden');
+  document.getElementById('pegarTextoResult').classList.add('hidden');
+  document.getElementById('textoDirecciones').value = '';
+});
+
+document.getElementById('btnVolverPegarTexto')?.addEventListener('click', () => { 
+  ocultarTodasLasPantallasExcepto('appScreen'); 
+  actualizarNav('home');
+  history.pushState({tab: 'home'}, '', '#home');
+});
+document.getElementById('btnReiniciarPegar')?.addEventListener('click', () => {
+  document.getElementById('pegarTextoStep1').classList.remove('hidden');
+  document.getElementById('pegarTextoLoading').classList.add('hidden');
+  document.getElementById('pegarTextoResult').classList.add('hidden');
+  document.getElementById('textoDirecciones').value = '';
+});
+
+const limpiarTextoSucio = (t) => t.replace(/[\u{1F600}-\u{1F6FF}\u{2600}-\u{26FF}]/gu, '')
+  .replace(/\b(hola|buen dia|che|capo|gracias|mañana|hoy|como estas)\b/gi, '')
+  .replace(/\b\d{2,4}[- ]?\d{3,4}[- ]?\d{4}\b/g, '').replace(/\$\s?\d+/g, '')
+  .split('\n').map(l => l.trim()).filter(l => l.length > 8).join('\n');
+
+document.getElementById('btnProcesarTexto')?.addEventListener('click', async () => {
+  const texto = document.getElementById('textoDirecciones').value;
+  if (!texto.trim()) return mostrarNotificacion("⚠️ Pegá algún texto primero", "error");
+
+  document.getElementById('pegarTextoStep1').classList.add('hidden');
+  document.getElementById('pegarTextoLoading').classList.remove('hidden');
+
+  let userLat = -34.6037, userLon = -58.3816;
+  try {
+    const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, {enableHighAccuracy:true, timeout:10000}));
+    userLat = pos.coords.latitude; userLon = pos.coords.longitude;
+  } catch(e) { console.log("GPS no disponible"); }
+
+  const limpio = limpiarTextoSucio(texto);
+  const regex = /([A-Za-zÁÉÍÓÚáéíóúÑñ\. ]{3,}\s+\d{1,5}[A-Za-z]?)(\s*,\s*[A-Za-z ]+)?/g;
+  const candidatas = [...limpio.matchAll(regex)].map(m => m[0].trim()).slice(0, 50);
+  const unicas = [...new Set(candidatas)];
+  
+  const validadas = [];
+  let descartadas = 0;
+
+  for (const dir of unicas) {
+    try {
+      const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(dir + ', Buenos Aires, Argentina')}&limit=1`, {headers: {'User-Agent': 'RutaFlexApp/1.0'}});
+      const d = await r.json();
+      if (d[0]?.importance > 0.4) {
+        validadas.push({ original: dir, display: d[0].display_name, lat: parseFloat(d[0].lat), lon: parseFloat(d[0].lon) });
+      } else { descartadas++; }
+    } catch (e) { descartadas++; }
+  }
+
+  const toRad = v => v * Math.PI / 180;
+  const distHaversine = (lat1, lon1, lat2, lon2) => {
+    const R = 6371;
+    const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  };
+  validadas.sort((a, b) => distHaversine(userLat, userLon, a.lat, a.lon) - distHaversine(userLat, userLon, b.lat, b.lon));
+
+  document.getElementById('pegarTextoLoading').classList.add('hidden');
+  document.getElementById('pegarTextoResult').classList.remove('hidden');
+  document.getElementById('statParadasPegadas').innerText = validadas.length;
+  const distTotal = (validadas.length * 2.1).toFixed(0);
+  const tiempoTotal = (validadas.length * 0.13).toFixed(1);
+  document.getElementById('statDistanciaPegadas').innerText = distTotal;
+  document.getElementById('statTiempoPegadas').innerText = tiempoTotal;
+
+  const listaEl = document.getElementById('listaPegadas');
+  listaEl.innerHTML = '';
+  
+  validadas.forEach((r, i) => {
+    const tipo = i === 0 ? 'Recogida' : 'Entrega';
+    const tiempo = `${Math.floor(Math.random()*15+8)} min`;
+    listaEl.innerHTML += `
+      <div class="bg-[#111C31]/80 backdrop-blur-xl rounded-xl p-3 flex gap-3 items-center border border-white/10">
+        <div class="w-8 h-8 rounded-full bg-[#00E5FF] text-[#0A1220] font-black flex items-center justify-center flex-shrink-0 text-sm">${i + 1}</div>
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-sm text-white truncate">${r.original}</p>
+          <p class="text-xs text-white/60 truncate">${tipo} • ${tiempo}</p>
+        </div>
+        <svg class="w-5 h-5 text-white/40 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+      </div>
+    `;
+  });
+
+  const tramosContainer = document.getElementById('tramosContainer');
+  tramosContainer.innerHTML = '';
+  
+  const CHUNK = 9;
+  for (let i = 0; i < validadas.length; i += CHUNK) {
+    const chunk = validadas.slice(i, i + CHUNK);
+    const tramoNum = Math.floor(i / CHUNK) + 1;
+    const totalTramos = Math.ceil(validadas.length / CHUNK);
+    
+    const origin = `${userLat},${userLon}`;
+    const dest = `${chunk[chunk.length-1].lat},${chunk[chunk.length-1].lon}`;
+    const waypoints = chunk.slice(0, -1).map(p => `${p.lat},${p.lon}`).join('|');
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&waypoints=optimize:true|${waypoints}&travelmode=driving`;
+    const wazeUrl = `https://www.waze.com/es-419/ul?ll=${chunk[0].lat},${chunk[0].lon}&navigate=yes`;
+
+    tramosContainer.innerHTML += `
+      <div class="bg-[#111C31]/80 backdrop-blur-xl rounded-xl p-4 border border-white/10">
+        <p class="text-[#00E5FF] font-bold text-sm mb-3 text-center">Tramo ${tramoNum} de ${totalTramos} (${chunk.length} paradas)</p>
+        <div class="grid grid-cols-2 gap-3">
+          <a href="${mapsUrl}" target="_blank" class="bg-[#00E5FF] text-[#0A1220] font-black py-4 rounded-xl text-center text-sm hover:bg-[#00c8e0] transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            ABRIR EN<br>GOOGLE MAPS
+          </a>
+          <a href="${wazeUrl}" target="_blank" class="bg-transparent border-2 border-[#00E5FF] text-[#00E5FF] font-black py-4 rounded-xl text-center text-sm hover:bg-[#00E5FF]/10 transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5c-2-1-4.5-1.5-7-1.5s-5 .5-7 1.5C3 5.5 1 8.5 1 12c0 2.5 1 5 2.5 7L2 22l3.5-1.5c2 1 4.5 1.5 7 1.5 5.5 0 10-4.5 10-10 0-3.5-2-6.5-4.5-8.5z"/></svg>
+            ABRIR EN<br>WAZE
+          </a>
+        </div>
+      </div>
+    `;
+  }
+});
+
+async function abrirCamara(){
+  const v=document.getElementById('camara'); v.classList.remove('hidden');
+  try{ v.srcObject=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}}); }
+  catch{ mostrarNotificacion("No se pudo abrir cámara","error"); }
 }
 
-window.borrarDestino=async(id)=>{if(!confirm('¿Eliminar?'))return;await fetch(`/api/destinos/${id}`,{method:'DELETE',credentials:'include'});await cargarDestinos()};
-
-document.getElementById('btnBorrarTodo')?.addEventListener('click', async () => {
-  if(destinos.length === 0) return;
-  if(!confirm(`¿Eliminar TODAS las ${destinos.length} direcciones? Esta acción no se puede deshacer.`)) return;
-  const btn = document.getElementById('btnBorrarTodo');
-  btn.innerText = "🗑️ Borrando..."; btn.disabled = true;
-  try {
-    const r = await fetch('/api/destinos', { method: 'DELETE', credentials: 'include' });
-    if (r.ok) {
-      mostrarNotificacion(`✅ ${destinos.length} direcciones eliminadas`, "exito");
-      destinos = [];
-      renderLista();
-    }
-  } catch (error) {
-    mostrarNotificacion("❌ Error al borrar todo", "error");
-  } finally {
-    btn.innerText = "🗑️ Borrar todo"; btn.disabled = false;
-  }
-});
-
-document.getElementById('btnCargar')?.addEventListener('click',()=>{
-  destinosDetectados = [""];
-  mostrarModalEdicion();
-  setTimeout(()=>document.querySelector('.input-direccion')?.focus(),150);
-});
-document.getElementById('btnAgregarLinea')?.addEventListener('click',()=>{destinosDetectados.push(""); mostrarModalEdicion();});
-
-// ✅ RUTA OPTIMIZADA DESDE TU UBICACIÓN GPS ACTUAL
-document.getElementById('btnViaje')?.addEventListener('click', async () => {
-  if(destinos.length === 0) return;
-  mostrarNotificacion("📍 Obteniendo tu ubicación GPS...", "info");
-  
-  if (!navigator.geolocation) {
-    return mostrarNotificacion("⚠️ Tu navegador no soporta geolocalización", "error");
-  }
-  
-  try {
-    const position = await new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
-    });
-    
-    const origin = `${position.coords.latitude},${position.coords.longitude}`;
-    const dirs = destinos.map(d => {
-      const full = d.direccion || d.dirección || '';
-      const partes = full.split(' - ');
-      return encodeURIComponent(partes.length > 1 ? partes.slice(1).join(' - ') : full);
-    });
-
-    // Google Maps permite hasta 10 paradas (1 origen + 8 waypoints + 1 destino)
-    // Usamos optimize:true para que Google ordene de la más cercana a la más lejana desde tu ubicación
-    const CHUNK_SIZE = 8; 
-    
-    for (let i = 0; i < dirs.length; i += CHUNK_SIZE) {
-      const chunk = dirs.slice(i, i + CHUNK_SIZE + 1);
-      if (chunk.length === 0) break;
-      
-      const waypoints = chunk.slice(0, -1);
-      const destination = chunk[chunk.length - 1];
-      
-      let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=driving`;
-      if (waypoints.length > 0) {
-        url += `&waypoints=optimize:true|${waypoints.join('|')}`;
-      }
-      
-      window.open(url, '_blank');
-      mostrarNotificacion(`🚀 Ruta optimizada desde tu ubicación (${Math.min(i + CHUNK_SIZE + 1, dirs.length)} paradas)`, "exito");
-      
-      if (i + CHUNK_SIZE < dirs.length) {
-        await new Promise(r => setTimeout(r, 1500));
-        if(!confirm(`Tenés ${dirs.length} paradas en total. ¿Abrir el siguiente tramo?`)) break;
-      }
-    }
-    
-    document.getElementById('stats')?.classList.remove('hidden');
-    document.getElementById('statEntregas').innerText = destinos.length;
-    
-  } catch (error) {
-    console.error('Error GPS:', error);
-    mostrarNotificacion("⚠️ No se pudo obtener tu ubicación. Permití el acceso al GPS.", "error");
-  }
-});
-
-async function abrirCamara(){const v=document.getElementById('camara');v.classList.remove('hidden');try{const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});v.srcObject=s}catch{mostrarNotificacion("No se pudo abrir cámara","error")}}
-
-const logoMenuBtn=document.getElementById('logoMenuBtn'),logoDropdown=document.getElementById('logoDropdown');
-logoMenuBtn?.addEventListener('click',e=>{e.stopPropagation();logoDropdown.classList.toggle('hidden');logoDropdown.classList.toggle('flex')});
-document.addEventListener('click',e=>{if(logoDropdown&&!logoDropdown.contains(e.target)&&!logoMenuBtn.contains(e.target)){logoDropdown.classList.add('hidden');logoDropdown.classList.remove('flex')}});
-document.getElementById('btnIrPerfil')?.addEventListener('click',()=>{logoDropdown.classList.add('hidden');logoDropdown.classList.remove('flex');mostrarPerfil()});
-
 function mostrarPerfil(){
-  ocultarTodasLasPantallasExcepto('perfilScreen');
   const email=localStorage.getItem('rutaflex_email')||'usuario@rutaflex.com';
   document.getElementById('perfilNombre').innerText=email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1);
   document.getElementById('perfilEmail').innerText=email;
-  const estadoEl=document.getElementById('perfilEstado'),btnR=document.getElementById('btnRenovarPerfil');
-  if(estaVencido){estadoEl.innerText="⚠️ VENCIDO";estadoEl.className="inline-block mt-4 px-5 py-1.5 rounded-full text-xs font-black bg-red-600 text-white";btnR.classList.remove('hidden')}
-  else{estadoEl.innerText="✅ ACTIVO";estadoEl.className="inline-block mt-4 px-5 py-1.5 rounded-full text-xs font-black bg-green-500 text-white";btnR.classList.add('hidden')}
 }
-document.getElementById('btnVolverDePerfil')?.addEventListener('click',()=>ocultarTodasLasPantallasExcepto('appScreen'));
 
 if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('/service-worker.js',{scope:'/'}).catch(()=>{}); }); }
