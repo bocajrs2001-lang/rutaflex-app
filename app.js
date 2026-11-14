@@ -1,13 +1,14 @@
 const CONFIG_RUTAFLEX = { whatsapp:"5491123793596", alias:"RUTAFLEX.MP", linkSemanal:"https://mpago.la/2DjaHdB", linkMensual:"https://mpago.la/2aNpJ1B" };
 let destinos=[], destinosDetectados=[], emailRecuperacion="", estaVencido=false;
 
+// Fecha de hoy
 const hoy = new Date();
 const opciones = { day: 'numeric', month: 'short' };
 const fechaHoy = hoy.toLocaleDateString('es-AR', opciones).replace('.', '');
 const fechaEl = document.getElementById('fechaHoy');
 if (fechaEl) fechaEl.innerText = `Hoy, ${fechaHoy}`;
 
-window.togglePass=(id,icon)=>{const i=document.getElementById(id);if(!i)return;i.type=i.type==="password"?"text":"password";icon.innerText=i.type==="text"?"":"👁️"};
+window.togglePass=(id,icon)=>{const i=document.getElementById(id);if(!i)return;i.type=i.type==="password"?"text":"password";icon.innerText=i.type==="text"?"🙈":"👁️"};
 
 function mostrarNotificacion(m,t='info'){
   const c=document.getElementById('notificaciones');if(!c)return;
@@ -157,37 +158,112 @@ function actualizarRecientes() {
   }
 }
 
+// ==========================================
+// 🖼️ LECTURA DE IMAGEN MEJORADA CON TESSERACT
+// ==========================================
 document.getElementById('fileImg')?.addEventListener('change', async (e) => {
-  if (estaVencido) return mostrarNotificacion("️ Plan vencido", "error");
-  const file = e.target.files[0]; if (!file) return;
+  if (estaVencido) return mostrarNotificacion("⚠️ Plan vencido", "error");
+  const file = e.target.files[0]; 
+  if (!file) return;
+  
+  // Validar tipo de archivo
+  if (!file.type.startsWith('image/')) {
+    return mostrarNotificacion("⚠️ El archivo debe ser una imagen", "error");
+  }
+  
+  // Validar tamaño (máximo 10MB)
+  if (file.size > 10 * 1024 * 1024) {
+    return mostrarNotificacion("⚠️ La imagen es muy grande (máx 10MB)", "error");
+  }
+
+  // Mostrar notificación de carga
   mostrarNotificacion("🤖 Leyendo imagen...", "info");
+  
   try {
-    const { data: { text } } = await Tesseract.recognize(file, 'spa');
+    // Verificar que Tesseract esté cargado
+    if (typeof Tesseract === 'undefined') {
+      throw new Error('Tesseract.js no está cargado. Recargá la página.');
+    }
+    
+    // Crear worker con configuración robusta
+    const worker = await Tesseract.createWorker('spa', 1, {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          const progress = Math.round(m.progress * 100);
+          console.log(`Progreso OCR: ${progress}%`);
+        }
+      }
+    });
+    
+    // Procesar la imagen
+    const { data: { text } } = await worker.recognize(file);
+    await worker.terminate();
+    
+    if (!text || text.trim().length < 5) {
+      throw new Error('No se pudo leer texto de la imagen. Probá con una foto más clara.');
+    }
+    
+    console.log('Texto detectado:', text);
+    
+    // Procesar el texto detectado
     let lineas = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
     let agrupadas = [];
+    
     for (let i = 0; i < lineas.length; i++) {
-      let actual = lineas[i]; let siguiente = lineas[i+1] || "";
-      if (actual.length < 40 && !/\d{3,4}/.test(actual) && (/\d{2,4}/.test(siguiente) || /(Av\.|Libertador|Rivadavia|Corrientes|Santa Fe)/i.test(siguiente))) {
-        agrupadas.push(`${actual} - ${siguiente}`); i++;
-      } else if (actual.length > 8) { agrupadas.push(actual); }
+      let actual = lineas[i]; 
+      let siguiente = lineas[i+1] || "";
+      
+      // Detectar si es un label + dirección
+      if (actual.length < 40 && !/\d{3,4}/.test(actual) && 
+          (/\d{2,4}/.test(siguiente) || /(Av\.|Avda|Libertador|Rivadavia|Corrientes|Santa Fe|Calle|San|Juan|Belgrano|Maipú|Florida)/i.test(siguiente))) {
+        agrupadas.push(`${actual} - ${siguiente}`); 
+        i++;
+      } else if (actual.length > 8 && /\d/.test(actual)) { 
+        agrupadas.push(actual); 
+      }
     }
+    
+    // Eliminar duplicados y filtrar
     destinosDetectados = [...new Set(agrupadas)].filter(l=>l.length>10);
-    if (destinosDetectados.length === 0) return mostrarNotificacion("⚠️ No se entendió", "error");
-    mostrarNotificacion(`✅ ${destinosDetectados.length} detectados`, "exito");
+    
+    if (destinosDetectados.length === 0) {
+      throw new Error('No se detectaron direcciones válidas. Probá con una foto más nítida y de frente.');
+    }
+    
+    mostrarNotificacion(`✅ ${destinosDetectados.length} direcciones detectadas`, "exito");
     mostrarModalEdicion();
-  } catch (err) { mostrarNotificacion(" Error leyendo", "error");
-  } finally { e.target.value = ''; }
+    
+  } catch (err) {
+    console.error('Error OCR:', err);
+    let mensaje = "❌ Error leyendo la imagen";
+    
+    if (err.message.includes('Tesseract')) {
+      mensaje = "⚠️ Error de conexión. Recargá la página e intentá de nuevo.";
+    } else if (err.message.includes('No se pudo leer')) {
+      mensaje = "⚠️ No se detectó texto. Usá una foto más clara.";
+    } else if (err.message.includes('No se detectaron')) {
+      mensaje = "⚠️ No se encontraron direcciones. Verificá que la imagen tenga direcciones escritas.";
+    }
+    
+    mostrarNotificacion(mensaje, "error");
+  } finally { 
+    e.target.value = ''; 
+  }
 });
 
 function mostrarModalEdicion(){
   const c=document.getElementById('contenedorInputs'); c.innerHTML='';
-  destinosDetectados.forEach((dir,i)=>{
-    c.innerHTML+=`<div class="flex gap-2 items-start bg-[#0A1220]/80 backdrop-blur-xl p-3 rounded-xl border border-white/10">
-      <span class="bg-[#00E5FF] text-[#0A1220] rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold mt-1 flex-shrink-0">${i+1}</span>
-      <input type="text" value="${dir.replace(/"/g,'&quot;')}" class="input-direccion flex-1 bg-[#111C31]/80 border border-white/10 rounded-lg px-3 py-2 text-sm text-white" placeholder="Dirección">
-      <button onclick="eliminarLinea(${i})" class="text-red-400 p-2">🗑️</button>
-    </div>`;
-  });
+  if (destinosDetectados.length === 0) {
+    c.innerHTML='<p class="text-center py-4 text-gray-400">Sin direcciones</p>';
+  } else {
+    destinosDetectados.forEach((dir,i)=>{
+      c.innerHTML+=`<div class="flex gap-2 items-start bg-[#0A1220]/80 backdrop-blur-xl p-3 rounded-xl border border-white/10">
+        <span class="bg-[#00E5FF] text-[#0A1220] rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold mt-1 flex-shrink-0">${i+1}</span>
+        <input type="text" value="${dir.replace(/"/g,'&quot;')}" class="input-direccion flex-1 bg-[#111C31]/80 border border-white/10 rounded-lg px-3 py-2 text-sm text-white" placeholder="Dirección">
+        <button onclick="eliminarLinea(${i})" class="text-red-400 p-2">🗑️</button>
+      </div>`;
+    });
+  }
   document.getElementById('modalEdicion').classList.remove('hidden');
 }
 window.eliminarLinea=i=>{destinosDetectados.splice(i,1);mostrarModalEdicion()};
