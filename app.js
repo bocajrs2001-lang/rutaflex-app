@@ -1,5 +1,5 @@
 const CONFIG_RUTAFLEX = { whatsapp:"5491123793596", alias:"RUTAFLEX.MP", linkSemanal:"https://mpago.la/2DjaHdB", linkMensual:"https://mpago.la/2aNpJ1B" };
-let destinos=[], destinosDetectados=[], estaVencido=false, camaraStream=null, mapaLeaflet=null, marcadoresMapa=[];
+let destinos=[], destinosDetectados=[], estaVencido=false, camaraStream=null, mapaLeaflet=null;
 let ubicacionActual = null;
 
 // ============ UTILIDADES ============
@@ -21,19 +21,11 @@ function mostrarNotificacion(m,t='info'){
 }
 
 function ocultarTodasLasPantallasExcepto(id){
-  console.log('Ocultando todo excepto:', id);
-  const pantallas=['authScreen','appScreen','pegarTextoScreen','perfilScreen','payment-modal','modalEdicion','modalMapa'];
-  pantallas.forEach(s=>{
+  ['authScreen','appScreen','pegarTextoScreen','perfilScreen','payment-modal','modalEdicion','modalMapa'].forEach(s=>{
     const el=document.getElementById(s);
     if(el) el.classList.add('hidden');
   });
-  const target=document.getElementById(id);
-  if(target) {
-    target.classList.remove('hidden');
-    console.log('Mostrando:', id);
-  } else {
-    console.error('No se encontró el elemento:', id);
-  }
+  document.getElementById(id)?.classList.remove('hidden');
   window.scrollTo(0,0);
 }
 
@@ -121,7 +113,7 @@ function extraerDirecciones(texto) {
       direcciones.push(limpia);
     }
   });
-  return [...new Set(direcciones)].slice(0, 50);
+  return [...new Set(direcciones)].slice(0, 100);
 }
 
 // ============ OCR ============
@@ -190,31 +182,80 @@ async function procesarPDF(file) {
   return texto;
 }
 
-async function procesarYMostrar(textoCrudo) {
-  const limpio = limpiarTextoSucio(textoCrudo);
-  const direcciones = extraerDirecciones(limpio);
-  if (direcciones.length === 0) {
-    throw new Error('No se detectaron direcciones');
+// ============ 🚀 BOTÓN COMENZAR VIAJE ============
+async function comenzarViaje() {
+  if (destinos.length === 0) {
+    return mostrarNotificacion("⚠️ No hay direcciones cargadas", "error");
   }
+  
+  mostrarNotificacion("📍 Obteniendo tu ubicación...", "info");
   const gps = await obtenerUbicacionActual();
-  destinosDetectados = direcciones;
-  mostrarModalEdicionConGPS(gps, direcciones);
-}
-
-function mostrarModalEdicionConGPS(gps, direcciones) {
-  const c = document.getElementById('contenedorInputs');
-  c.innerHTML = `<div class="bg-[#00C950]/10 border border-[#00C950]/30 rounded-xl p-3 mb-3 flex items-center gap-2">
-    <span class="text-[#00D084]">📍</span>
-    <span class="text-[#00D084] text-sm font-bold">Origen: Tu ubicación (${gps.lat.toFixed(4)}, ${gps.lon.toFixed(4)})</span>
-  </div>`;
-  direcciones.forEach((dir, i) => {
-    c.innerHTML += `<div class="flex gap-2 items-start bg-[#0A1220]/80 p-3 rounded-xl border border-white/10">
-      <span class="bg-[#00E5FF] text-[#0A1220] rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold mt-1 flex-shrink-0">${i+1}</span>
-      <input type="text" value="${dir.replace(/"/g,'&quot;')}" class="input-direccion flex-1 bg-[#111C31]/80 border border-white/10 rounded-lg px-3 py-2 text-sm text-white">
-      <button onclick="eliminarLinea(${i})" class="text-red-400 p-2">🗑️</button>
-    </div>`;
+  
+  // Preparar direcciones para Google Maps
+  const direccionesEncoded = destinos.map(d => {
+    const dir = d.direccion || d.dirección || '';
+    return encodeURIComponent(dir);
   });
-  document.getElementById('modalEdicion').classList.remove('hidden');
+  
+  const CHUNK = 9; // 1 destino final + 8 waypoints
+  const tramosContainer = document.getElementById('tramosContainer');
+  tramosContainer.innerHTML = '';
+  
+  for (let i = 0; i < direccionesEncoded.length; i += CHUNK) {
+    const chunk = direccionesEncoded.slice(i, i + CHUNK);
+    const tramoNum = Math.floor(i/CHUNK) + 1;
+    const totalTramos = Math.ceil(direccionesEncoded.length/CHUNK);
+    
+    // ✅ ORIGEN: GPS actual del usuario
+    const origin = `${gps.lat},${gps.lon}`;
+    // ✅ DESTINO: última dirección del tramo
+    const destino = chunk[chunk.length-1];
+    // ✅ WAYPOINTS: las demás con optimize:true
+    const waypoints = chunk.slice(0, -1).join('|');
+    
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destino}&waypoints=optimize:true|${waypoints}&travelmode=driving`;
+    const wazeUrl = `https://www.waze.com/ul?q=${chunk[0]}&navigate=yes`;
+    
+    tramosContainer.innerHTML += `
+      <div class="bg-[#111C31]/80 backdrop-blur-xl rounded-xl p-4 border border-white/10 mb-3">
+        <p class="text-[#00E5FF] font-bold text-sm mb-3 text-center">Tramo ${tramoNum} de ${totalTramos} (${chunk.length} paradas)</p>
+        <p class="text-white/60 text-xs text-center mb-3">📍 Origen: Tu ubicación actual</p>
+        <div class="grid grid-cols-2 gap-3">
+          <a href="${mapsUrl}" target="_blank" class="bg-[#00E5FF] text-[#0A1220] font-black py-4 rounded-xl text-center text-sm hover:bg-[#00c8e0] transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            ABRIR EN<br>GOOGLE MAPS
+          </a>
+          <a href="${wazeUrl}" target="_blank" class="bg-transparent border-2 border-[#00E5FF] text-[#00E5FF] font-black py-4 rounded-xl text-center text-sm hover:bg-[#00E5FF]/10 transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5c-2-1-4.5-1.5-7-1.5s-5 .5-7 1.5C3 5.5 1 8.5 1 12c0 2.5 1 5 2.5 7L2 22l3.5-1.5c2 1 4.5 1.5 7 1.5 5.5 0 10-4.5 10-10 0-3.5-2-6.5-4.5-8.5z"/></svg>
+            ABRIR EN<br>WAZE
+          </a>
+        </div>
+      </div>`;
+  }
+  
+  // Mostrar pantalla de resultados
+  document.getElementById('pegarTextoResult').classList.remove('hidden');
+  document.getElementById('resumenValidas').innerText = destinos.length;
+  document.getElementById('resumenDescartadas').innerText = '0';
+  document.getElementById('statParadasPegadas').innerText = destinos.length;
+  document.getElementById('statDistanciaPegadas').innerText = '~' + (destinos.length * 2).toFixed(0);
+  document.getElementById('statTiempoPegadas').innerText = '~' + (destinos.length * 3).toFixed(0);
+  
+  const listaEl = document.getElementById('listaPegadas');
+  listaEl.innerHTML = '';
+  destinos.forEach((d, i) => {
+    const dir = d.direccion || d.dirección || '';
+    listaEl.innerHTML += `
+      <div class="bg-[#111C31]/80 backdrop-blur-xl rounded-xl p-3 flex gap-3 items-center border border-white/10">
+        <div class="w-8 h-8 rounded-full bg-[#00E5FF] text-[#0A1220] font-black flex items-center justify-center flex-shrink-0 text-sm">${i+1}</div>
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-sm text-white truncate">${dir}</p>
+        </div>
+      </div>`;
+  });
+  
+  ocultarTodasLasPantallasExcepto('pegarTextoScreen');
+  mostrarNotificacion(`🚀 Ruta optimizada desde tu ubicación (${destinos.length} paradas)`, "exito");
 }
 
 // ============ 🖼️ IMAGEN ============
@@ -228,7 +269,10 @@ document.getElementById('fileImg')?.addEventListener('change', async (e) => {
     const url = URL.createObjectURL(file);
     const texto = await procesarImagenOCR(url);
     URL.revokeObjectURL(url);
-    await procesarYMostrar(texto);
+    const direcciones = extraerDirecciones(limpiarTextoSucio(texto));
+    if (direcciones.length === 0) throw new Error('No se detectaron direcciones');
+    destinosDetectados = direcciones;
+    mostrarModalEdicionConGPS();
   } catch(err) {
     mostrarNotificacion(`❌ ${err.message}`, "error");
   } finally { e.target.value = ''; }
@@ -241,7 +285,10 @@ document.getElementById('filePdf')?.addEventListener('change', async (e) => {
   mostrarNotificacion("📄 Leyendo PDF...", "info");
   try {
     const texto = await procesarPDF(file);
-    await procesarYMostrar(texto);
+    const direcciones = extraerDirecciones(limpiarTextoSucio(texto));
+    if (direcciones.length === 0) throw new Error('No se detectaron direcciones');
+    destinosDetectados = direcciones;
+    mostrarModalEdicionConGPS();
   } catch(err) {
     mostrarNotificacion(`❌ ${err.message}`, "error");
   } finally { e.target.value = ''; }
@@ -276,7 +323,10 @@ document.getElementById('btnCapturar')?.addEventListener('click', async () => {
   mostrarNotificacion("🤖 Procesando foto...", "info");
   try {
     const texto = await procesarImagenOCR(canvas.toDataURL('image/png'));
-    await procesarYMostrar(texto);
+    const direcciones = extraerDirecciones(limpiarTextoSucio(texto));
+    if (direcciones.length === 0) throw new Error('No se detectaron direcciones');
+    destinosDetectados = direcciones;
+    mostrarModalEdicionConGPS();
   } catch(err) {
     mostrarNotificacion(`❌ ${err.message}`, "error");
   }
@@ -317,11 +367,24 @@ document.getElementById('btnMiUbicacion')?.addEventListener('click', async () =>
 document.getElementById('btnListoMapa')?.addEventListener('click', () => {
   document.getElementById('modalMapa').classList.add('hidden');
   if (destinosDetectados.length > 0) {
-    obtenerUbicacionActual().then(gps => mostrarModalEdicionConGPS(gps, destinosDetectados));
+    mostrarModalEdicionConGPS();
   }
 });
 
 // ============ MODAL EDICIÓN ============
+function mostrarModalEdicionConGPS() {
+  const c = document.getElementById('contenedorInputs');
+  c.innerHTML = '';
+  destinosDetectados.forEach((dir, i) => {
+    c.innerHTML += `<div class="flex gap-2 items-start bg-[#0A1220]/80 p-3 rounded-xl border border-white/10">
+      <span class="bg-[#00E5FF] text-[#0A1220] rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold mt-1 flex-shrink-0">${i+1}</span>
+      <input type="text" value="${dir.replace(/"/g,'&quot;')}" class="input-direccion flex-1 bg-[#111C31]/80 border border-white/10 rounded-lg px-3 py-2 text-sm text-white">
+      <button onclick="eliminarLinea(${i})" class="text-red-400 p-2">🗑️</button>
+    </div>`;
+  });
+  document.getElementById('modalEdicion').classList.remove('hidden');
+}
+
 document.getElementById('btnGuardarEdicion')?.addEventListener('click', async () => {
   const dirs = document.querySelectorAll('.input-direccion');
   const finales = [...dirs].map(d => d.value.trim()).filter(d => d.length > 3);
@@ -341,6 +404,8 @@ document.getElementById('btnGuardarEdicion')?.addEventListener('click', async ()
     document.getElementById('modalEdicion').classList.add('hidden');
     destinosDetectados = [];
     await cargarDestinos();
+    // ✅ MOSTRAR BOTÓN COMENZAR VIAJE
+    setTimeout(() => comenzarViaje(), 500);
   } catch {
     mostrarNotificacion("❌ Error al guardar", "error");
   } finally {
@@ -349,6 +414,7 @@ document.getElementById('btnGuardarEdicion')?.addEventListener('click', async ()
 });
 
 window.eliminarLinea = (i) => {
+  destinosDetectados.splice(i, 1);
   const c = document.getElementById('contenedorInputs');
   const inputs = c.querySelectorAll('.input-direccion');
   if (inputs[i]) inputs[i].closest('div').remove();
@@ -401,9 +467,11 @@ document.getElementById('btnProcesarTexto')?.addEventListener('click', async () 
   document.getElementById('pegarTextoLoading').classList.remove('hidden');
   document.getElementById('loadingMensaje').innerText = 'Extrayendo direcciones...';
   try {
-    await procesarYMostrar(texto);
+    const direcciones = extraerDirecciones(limpiarTextoSucio(texto));
+    if (direcciones.length === 0) throw new Error('No se detectaron direcciones');
+    destinosDetectados = direcciones;
     document.getElementById('pegarTextoLoading').classList.add('hidden');
-    mostrarResultadosRapidos(destinosDetectados);
+    mostrarModalEdicionConGPS();
   } catch(err) {
     mostrarNotificacion(`❌ ${err.message}`, "error");
     document.getElementById('pegarTextoStep1').classList.remove('hidden');
@@ -411,60 +479,7 @@ document.getElementById('btnProcesarTexto')?.addEventListener('click', async () 
   }
 });
 
-function mostrarResultadosRapidos(direcciones) {
-  document.getElementById('pegarTextoResult').classList.remove('hidden');
-  document.getElementById('resumenValidas').innerText = direcciones.length;
-  document.getElementById('resumenDescartadas').innerText = '0';
-  document.getElementById('statParadasPegadas').innerText = direcciones.length;
-  document.getElementById('statDistanciaPegadas').innerText = '~' + (direcciones.length * 2).toFixed(0);
-  document.getElementById('statTiempoPegadas').innerText = '~' + (direcciones.length * 3).toFixed(0);
-  const listaEl = document.getElementById('listaPegadas');
-  listaEl.innerHTML = '';
-  direcciones.forEach((dir, i) => {
-    listaEl.innerHTML += `
-      <div class="bg-[#111C31]/80 backdrop-blur-xl rounded-xl p-3 flex gap-3 items-center border border-white/10">
-        <div class="w-8 h-8 rounded-full bg-[#00E5FF] text-[#0A1220] font-black flex items-center justify-center flex-shrink-0 text-sm">${i+1}</div>
-        <div class="flex-1 min-w-0">
-          <p class="font-bold text-sm text-white truncate">${dir}</p>
-        </div>
-      </div>`;
-  });
-  generarTramos(direcciones);
-}
-
-async function generarTramos(direcciones) {
-  const gps = await obtenerUbicacionActual();
-  const tramosContainer = document.getElementById('tramosContainer');
-  tramosContainer.innerHTML = '';
-  const CHUNK = 9;
-  for (let i = 0; i < direcciones.length; i += CHUNK) {
-    const chunk = direcciones.slice(i, i + CHUNK);
-    const tramoNum = Math.floor(i/CHUNK) + 1;
-    const totalTramos = Math.ceil(direcciones.length/CHUNK);
-    const origin = `${gps.lat},${gps.lon}`;
-    const destino = encodeURIComponent(chunk[chunk.length-1]);
-    const waypoints = chunk.slice(0, -1).map(d => encodeURIComponent(d)).join('|');
-    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destino}&waypoints=optimize:true|${waypoints}&travelmode=driving`;
-    const wazeUrl = `https://www.waze.com/ul?q=${encodeURIComponent(chunk[0])}&navigate=yes`;
-    tramosContainer.innerHTML += `
-      <div class="bg-[#111C31]/80 backdrop-blur-xl rounded-xl p-4 border border-white/10">
-        <p class="text-[#00E5FF] font-bold text-sm mb-3 text-center">Tramo ${tramoNum} de ${totalTramos} (${chunk.length} paradas)</p>
-        <p class="text-white/60 text-xs text-center mb-3">📍 Origen: Tu ubicación actual</p>
-        <div class="grid grid-cols-2 gap-3">
-          <a href="${mapsUrl}" target="_blank" class="bg-[#00E5FF] text-[#0A1220] font-black py-4 rounded-xl text-center text-sm hover:bg-[#00c8e0] transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            ABRIR EN<br>GOOGLE MAPS
-          </a>
-          <a href="${wazeUrl}" target="_blank" class="bg-transparent border-2 border-[#00E5FF] text-[#00E5FF] font-black py-4 rounded-xl text-center text-sm hover:bg-[#00E5FF]/10 transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5c-2-1-4.5-1.5-7-1.5s-5 .5-7 1.5C3 5.5 1 8.5 1 12c0 2.5 1 5 2.5 7L2 22l3.5-1.5c2 1 4.5 1.5 7 1.5 5.5 0 10-4.5 10-10 0-3.5-2-6.5-4.5-8.5z"/></svg>
-            ABRIR EN<br>WAZE
-          </a>
-        </div>
-      </div>`;
-  }
-}
-
-// ============ 🔐 AUTH ============
+// ============ AUTH ============
 document.getElementById('tabLogin')?.addEventListener('click', () => {
   document.getElementById('formLogin').classList.remove('hidden');
   document.getElementById('formRegistro').classList.add('hidden');
@@ -479,11 +494,8 @@ document.getElementById('formLogin')?.addEventListener('submit', async (e) => {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
   const msg = document.getElementById('authMessage');
-  
-  console.log('Intentando login con:', email);
   msg.innerText = "Conectando...";
   msg.className = "text-center text-sm mt-4 font-bold text-[#00E5FF] min-h-[20px]";
-  
   try {
     const r = await fetch('/api/login', {
       method: 'POST',
@@ -491,30 +503,21 @@ document.getElementById('formLogin')?.addEventListener('submit', async (e) => {
       credentials: 'include',
       body: JSON.stringify({email, password})
     });
-    
-    console.log('Respuesta del servidor:', r.status);
     const d = await r.json();
-    console.log('Datos recibidos:', d);
-    
     if (r.ok && d.ok) {
-      console.log('Login exitoso, guardando email...');
       localStorage.setItem('rutaflex_email', email);
-      console.log('Llamando a mostrarApp...');
       mostrarApp(d.usuario.nombre, d.usuario.fecha_vencimiento);
     } else {
-      console.error('Error en login:', d);
       msg.innerText = d.error || "Email o contraseña incorrectos";
       msg.className = "text-center text-sm mt-4 font-bold text-red-400 min-h-[20px]";
     }
-  } catch(err) {
-    console.error('Error de conexión:', err);
-    msg.innerText = "Error de conexión. Verificá tu internet.";
+  } catch {
+    msg.innerText = "Error de conexión";
     msg.className = "text-center text-sm mt-4 font-bold text-red-400 min-h-[20px]";
   }
 });
 
 document.getElementById('btnLogoutPerfil')?.addEventListener('click', hacerLogout);
-
 document.getElementById('btnPromo')?.addEventListener('click', async () => {
   const codigo = document.getElementById('promo').value;
   if (!codigo) return;
@@ -547,45 +550,34 @@ async function hacerLogout() {
 }
 
 function mostrarApp(nombre, fechaVencimiento) {
-  console.log('mostrarApp llamado con:', nombre, fechaVencimiento);
-  try {
-    ocultarTodasLasPantallasExcepto('appScreen');
-    actualizarNav('home');
-    history.replaceState({tab: 'home'}, '', '#home');
-    
-    const userNameEl = document.getElementById('userName');
-    if (userNameEl) userNameEl.innerText = `¡Hola, ${nombre}!`;
-    
-    const diff = Math.ceil((new Date(fechaVencimiento) - new Date()) / (1000*60*60*24));
-    estaVencido = diff <= 0;
-    const contadorEl = document.getElementById('contadorDias');
-    if (contadorEl) {
-      if (estaVencido) {
-        contadorEl.innerHTML = "⚠️ VENCIDO";
-        contadorEl.className = "mt-4 inline-flex items-center gap-1.5 bg-red-500/15 border border-red-500/30 text-red-400 px-3.5 py-1.5 rounded-full text-[13px] font-bold";
-        const banner = document.getElementById('bannerVencido');
-        if (banner) banner.classList.remove('hidden');
-      } else {
-        contadorEl.innerHTML = `✅ Activo (${diff} días)`;
-        contadorEl.className = "mt-4 inline-flex items-center gap-1.5 bg-[#00C950]/15 border border-[#00C950]/30 text-[#00D084] px-3.5 py-1.5 rounded-full text-[13px] font-bold";
-      }
+  ocultarTodasLasPantallasExcepto('appScreen');
+  actualizarNav('home');
+  history.replaceState({tab: 'home'}, '', '#home');
+  const userNameEl = document.getElementById('userName');
+  if (userNameEl) userNameEl.innerText = `¡Hola, ${nombre}!`;
+  const diff = Math.ceil((new Date(fechaVencimiento) - new Date()) / (1000*60*60*24));
+  estaVencido = diff <= 0;
+  const contadorEl = document.getElementById('contadorDias');
+  if (contadorEl) {
+    if (estaVencido) {
+      contadorEl.innerHTML = "⚠️ VENCIDO";
+      contadorEl.className = "mt-4 inline-flex items-center gap-1.5 bg-red-500/15 border border-red-500/30 text-red-400 px-3.5 py-1.5 rounded-full text-[13px] font-bold";
+      const banner = document.getElementById('bannerVencido');
+      if (banner) banner.classList.remove('hidden');
+    } else {
+      contadorEl.innerHTML = `✅ Activo (${diff} días)`;
+      contadorEl.className = "mt-4 inline-flex items-center gap-1.5 bg-[#00C950]/15 border border-[#00C950]/30 text-[#00D084] px-3.5 py-1.5 rounded-full text-[13px] font-bold";
     }
-    console.log('Llamando a cargarDestinos...');
-    cargarDestinos();
-  } catch(err) {
-    console.error('Error en mostrarApp:', err);
-    mostrarNotificacion("❌ Error al cargar la app", "error");
   }
+  cargarDestinos();
 }
 
 async function cargarDestinos() {
-  console.log('cargarDestinos llamado, estaVencido:', estaVencido);
   if (estaVencido) return;
   try {
     const r = await fetch('/api/destinos', {credentials: 'include'});
     if (!r.ok) throw new Error('Error al cargar destinos');
     destinos = await r.json();
-    console.log('Destinos cargados:', destinos.length);
     const titulo = document.getElementById('recienteTitulo');
     const sub = document.getElementById('recienteSub');
     if (destinos.length > 0 && titulo && sub) {
@@ -606,18 +598,13 @@ function mostrarPerfil() {
 }
 
 window.addEventListener('load', async () => {
-  console.log('Página cargada');
   const hoy = new Date();
   const fechaEl = document.getElementById('fechaHoy');
   if (fechaEl) fechaEl.innerText = `Hoy, ${hoy.getDate()} ${hoy.toLocaleDateString('es-AR', {month: 'short'}).replace('.','')}`;
-  
   try {
     const r = await fetch('/api/yo', {credentials: 'include'});
     const d = await r.json();
-    console.log('Sesión actual:', d);
-    if (d.ok) {
-      mostrarApp(d.nombre, d.fecha_vencimiento);
-    }
+    if (d.ok) mostrarApp(d.nombre, d.fecha_vencimiento);
   } catch(err) {
     console.error('Error al verificar sesión:', err);
   }
