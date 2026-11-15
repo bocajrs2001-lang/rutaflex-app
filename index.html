@@ -3,8 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<!-- GOOGLE ANALYTICS 4 -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-CVQHE6K2DV"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -15,14 +13,10 @@
     gtag('event', 'pwa_installed', { 'event_category': 'PWA', 'event_label': 'RutaFlex Install' });
   });
 </script>
-
-<!-- FAVICON -->
 <link rel="icon" type="image/svg+xml" href="/logo.svg">
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
 <link rel="apple-touch-icon" href="/logo.svg">
-
-<!-- SEO -->
 <meta name="google-site-verification" content="uzyX6zsqHquA4NB7C3qKIhV-1NMKW6EV2nanwHVo_wU" />
 <title>RutaFlex - El camino inteligente</title>
 <meta name="description" content="RutaFlex optimiza tus rutas de entrega. Del más cercano al más lejano." />
@@ -30,7 +24,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="RutaFlex">
-
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
@@ -43,15 +36,11 @@
 </style>
 </head>
 <body class="bg-[#050A14] text-white overflow-x-hidden">
-
 <div class="fixed inset-0 z-0" style="background-image: url('/satellite-dark.png'); background-size: cover; background-position: center center;">
   <div class="absolute inset-0 bg-[#070E1E]/75"></div>
   <div class="absolute inset-0 bg-gradient-to-b from-[#050A14]/50 via-transparent to-[#050A14]/90"></div>
 </div>
-
 <div class="app-container relative z-10 min-h-screen flex flex-col pb-[80px]">
-
-  <!-- ==================== AUTH SCREEN ==================== -->
   <div id="authScreen" class="min-h-screen flex flex-col justify-center items-center p-6">
      <div class="mb-10 w-full max-w-sm mx-auto text-center">
         <div class="w-40 h-40 rounded-full overflow-hidden bg-[#0F2E57] shadow-[0_0_35px_rgba(0,229,255,0.35)] mx-auto mb-6">
@@ -85,8 +74,6 @@
      </form>
      <p id="authMessage" class="text-center text-sm mt-4 font-bold text-red-400 min-h-[20px]"></p>
   </div>
-
-  <!-- ==================== APP SCREEN (HOME) ==================== -->
   <div id="appScreen" class="hidden min-h-screen">
     <div class="p-5">
       <div class="flex items-center gap-3">
@@ -95,7 +82,6 @@
         </div>
         <h1 class="text-[22px] font-black tracking-tight text-white">RutaFlex</h1>
       </div>
-
       <div class="mt-8">
         <h2 id="userName" class="text-[32px] font-black leading-[1.1]">¡Hola! 👋</h2>
         <p class="text-white/60 text-[14px] mt-3 flex items-center gap-2">
@@ -103,14 +89,17 @@
         </p>
         <div id="contadorDias" class="mt-4 inline-flex items-center gap-1.5 bg-[#00C950]/15 border border-[#00C950]/30 text-[#00D084] px-3.5 py-1.5 rounded-full text-[13px] font-bold">✅ Activo</div>
       </div>
-
       <div id="alertaProximoVencimiento" class="hidden bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 p-3 text-center font-bold mt-4 rounded-xl">⚠️ ¡TU PLAN VENCE MAÑANA!</div>
       <div id="bannerVencido" class="hidden bg-red-600/20 text-red-400 border border-red-600/30 p-3 text-center font-bold mt-4 rounded-xl">🔒 PLAN VENCIDO</div>
-
+      <!-- PARCHE 1: BOTON CONTINUAR RUTA GUARDADA - aparece solo si hay ruta en curso -->
+      <div id="bannerContinuarRuta" class="hidden mt-6 bg-[#00E5FF] rounded-[18px] p-4 text-center">
+        <p class="text-[#0A1220] font-black text-[15px]">⏸️ Tenés una ruta en curso</p>
+        <p id="textoContinuarRuta" class="text-[#0A1220]/70 text-xs font-bold mt-1">Tramo 2 de 11 • Te falta continuar</p>
+        <button id="btnContinuarRutaGuardada" class="w-full mt-3 bg-[#0A1220] text-white font-black py-3.5 rounded-xl text-sm">➡️ CONTINUAR MI RUTA</button>
+      </div>
       <button id="btnPegarTexto" class="mt-8 w-full bg-[#00E5FF] text-[#0A1220] font-black text-[14px] tracking-wide py-[18px] rounded-[18px] shadow-[0_8px_24px_rgba(0,229,255,0.4)] flex items-center justify-center gap-3 active:scale-[0.98] transition">
         <span class="text-[18px]">📋</span> PEGAR TEXTO DE WHATSAPP / MAIL / EXCEL
       </button>
-
       <h3 class="mt-9 text-[18px] font-bold">Importar ruta</h3>
       <div class="grid grid-cols-4 gap-3 mt-4">
         <label class="rounded-[18px] p-4 flex flex-col items-center gap-2.5 border backdrop-blur-xl bg-[#12203A]/80 border-white/10 cursor-pointer hover:border-[#00E5FF] active:scale-95 transition">
@@ -132,8 +121,6 @@
            <span class="text-[11px] font-medium">Mapa</span>
         </button>
       </div>
-
-      <!-- Panel de cámara -->
       <div id="panelCamara" class="hidden mt-3">
          <video id="camara" autoplay playsinline class="w-full rounded-2xl border-2 border-[#00E5FF]"></video>
          <div class="flex gap-2 mt-2">
@@ -141,9 +128,8 @@
             <button id="btnCerrarCamara" class="flex-1 bg-[#1E324F] text-white font-bold py-3 rounded-xl active:scale-95">✕ Cerrar</button>
          </div>
       </div>
-
       <h3 class="mt-9 text-[18px] font-bold">Recientes</h3>
-      <div class="mt-4 bg-[#111C31]/80 backdrop-blur-xl border border-white/10 rounded-[18px] p-4 flex items-center justify-between">
+      <div id="cardReciente" class="mt-4 bg-[#111C31]/80 backdrop-blur-xl border border-white/10 rounded-[18px] p-4 flex items-center justify-between cursor-pointer">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-full bg-[#00E5FF]/15 flex items-center justify-center text-[#00E5FF]">📍</div>
           <div>
@@ -154,7 +140,6 @@
         <span class="text-white/20 text-xl">›</span>
       </div>
     </div>
-
     <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-30 bg-[#0A1220]/90 backdrop-blur-xl border-t border-white/10 flex justify-around py-3 px-2">
       <button onclick="mostrarTab('home')" class="flex flex-col items-center gap-1 text-[#00E5FF] w-16 nav-btn" data-tab="home">
         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
@@ -170,8 +155,6 @@
       </button>
     </nav>
   </div>
-
-  <!-- ==================== PANTALLA PEGAR TEXTO ==================== -->
   <div id="pegarTextoScreen" class="hidden min-h-screen">
      <div class="bg-[#121E32]/90 backdrop-blur-xl border-b border-white/10 p-5 flex items-center gap-3">
         <div class="w-12 h-12 rounded-full overflow-hidden bg-[#123A66] flex items-center justify-center">
@@ -193,13 +176,16 @@
            <button id="btnProcesarTexto" class="w-full bg-[#00E5FF] text-[#0A1220] font-black py-5 rounded-2xl text-base hover:bg-[#00c8e0] transition-all shadow-[0_8px_24px_rgba(0,229,255,0.4)] active:scale-[0.98]">ARMAR MI RUTA OPTIMIZADA</button>
            <p class="text-center text-xs text-white/50 mt-4">Usamos IA para optimizar el orden y ahorrar tiempo y combustible</p>
         </div>
-
         <div id="pegarTextoLoading" class="hidden text-center py-20">
            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-[#00E5FF] mx-auto mb-4"></div>
            <p class="text-[#00E5FF] font-bold text-lg" id="loadingMensaje">Analizando direcciones...</p>
            <p class="text-white/60 text-sm mt-2" id="loadingDetalle">Esto puede tardar unos segundos</p>
+           <!-- PARCHE 2: BARRA DE PROGRESO PARA 100 DIRECCIONES -->
+           <div class="w-full max-w-xs mx-auto mt-6 bg-white/10 rounded-full h-3 overflow-hidden">
+             <div id="barraProgreso" class="bg-[#00E5FF] h-3 rounded-full transition-all" style="width: 0%"></div>
+           </div>
+           <p id="textoProgreso" class="text-white/60 text-xs mt-2">0 de 100 direcciones ubicadas...</p>
         </div>
-
         <div id="pegarTextoResult" class="hidden space-y-4">
            <div class="flex items-center gap-3 mb-2">
               <div class="w-14 h-14 rounded-full overflow-hidden bg-[#123A66] flex items-center justify-center">
@@ -213,7 +199,9 @@
            <div class="bg-[#111C31]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-5">
               <h2 class="font-black text-xl text-white mb-1">Resultado optimizado</h2>
               <p class="text-white/60 text-xs mb-4"><span id="resumenValidas">0</span> válidas • <span id="resumenDescartadas">0</span> descartadas</p>
-              <div id="mapaResultado" class="rounded-xl h-48 mb-4 bg-gradient-to-br from-[#0d1b2a] to-[#1b263b] relative overflow-hidden"></div>
+              <div id="mapaResultado" class="rounded-xl h-48 mb-4 bg-gradient-to-br from-[#0d1b2a] to-[#1b263b] relative overflow-hidden flex items-center justify-center">
+                <p class="text-white/40 text-xs text-center px-6">Tu ruta ya está ordenada de la más cercana a la más lejana.<br>Empezá con el Tramo 1 abajo.</p>
+              </div>
               <div class="grid grid-cols-3 gap-2 mb-4">
                  <div class="bg-[#0A1220]/80 rounded-xl p-3 text-center border border-white/10">
                     <p class="text-[#00E5FF] font-black text-lg" id="statParadasPegadas">0</p>
@@ -236,8 +224,6 @@
         </div>
      </div>
   </div>
-
-  <!-- ==================== PERFIL SCREEN ==================== -->
   <div id="perfilScreen" class="hidden min-h-screen">
      <div class="bg-[#111C31]/80 backdrop-blur-xl pb-8 pt-6 px-6 text-center text-white relative rounded-b-[32px] border-b border-white/10">
         <h3 class="font-bold text-[11px] tracking-[1.5px] opacity-50 mb-4">MI PERFIL</h3>
@@ -282,8 +268,6 @@
         </button>
      </div>
   </div>
-
-  <!-- ==================== MODAL EDICIÓN ==================== -->
   <div id="modalEdicion" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[60] p-4 backdrop-blur-sm">
     <div class="bg-[#111C31]/95 backdrop-blur-xl rounded-2xl w-full max-w-md max-h-[85vh] flex flex-col border border-white/10">
       <div class="p-4 bg-[#0A1220]/90 rounded-t-2xl flex justify-between items-center border-b border-white/10">
@@ -298,8 +282,6 @@
       </div>
     </div>
   </div>
-
-  <!-- ==================== MODAL MAPA ==================== -->
   <div id="modalMapa" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[60] p-4 backdrop-blur-sm">
     <div class="bg-[#111C31]/95 backdrop-blur-xl rounded-2xl w-full max-w-md flex flex-col border border-white/10">
       <div class="p-4 bg-[#0A1220]/90 rounded-t-2xl flex justify-between items-center border-b border-white/10">
@@ -316,8 +298,6 @@
       </div>
     </div>
   </div>
-
-  <!-- ==================== MODAL PAGO ==================== -->
   <div id="payment-modal" class="hidden fixed inset-0 bg-black/80 flex items-end sm:items-center justify-center z-[70] p-4 backdrop-blur-sm">
     <div class="bg-[#111C31]/95 backdrop-blur-xl rounded-3xl w-full max-w-md p-6 border border-white/10 shadow-2xl">
       <h3 class="text-2xl font-black text-center text-white">Elegí cómo pagar</h3>
@@ -341,9 +321,54 @@
       </div>
     </div>
   </div>
-  
   <div id="notificaciones" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 w-11/12 max-w-sm pointer-events-none text-center"></div>
 </div>
 <script src="app.js"></script>
+<script>
+// PARCHE 3: Registro + Boton Continuar + Click en Recientes - sin tocar diseño
+document.getElementById('formRegistro')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const nombre = document.getElementById('regNombre').value;
+  const email = document.getElementById('regEmail').value;
+  const password = document.getElementById('regPassword').value;
+  const msg = document.getElementById('authMessage');
+  msg.innerText = "Creando cuenta..."; msg.className = "text-center text-sm mt-4 font-bold text-[#00E5FF] min-h-[20px]";
+  try {
+    const r = await fetch('/api/registro', { method: 'POST', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify({nombre, email, password}) });
+    const d = await r.json();
+    if (r.ok && d.ok) { localStorage.setItem('rutaflex_email', email); location.reload(); }
+    else { msg.innerText = d.error || "No se pudo crear la cuenta"; msg.className = "text-center text-sm mt-4 font-bold text-red-400 min-h-[20px]"; }
+  } catch { msg.innerText = "Error de conexión"; }
+});
+document.getElementById('btnOlvideContrasena')?.addEventListener('click', () => {
+  const email = document.getElementById('loginEmail').value;
+  if (!email) return alert('Escribí tu email primero');
+  fetch('/api/recuperar', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email}) }).then(()=> alert('Si el email existe, te enviamos el link para recuperar'));
+});
+document.getElementById('btnContinuarRutaGuardada')?.addEventListener('click', () => {
+  const g = localStorage.getItem('rutaflex_ruta');
+  if (!g) return;
+  const data = JSON.parse(g);
+  if (data.ordenadas) { rutaOptimizada = data.ordenadas; tramoActual = data.tramo || 0; mostrarPantallaTramos(data.gps); }
+});
+document.getElementById('cardReciente')?.addEventListener('click', () => {
+  if (destinos.length > 0) comenzarViaje();
+});
+// Mostrar banner si hay ruta en curso al entrar a Home
+setInterval(() => {
+  try {
+    const g = localStorage.getItem('rutaflex_ruta');
+    const banner = document.getElementById('bannerContinuarRuta');
+    if (g && banner && !document.getElementById('appScreen').classList.contains('hidden')) {
+      const data = JSON.parse(g);
+      const total = Math.ceil((data.ordenadas?.length||0)/9);
+      if (data.tramo > 0 && data.tramo < total) {
+        banner.classList.remove('hidden');
+        document.getElementById('textoContinuarRuta').innerText = `Tramo ${data.tramo+1} de ${total} • Te falta continuar`;
+      }
+    }
+  } catch(e) {}
+}, 2000);
+</script>
 </body>
 </html>
