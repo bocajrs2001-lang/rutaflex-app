@@ -1,6 +1,8 @@
 const CONFIG_RUTAFLEX = { whatsapp:"5491123793596", alias:"RUTAFLEX.MP", linkSemanal:"https://mpago.la/2DjaHdB", linkMensual:"https://mpago.la/2aNpJ1B" };
 let destinos=[], destinosDetectados=[], estaVencido=false, camaraStream=null, mapaLeaflet=null;
 let ubicacionActual = null;
+let rutaOptimizada = [];
+let tramoActual = 0;
 
 // ============ UTILIDADES ============
 window.togglePass=(id,icon)=>{
@@ -99,7 +101,6 @@ function extraerDirecciones(texto) {
   const lineas = texto.split(/[\n;]+/).map(l => l.trim()).filter(l => l.length > 5);
   const direcciones = [];
   const regexDir = /(?:^|\s)(?:Av\.?|Avenida|Avda\.?|Calle|Pasaje|Pje\.?|Bv\.?|Bulevar|Cam\.?|Rambla|Rua|R\.?)?\s*[A-Za-zÁÉÍÓÚáéíóúÑñ][A-Za-zÁÉÍÓÚáéíóúÑñ\.\s]{2,30}?\s+\d{1,5}[A-Za-z]?(?:\s*(?:bis|BIS|b|º|°|\/\d+))?(?:\s*,\s*[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+)?/gi;
-  
   lineas.forEach(linea => {
     const limpia = limpiarTextoSucio(linea);
     const matches = limpia.matchAll(regexDir);
@@ -182,81 +183,153 @@ async function procesarPDF(file) {
   return texto;
 }
 
-// ============ 🚀 BOTÓN COMENZAR VIAJE ============
-async function comenzarViaje() {
-  if (destinos.length === 0) {
-    return mostrarNotificacion("⚠️ No hay direcciones cargadas", "error");
+// ============ 🚀 RUTAFLEX V2 - TRAMOS GUARDADOS Y CONTINUOS ============
+function distanciaKm(a, b) {
+  const R = 6371;
+  const dLat = (b.lat - a.lat) * Math.PI / 180;
+  const dLon = (b.lon - a.lon) * Math.PI / 180;
+  const x = Math.sin(dLat/2)**2 + Math.cos(a.lat*Math.PI/180) * Math.cos(b.lat*Math.PI/180) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.asin(Math.sqrt(x));
+}
+
+async function geocodificar(direccion) {
+  try {
+    const q = encodeURIComponent(direccion + ", Buenos Aires, Argentina");
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${q}`);
+    const data = await r.json();
+    if (data && data[0]) return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+  } catch(e) {}
+  return null;
+}
+
+function mejorarRuta(ruta) {
+  for (let k = 0; k < 2; k++) {
+    for (let i = 1; i < ruta.length - 2; i++) {
+      for (let j = i + 1; j < ruta.length - 1; j++) {
+        const a = ruta[i-1], b = ruta[i], c = ruta[j], d = ruta[j+1];
+        if (!a.lat || !b.lat || !c.lat || !d.lat) continue;
+        const antes = distanciaKm(a,b) + distanciaKm(c,d);
+        const despues = distanciaKm(a,c) + distanciaKm(b,d);
+        if (despues < antes) {
+          ruta.splice(i, j-i+1, ...ruta.slice(i, j+1).reverse());
+        }
+      }
+    }
   }
-  
+  return ruta;
+}
+
+async function comenzarViaje() {
+  if (destinos.length === 0) return mostrarNotificacion("⚠️ No hay direcciones cargadas", "error");
   mostrarNotificacion("📍 Obteniendo tu ubicación...", "info");
   const gps = await obtenerUbicacionActual();
-  
-  // Preparar direcciones para Google Maps
-  const direccionesEncoded = destinos.map(d => {
-    const dir = d.direccion || d.dirección || '';
-    return encodeURIComponent(dir);
-  });
-  
-  const CHUNK = 9; // 1 destino final + 8 waypoints
-  const tramosContainer = document.getElementById('tramosContainer');
-  tramosContainer.innerHTML = '';
-  
-  for (let i = 0; i < direccionesEncoded.length; i += CHUNK) {
-    const chunk = direccionesEncoded.slice(i, i + CHUNK);
-    const tramoNum = Math.floor(i/CHUNK) + 1;
-    const totalTramos = Math.ceil(direccionesEncoded.length/CHUNK);
-    
-    // ✅ ORIGEN: GPS actual del usuario
-    const origin = `${gps.lat},${gps.lon}`;
-    // ✅ DESTINO: última dirección del tramo
-    const destino = chunk[chunk.length-1];
-    // ✅ WAYPOINTS: las demás con optimize:true
-    const waypoints = chunk.slice(0, -1).join('|');
-    
-    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destino}&waypoints=optimize:true|${waypoints}&travelmode=driving`;
-    const wazeUrl = `https://www.waze.com/ul?q=${chunk[0]}&navigate=yes`;
-    
-    tramosContainer.innerHTML += `
-      <div class="bg-[#111C31]/80 backdrop-blur-xl rounded-xl p-4 border border-white/10 mb-3">
-        <p class="text-[#00E5FF] font-bold text-sm mb-3 text-center">Tramo ${tramoNum} de ${totalTramos} (${chunk.length} paradas)</p>
-        <p class="text-white/60 text-xs text-center mb-3">📍 Origen: Tu ubicación actual</p>
-        <div class="grid grid-cols-2 gap-3">
-          <a href="${mapsUrl}" target="_blank" class="bg-[#00E5FF] text-[#0A1220] font-black py-4 rounded-xl text-center text-sm hover:bg-[#00c8e0] transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            ABRIR EN<br>GOOGLE MAPS
-          </a>
-          <a href="${wazeUrl}" target="_blank" class="bg-transparent border-2 border-[#00E5FF] text-[#00E5FF] font-black py-4 rounded-xl text-center text-sm hover:bg-[#00E5FF]/10 transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5c-2-1-4.5-1.5-7-1.5s-5 .5-7 1.5C3 5.5 1 8.5 1 12c0 2.5 1 5 2.5 7L2 22l3.5-1.5c2 1 4.5 1.5 7 1.5 5.5 0 10-4.5 10-10 0-3.5-2-6.5-4.5-8.5z"/></svg>
-            ABRIR EN<br>WAZE
-          </a>
-        </div>
-      </div>`;
+  mostrarNotificacion("🧭 Ordenando de la más cercana a la más lejana...", "info");
+
+  let conCoords = [];
+  for (let d of destinos) {
+    const texto = d.direccion || d.dirección || '';
+    const c = await geocodificar(texto);
+    conCoords.push({ texto, lat: c ? c.lat : null, lon: c ? c.lon : null });
+    await new Promise(r => setTimeout(r, 120));
   }
-  
-  // Mostrar pantalla de resultados
-  document.getElementById('pegarTextoResult').classList.remove('hidden');
-  document.getElementById('resumenValidas').innerText = destinos.length;
-  document.getElementById('resumenDescartadas').innerText = '0';
-  document.getElementById('statParadasPegadas').innerText = destinos.length;
-  document.getElementById('statDistanciaPegadas').innerText = '~' + (destinos.length * 2).toFixed(0);
-  document.getElementById('statTiempoPegadas').innerText = '~' + (destinos.length * 3).toFixed(0);
-  
-  const listaEl = document.getElementById('listaPegadas');
-  listaEl.innerHTML = '';
-  destinos.forEach((d, i) => {
-    const dir = d.direccion || d.dirección || '';
-    listaEl.innerHTML += `
-      <div class="bg-[#111C31]/80 backdrop-blur-xl rounded-xl p-3 flex gap-3 items-center border border-white/10">
-        <div class="w-8 h-8 rounded-full bg-[#00E5FF] text-[#0A1220] font-black flex items-center justify-center flex-shrink-0 text-sm">${i+1}</div>
-        <div class="flex-1 min-w-0">
-          <p class="font-bold text-sm text-white truncate">${dir}</p>
-        </div>
-      </div>`;
-  });
-  
-  ocultarTodasLasPantallasExcepto('pegarTextoScreen');
-  mostrarNotificacion(`🚀 Ruta optimizada desde tu ubicación (${destinos.length} paradas)`, "exito");
+
+  let ordenadas = [];
+  let actual = { lat: gps.lat, lon: gps.lon };
+  let pendientes = conCoords.filter(c => c.lat !== null);
+  let sinCoords = conCoords.filter(c => c.lat === null);
+  while (pendientes.length > 0) {
+    let mejorIdx = 0, mejorDist = Infinity;
+    pendientes.forEach((p, i) => {
+      const dist = distanciaKm(actual, p);
+      if (dist < mejorDist) { mejorDist = dist; mejorIdx = i; }
+    });
+    const elegida = pendientes.splice(mejorIdx, 1)[0];
+    elegida.distDesdeAnterior = mejorDist;
+    ordenadas.push(elegida);
+    actual = elegida;
+  }
+  ordenadas = mejorarRuta(ordenadas);
+  ordenadas = [...ordenadas, ...sinCoords];
+
+  rutaOptimizada = ordenadas;
+  tramoActual = 0;
+  localStorage.setItem('rutaflex_ruta', JSON.stringify({ gps, ordenadas, tramo: 0, fecha: Date.now() }));
+  destinos = ordenadas.map(o => ({ direccion: o.texto }));
+  mostrarPantallaTramos(gps);
+  mostrarNotificacion(`🚀 Lista lista: ${ordenadas.length} paradas ordenadas`, "exito");
 }
+
+function mostrarPantallaTramos(gps) {
+  const totalTramos = Math.ceil(rutaOptimizada.length / 9);
+  const tramosContainer = document.getElementById('tramosContainer');
+  if (!tramosContainer) return;
+  tramosContainer.innerHTML = '';
+  const listaEl = document.getElementById('listaPegadas');
+  if (listaEl) {
+    listaEl.innerHTML = '';
+    rutaOptimizada.forEach((d, i) => {
+      const numTramo = Math.floor(i / 9) + 1;
+      listaEl.innerHTML += `
+        <div class="bg-[#111C31]/80 rounded-xl p-3 flex gap-3 items-center border border-white/10">
+          <div class="w-8 h-8 rounded-full bg-[#00E5FF] text-[#0A1220] font-black flex items-center justify-center text-sm">${i+1}</div>
+          <div class="flex-1 min-w-0">
+            <p class="font-bold text-sm text-white truncate">${d.texto}</p>
+            <p class="text-xs text-white/50">Tramo ${numTramo} • ${d.distDesdeAnterior ? d.distDesdeAnterior.toFixed(1)+' km desde anterior' : ''}</p>
+          </div>
+        </div>`;
+    });
+  }
+  const esPrimero = tramoActual === 0;
+  tramosContainer.innerHTML += `
+    <div class="bg-[#00E5FF] rounded-xl p-4 mb-3 text-center">
+      <p class="text-[#0A1220] font-black text-base">${esPrimero ? '▶️ EMPEZAR RECORRIDO' : '➡️ CONTINUAR CON TRAMO ' + (tramoActual+1) + ' de ' + totalTramos}</p>
+      <p class="text-[#0A1220]/70 text-xs font-bold mt-1">Tramo ${tramoActual+1} de ${totalTramos} • Paradas ${tramoActual*9+1} a ${Math.min((tramoActual+1)*9, rutaOptimizada.length)}</p>
+      <button onclick="abrirTramoActual()" class="bg-[#0A1220] text-white font-black py-4 px-6 rounded-xl w-full mt-3 text-sm">ABRIR EN GOOGLE MAPS</button>
+      <p class="text-[#0A1220]/70 text-xs mt-2">Cuando termines este tramo, volvé acá y apretá continuar</p>
+    </div>
+    <div class="text-center text-white/60 text-xs mb-3">Todos los tramos ya quedaron guardados y ordenados</div>
+  `;
+  const r = document.getElementById('pegarTextoResult');
+  if (r) r.classList.remove('hidden');
+  const rv = document.getElementById('resumenValidas'); if (rv) rv.innerText = rutaOptimizada.length;
+  const rd = document.getElementById('resumenDescartadas'); if (rd) rd.innerText = '0';
+  const spp = document.getElementById('statParadasPegadas'); if (spp) spp.innerText = rutaOptimizada.length;
+  let distTotal = rutaOptimizada.reduce((a,o)=>a+(o.distDesdeAnterior||0),0);
+  const sdp = document.getElementById('statDistanciaPegadas'); if (sdp) sdp.innerText = '~'+distTotal.toFixed(1)+' km';
+  const stp = document.getElementById('statTiempoPegadas'); if (stp) stp.innerText = '~'+Math.round(distTotal/0.5)+' min';
+  ocultarTodasLasPantallasExcepto('pegarTextoScreen');
+}
+
+window.abrirTramoActual = function() {
+  const i = tramoActual * 9;
+  const tramo = rutaOptimizada.slice(i, i+9);
+  if (tramo.length === 0) return mostrarNotificacion("✅ ¡Recorrido terminado!", "exito");
+  let origen;
+  if (tramoActual === 0) {
+    const guardado = JSON.parse(localStorage.getItem('rutaflex_ruta') || '{}');
+    origen = guardado.gps ? `${guardado.gps.lat},${guardado.gps.lon}` : encodeURIComponent("Mi ubicación");
+  } else {
+    const anterior = rutaOptimizada[i-1];
+    origen = anterior.lat ? `${anterior.lat},${anterior.lon}` : encodeURIComponent(anterior.texto);
+  }
+  const destinoFinal = tramo[tramo.length-1];
+  const destination = destinoFinal.lat ? `${destinoFinal.lat},${destinoFinal.lon}` : encodeURIComponent(destinoFinal.texto);
+  const waypoints = tramo.slice(0,-1).map(d => d.lat ? `${d.lat},${d.lon}` : encodeURIComponent(d.texto)).join('|');
+  const url = `https://www.google.com/maps/dir/?api=1&origin=${origen}&destination=${destination}&waypoints=${waypoints}&travelmode=driving`;
+  tramoActual++;
+  const guardadoPrevio = JSON.parse(localStorage.getItem('rutaflex_ruta')||'{}');
+  localStorage.setItem('rutaflex_ruta', JSON.stringify({ gps: guardadoPrevio.gps, ordenadas: rutaOptimizada, tramo: tramoActual, fecha: Date.now() }));
+  setTimeout(() => {
+    if (tramoActual < Math.ceil(rutaOptimizada.length/9)) {
+      const g = JSON.parse(localStorage.getItem('rutaflex_ruta')||'{}');
+      mostrarPantallaTramos(g.gps);
+      mostrarNotificacion(`✅ Tramo ${tramoActual} listo. Seguí con Tramo ${tramoActual+1}`, "exito");
+    } else {
+      mostrarNotificacion("🎉 ¡Recorrido completo!", "exito");
+    }
+  }, 1000);
+  window.open(url, '_blank');
+};
 
 // ============ 🖼️ IMAGEN ============
 document.getElementById('fileImg')?.addEventListener('change', async (e) => {
@@ -404,7 +477,6 @@ document.getElementById('btnGuardarEdicion')?.addEventListener('click', async ()
     document.getElementById('modalEdicion').classList.add('hidden');
     destinosDetectados = [];
     await cargarDestinos();
-    // ✅ MOSTRAR BOTÓN COMENZAR VIAJE
     setTimeout(() => comenzarViaje(), 500);
   } catch {
     mostrarNotificacion("❌ Error al guardar", "error");
@@ -458,6 +530,8 @@ document.getElementById('btnReiniciarPegar')?.addEventListener('click', () => {
   document.getElementById('pegarTextoStep1').classList.remove('hidden');
   document.getElementById('pegarTextoResult').classList.add('hidden');
   document.getElementById('textoDirecciones').value = '';
+  localStorage.removeItem('rutaflex_ruta');
+  rutaOptimizada = []; tramoActual = 0;
 });
 
 document.getElementById('btnProcesarTexto')?.addEventListener('click', async () => {
@@ -608,6 +682,20 @@ window.addEventListener('load', async () => {
   } catch(err) {
     console.error('Error al verificar sesión:', err);
   }
+  // RECUPERAR RUTA GUARDADA SI VOLVIÓ DE GOOGLE MAPS
+  try {
+    const g = localStorage.getItem('rutaflex_ruta');
+    if (g) {
+      const data = JSON.parse(g);
+      if (data.ordenadas && Date.now() - data.fecha < 12*60*60*1000) {
+        rutaOptimizada = data.ordenadas;
+        tramoActual = data.tramo || 0;
+        if (tramoActual > 0 && tramoActual < Math.ceil(rutaOptimizada.length/9)) {
+          setTimeout(() => mostrarPantallaTramos(data.gps), 800);
+        }
+      }
+    }
+  } catch(e) {}
 });
 
 if ('serviceWorker' in navigator) {
