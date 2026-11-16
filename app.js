@@ -5,6 +5,7 @@ let rutaOptimizada = [];
 let tramoActual = 0;
 let duplicadosDetectados = [];
 let direccionesInvalidas = new Set();
+let abriendoReciente = false; // anti doble click
 
 // ============ UTILIDADES ============
 window.togglePass=(id,icon)=>{
@@ -46,7 +47,19 @@ window.addEventListener('popstate', (e) => {
   else mostrarTab('home', false);
 });
 
-// ============ 🎯 GPS ============
+// ============ CACHE DE COORDENADAS ============
+function getCacheCoords(){
+  try { return JSON.parse(localStorage.getItem('rutaflex_coords_cache') || '{}'); } catch { return {}; }
+}
+function setCacheCoords(direccion, coords){
+  try {
+    const c = getCacheCoords();
+    c[normalizarDireccion(direccion)] = coords;
+    localStorage.setItem('rutaflex_coords_cache', JSON.stringify(c));
+  } catch {}
+}
+
+// ============ GPS ============
 async function obtenerUbicacionActual() {
   if (ubicacionActual && (Date.now() - ubicacionActual.timestamp < 300000)) return ubicacionActual.coords;
   return new Promise((resolve) => {
@@ -59,11 +72,10 @@ async function obtenerUbicacionActual() {
   });
 }
 
-// ============ MOTOR DE DIRECCIONES + MEJORA 3 y 4 ============
+// ============ MOTOR DE DIRECCIONES ============
 function limpiarTextoSucio(t) {
   return t.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '').replace(/\b(hola|buen dia|buenas|che|capo|dale|gracias|mañana|hoy|como estas|favor|por favor|ok|listo|avisame|envio|entrega|reparto|turno|pedido|factura|urgente|importante|recordar)\b/gi, '').replace(/\b\d{2,4}[- ]?\d{3,4}[- ]?\d{4}\b/g, '').replace(/\b11[- ]?\d{4}[- ]?\d{4}\b/g, '').replace(/\$\s?\d+([.,]\d+)?/g, '').replace(/\s{2,}/g, ' ').trim();
 }
-// MEJORA 3: Normalizar para detectar duplicados aunque escriban distinto
 function normalizarDireccion(d) {
   return d.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\b(av|avenida|avda)\b/g,"av").replace(/\b(calle)\b/g,"").replace(/[.,#\-]/g," ").replace(/\s+/g," ").trim();
 }
@@ -121,23 +133,26 @@ async function procesarPDF(file) {
   if (texto.trim().length < 5) throw new Error('PDF sin texto seleccionable'); return texto;
 }
 
-// ============ 🚀 RUTAFLEX V2 + MEJORAS 3,4,5 ============
+// ============ RUTAFLEX V2 ============
 function distanciaKm(a, b) {
   const R = 6371; const dLat = (b.lat - a.lat) * Math.PI / 180; const dLon = (b.lon - a.lon) * Math.PI / 180;
   const x = Math.sin(dLat/2)**2 + Math.cos(a.lat*Math.PI/180) * Math.cos(b.lat*Math.PI/180) * Math.sin(dLon/2)**2;
   return R * 2 * Math.asin(Math.sqrt(x));
 }
 async function geocodificar(direccion) {
+  const cache = getCacheCoords();
+  const key = normalizarDireccion(direccion);
+  if (cache[key]) return cache[key];
   try {
     const q = encodeURIComponent(direccion + ", Buenos Aires, Argentina");
     const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${q}`);
     const data = await r.json();
     if (data && data[0]) {
       const lat = parseFloat(data[0].lat), lon = parseFloat(data[0].lon);
-      // MEJORA 4: Si está a más de 200km de Buenos Aires, probablemente es otra provincia -> marcar como dudosa
       const distBA = distanciaKm({lat:-34.6037, lon:-58.3816}, {lat, lon});
-      if (distBA > 200) return { lat, lon, dudosa: true, display: data[0].display_name };
-      return { lat, lon, dudosa: false, display: data[0].display_name };
+      const res = distBA > 200 ? { lat, lon, dudosa: true, display: data[0].display_name } : { lat, lon, dudosa: false, display: data[0].display_name };
+      setCacheCoords(direccion, res);
+      return res;
     }
   } catch(e) {}
   return null;
@@ -155,6 +170,55 @@ function mejorarRuta(ruta) {
   }
   return ruta;
 }
+
+// ===== NUEVO: ABRIR RECIENTE RAPIDO - NO RE-GEOCODIFICA =====
+window.abrirRecienteRapido = function(){
+  if (abriendoReciente) return;
+  abriendoReciente = true;
+  setTimeout(()=>{ abriendoReciente = false; }, 800);
+  // 1. Si hay ruta guardada, abrirla al instante
+  try {
+    const g = localStorage.getItem('rutaflex_ruta');
+    if (g) {
+      const data = JSON.parse(g);
+      if (data.ordenadas && data.ordenadas.length > 0) {
+        rutaOptimizada = data.ordenadas;
+        tramoActual = data.tramo || 0;
+        mostrarPantallaTramos(data.gps || {lat:-34.6037, lon:-58.3816});
+        return;
+      }
+    }
+  } catch(e) {}
+  // 2. Si no hay ruta guardada pero hay destinos, optimizar normal
+  if (destinos.length > 0) { comenzarViaje(); return; }
+  mostrarNotificacion("⚠️ No hay rutas recientes", "error");
+};
+
+// ===== NUEVO: ELIMINAR RECIENTE / BORRAR TODO =====
+window.eliminarReciente = function(){
+  if (!confirm("¿Eliminar esta ruta reciente?")) return;
+  localStorage.removeItem('rutaflex_ruta');
+  rutaOptimizada = []; tramoActual = 0; destinos = [];
+  const titulo = document.getElementById('recienteTitulo');
+  const sub = document.getElementById('recienteSub');
+  if (titulo) titulo.innerText = "Sin rutas recientes";
+  if (sub) sub.innerText = "Creá tu primera ruta";
+  document.getElementById('bannerContinuarRuta')?.classList.add('hidden');
+  mostrarNotificacion("🗑️ Ruta eliminada", "exito");
+};
+window.borrarTodoHistorial = function(){
+  if (!confirm("¿Borrar TODO el historial? Se van a eliminar la ruta guardada y las coordenadas guardadas.")) return;
+  localStorage.removeItem('rutaflex_ruta');
+  localStorage.removeItem('rutaflex_coords_cache');
+  rutaOptimizada = []; tramoActual = 0; destinos = [];
+  const titulo = document.getElementById('recienteTitulo');
+  const sub = document.getElementById('recienteSub');
+  if (titulo) titulo.innerText = "Sin rutas recientes";
+  if (sub) sub.innerText = "Creá tu primera ruta";
+  document.getElementById('bannerContinuarRuta')?.classList.add('hidden');
+  mostrarNotificacion("🗑️ Historial borrado", "exito");
+};
+
 async function comenzarViaje() {
   if (destinos.length === 0) return mostrarNotificacion("⚠️ No hay direcciones cargadas", "error");
   mostrarNotificacion("📍 Obteniendo tu ubicación...", "info");
@@ -168,7 +232,7 @@ async function comenzarViaje() {
     const barra = document.getElementById('barraProgreso'); const txtP = document.getElementById('textoProgreso');
     if (barra) barra.style.width = Math.round(((idx+1)/destinos.length)*100)+'%';
     if (txtP) txtP.innerText = `${idx+1} de ${destinos.length} direcciones ubicadas...`;
-    await new Promise(r => setTimeout(r, 120));
+    await new Promise(r => setTimeout(r, 60));
   }
   let ordenadas = []; let actual = { lat: gps.lat, lon: gps.lon }; let pendientes = conCoords.filter(c => c.lat !== null); let sinCoords = conCoords.filter(c => c.lat === null);
   while (pendientes.length > 0) {
@@ -201,7 +265,6 @@ function mostrarPantallaTramos(gps) {
     });
   }
   const esPrimero = tramoActual === 0;
-  // MEJORA 5: Boton Re-optimizar desde acá
   tramosContainer.innerHTML += `
     <div class="bg-[#00E5FF] rounded-xl p-4 mb-3 text-center">
       <p class="text-[#0A1220] font-black text-base">${esPrimero ? '▶️ EMPEZAR RECORRIDO' : '➡️ CONTINUAR CON TRAMO ' + (tramoActual+1) + ' de ' + totalTramos}</p>
@@ -239,18 +302,15 @@ window.abrirTramoActual = function() {
   }, 1000);
   window.open(url, '_blank');
 };
-// MEJORA 5: Re-optimizar solo lo que falta desde tu GPS actual
 window.reoptimizarDesdeAqui = async function() {
   if (rutaOptimizada.length === 0) return mostrarNotificacion("⚠️ No hay ruta activa", "error");
   mostrarNotificacion("📍 Obteniendo tu ubicación actual...", "info");
-  // Forzar GPS fresco, no usar cache de 5 min
   ubicacionActual = null;
   const gpsNuevo = await obtenerUbicacionActual();
   const yaHechas = tramoActual * 9;
   if (yaHechas >= rutaOptimizada.length) return mostrarNotificacion("✅ Ya terminaste toda la ruta", "exito");
   const hechas = rutaOptimizada.slice(0, yaHechas);
   let falta = rutaOptimizada.slice(yaHechas);
-  // Re-ordenar solo lo que falta desde donde estás AHORA
   let reordenadas = []; let actual = { lat: gpsNuevo.lat, lon: gpsNuevo.lon }; let pendientes = falta.filter(c=>c.lat!==null); let sinCoords = falta.filter(c=>c.lat===null);
   while (pendientes.length > 0) {
     let mejorIdx=0, mejorDist=Infinity;
@@ -259,12 +319,10 @@ window.reoptimizarDesdeAqui = async function() {
   }
   reordenadas = mejorarRuta(reordenadas); reordenadas = [...reordenadas, ...sinCoords];
   rutaOptimizada = [...hechas, ...reordenadas];
-  // Recalcular distancias de la parte reordenada desde el último hecho
   localStorage.setItem('rutaflex_ruta', JSON.stringify({ gps: gpsNuevo, ordenadas: rutaOptimizada, tramo: tramoActual, fecha: Date.now() }));
   mostrarPantallaTramos(gpsNuevo);
   mostrarNotificacion(`🔄 Re-ordenado desde donde estás: quedan ${falta.length} paradas`, "exito");
 };
-// MEJORA 3: Quitar duplicados desde el modal
 window.quitarDuplicados = function() {
   const inputs = [...document.querySelectorAll('.input-direccion')];
   const vistos = new Set(); let quitados = 0;
@@ -274,13 +332,12 @@ window.quitarDuplicados = function() {
     else vistos.add(norm);
   });
   destinosDetectados = [...document.querySelectorAll('.input-direccion')].map(i=>i.value.trim());
-  // Renumerar
   document.querySelectorAll('.input-direccion').forEach((inp, idx) => { const num = inp.closest('div').querySelector('span'); if(num) num.innerText = idx+1; });
   mostrarNotificacion(`✅ Se quitaron ${quitados} duplicados`, "exito");
   document.getElementById('alertaDuplicados')?.remove();
 };
 
-// ============ 🖼️ IMAGEN ============
+// ============ IMAGEN / PDF / CAMARA / MAPA ============
 document.getElementById('fileImg')?.addEventListener('change', async (e) => {
   if (estaVencido) return mostrarNotificacion("⚠️ Plan vencido", "error");
   const file = e.target.files[0]; if (!file) return;
@@ -294,14 +351,12 @@ document.getElementById('fileImg')?.addEventListener('change', async (e) => {
     destinosDetectados = direcciones; mostrarModalEdicionConGPS();
   } catch(err) { mostrarNotificacion(`❌ ${err.message}`, "error"); } finally { e.target.value = ''; }
 });
-// ============ 📄 PDF ============
 document.getElementById('filePdf')?.addEventListener('change', async (e) => {
   if (estaVencido) return mostrarNotificacion("⚠️ Plan vencido", "error");
   const file = e.target.files[0]; if (!file) return; mostrarNotificacion("📄 Leyendo PDF...", "info");
   try { const texto = await procesarPDF(file); const direcciones = extraerDirecciones(limpiarTextoSucio(texto)); if (direcciones.length === 0) throw new Error('No se detectaron direcciones'); destinosDetectados = direcciones; mostrarModalEdicionConGPS(); }
   catch(err) { mostrarNotificacion(`❌ ${err.message}`, "error"); } finally { e.target.value = ''; }
 });
-// ============ 📷 CÁMARA ============
 document.getElementById('btnCamara')?.addEventListener('click', async () => {
   const panel = document.getElementById('panelCamara'); const v = document.getElementById('camara'); panel.classList.remove('hidden');
   try { camaraStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment", width:{ideal:1920}}}); v.srcObject = camaraStream; }
@@ -314,7 +369,6 @@ document.getElementById('btnCapturar')?.addEventListener('click', async () => {
   try { const texto = await procesarImagenOCR(canvas.toDataURL('image/png')); const direcciones = extraerDirecciones(limpiarTextoSucio(texto)); if (direcciones.length === 0) throw new Error('No se detectaron direcciones'); destinosDetectados = direcciones; mostrarModalEdicionConGPS(); }
   catch(err) { mostrarNotificacion(`❌ ${err.message}`, "error"); }
 });
-// ============ 📍 MAPA ============
 document.getElementById('btnMapa')?.addEventListener('click', async () => {
   document.getElementById('modalMapa').classList.remove('hidden'); await new Promise(r => setTimeout(r, 100));
   if (!mapaLeaflet) {
@@ -332,14 +386,13 @@ document.getElementById('btnCerrarMapa')?.addEventListener('click', () => { docu
 document.getElementById('btnMiUbicacion')?.addEventListener('click', async () => { const gps = await obtenerUbicacionActual(); if (mapaLeaflet) mapaLeaflet.setView([gps.lat, gps.lon], 16); });
 document.getElementById('btnListoMapa')?.addEventListener('click', () => { document.getElementById('modalMapa').classList.add('hidden'); if (destinosDetectados.length > 0) mostrarModalEdicionConGPS(); });
 
-// ============ MODAL EDICIÓN - CON MEJORAS 3 y 4 ============
+// ============ MODAL EDICIÓN ============
 function mostrarModalEdicionConGPS() {
   const c = document.getElementById('contenedorInputs'); c.innerHTML = '';
-  // MEJORA 3: Detectar duplicados antes de mostrar
   const { unicas, dups } = detectarDuplicados(destinosDetectados);
   duplicadosDetectados = dups;
   if (dups.length > 0) {
-    c.innerHTML += `<div id="alertaDuplicados" class="bg-yellow-500/20 border border-yellow-500/40 rounded-xl p-3 mb-2"><p class="text-yellow-300 font-bold text-sm">⚠️ Encontré ${dups.length} duplicadas</p><p class="text-yellow-200/80 text-xs mt-1">${dups.slice(0,3).map(d=>d.original).join('<br>')}${dups.length>3 ? '<br>...' : ''}</p><button onclick="quitarDuplicados()" class="w-full mt-2 bg-yellow-500 text-black font-black py-2 rounded-lg text-sm">QUUTAR DUPLICADAS Y DEJAR UNA SOLA</button></div>`;
+    c.innerHTML += `<div id="alertaDuplicados" class="bg-yellow-500/20 border border-yellow-500/40 rounded-xl p-3 mb-2"><p class="text-yellow-300 font-bold text-sm">⚠️ Encontré ${dups.length} duplicadas</p><p class="text-yellow-200/80 text-xs mt-1">${dups.slice(0,3).map(d=>d.original).join('<br>')}${dups.length>3 ? '<br>...' : ''}</p><button onclick="quitarDuplicados()" class="w-full mt-2 bg-yellow-500 text-black font-black py-2 rounded-lg text-sm">QUITAR DUPLICADAS Y DEJAR UNA SOLA</button></div>`;
   }
   destinosDetectados.forEach((dir, i) => {
     const norm = normalizarDireccion(dir);
@@ -355,7 +408,6 @@ function mostrarModalEdicionConGPS() {
     </div>`;
   });
   document.getElementById('modalEdicion').classList.remove('hidden');
-  // MEJORA 4: Validar en segundo plano sin frenar al usuario
   validarDireccionesEnModal();
 }
 async function validarDireccionesEnModal() {
@@ -375,7 +427,6 @@ document.getElementById('btnGuardarEdicion')?.addEventListener('click', async ()
   const dirs = document.querySelectorAll('.input-direccion');
   const finales = [...dirs].map(d => d.value.trim()).filter(d => d.length > 3);
   if (finales.length === 0) return mostrarNotificacion("Ingresá al menos una", "error");
-  // MEJORA 3: Último chequeo de duplicados antes de guardar
   const check = detectarDuplicados(finales);
   let aGuardar = finales;
   if (check.dups.length > 0) {
@@ -404,7 +455,7 @@ document.getElementById('btnAgregarLinea')?.addEventListener('click', () => {
 document.getElementById('btnCancelarEdicion')?.addEventListener('click', () => { document.getElementById('modalEdicion').classList.add('hidden'); destinosDetectados = []; });
 document.getElementById('btnCerrarModal')?.addEventListener('click', () => { document.getElementById('modalEdicion').classList.add('hidden'); });
 
-// ============ 📋 PEGAR TEXTO ============
+// ============ PEGAR TEXTO ============
 document.getElementById('btnPegarTexto')?.addEventListener('click', () => {
   ocultarTodasLasPantallasExcepto('pegarTextoScreen'); history.pushState({tab:'pegar'}, '', '#pegar');
   document.getElementById('pegarTextoStep1').classList.remove('hidden'); document.getElementById('pegarTextoLoading').classList.add('hidden'); document.getElementById('pegarTextoResult').classList.add('hidden'); document.getElementById('textoDirecciones').value = '';
@@ -470,6 +521,13 @@ async function cargarDestinos() {
     const r = await fetch('/api/destinos', {credentials: 'include'}); if (!r.ok) throw new Error('Error al cargar destinos'); destinos = await r.json();
     const titulo = document.getElementById('recienteTitulo'); const sub = document.getElementById('recienteSub');
     if (destinos.length > 0 && titulo && sub) { titulo.innerText = `${destinos[0].direccion} → ${destinos[destinos.length-1].direccion}`; sub.innerText = `${destinos.length} paradas`; }
+    else if (titulo && sub) {
+      // Si no hay destinos en el servidor pero si hay ruta guardada, mostrar esa
+      try {
+        const g = localStorage.getItem('rutaflex_ruta');
+        if (g) { const data = JSON.parse(g); if (data.ordenadas?.length) { titulo.innerText = `${data.ordenadas[0].texto} → ${data.ordenadas[data.ordenadas.length-1].texto}`; sub.innerText = `${data.ordenadas.length} paradas • Guardada`; } }
+      } catch {}
+    }
   } catch(e) { console.error('Error en cargarDestinos:', e); }
 }
 function mostrarPerfil() {
