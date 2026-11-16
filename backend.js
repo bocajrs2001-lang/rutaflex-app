@@ -63,6 +63,100 @@ function suscripcionVigente(req, res, next) {
   next();
 }
 
+// ============================================================
+// NIVEL 1 PRO - REPORTE DE ERRORES CRITICOS (SOLO SISTEMA)
+// Recibe lo que manda app.js. NO avisa por errores de usuario.
+// Solo avisa cuando el mismo error pasa 3+ veces en 10 min.
+// ============================================================
+const erroresRecibidos = []; // { tipo, detalle, usuario, fecha }
+const ultimoAvisoEnviado = {}; // tipo -> timestamp
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'rutaflex.soporte@gmail.com';
+const ADMIN_WHATSAPP = '5491123793596';
+
+function esErrorDeUsuarioBackend(detalle = '') {
+  const d = String(detalle || '').toLowerCase();
+  const ignorar = ['no se encontró','no se encontro','revisá número','revisa numero','duplicada','duplicado','sin ubicación','sin ubicacion','ingresá al menos','pegá algún texto','pega algun texto','imagen sin texto','pdf sin texto','no se detectaron direcciones','no hay direcciones','no hay rutas recientes','sin rutas recientes','no se pudo abrir la cámara','no se pudo obtener dirección','error de conexión','plan vencido','email o contraseña'];
+  return ignorar.some(p => d.includes(p));
+}
+
+async function avisarAdminCritico({ tipo, detalle, cantidad, usuarios }) {
+  const texto = `🚨 ALERTA RutaFlex - ERROR CRITICO\n\nTipo: ${tipo}\nDetalle: ${detalle}\nUsuarios afectados: ${cantidad} (en 10 min)\nUsuarios: ${usuarios.slice(0,5).join(', ')}\nFecha: ${new Date().toLocaleString('es-AR')}\n\nRevisar backend.js / Nominatim / Maps.`;
+  console.log('🚨 [NIVEL 1 PRO] ' + texto);
+
+  // 1) MAIL - siempre funciona con tu Resend que ya tenes
+  try {
+    if (process.env.RESEND_API_KEY) {
+      await resend.emails.send({
+        from: 'RUTAFLEX ALERTA <onboarding@resend.dev>',
+        to: ADMIN_EMAIL,
+        subject: `🚨 RutaFlex: ${tipo} - ${cantidad} usuarios afectados`,
+        html: `<div style="font-family:sans-serif; padding:20px; background:#0A1220; color:white; border-radius:12px;"><h2 style="color:#ff4444;">🚨 ALERTA RutaFlex</h2><p><b>Tipo:</b> ${tipo}</p><p><b>Detalle:</b> ${detalle}</p><p><b>Usuarios afectados:</b> ${cantidad} en 10 min</p><p><b>Usuarios:</b> ${usuarios.join(', ')}</p><p><b>Fecha:</b> ${new Date().toLocaleString('es-AR')}</p><p style="color:#00E5FF;">Revisar: Nominatim / Google Maps / /api/destinos / Optimizador</p></div>`
+      });
+      console.log('✅ [NIVEL 1 PRO] Mail de alerta enviado a', ADMIN_EMAIL);
+    }
+  } catch(e) { console.error('❌ [NIVEL 1 PRO] No se pudo enviar mail:', e.message); }
+
+  // 2) WHATSAPP - solo si configuraste WhatsApp Cloud API en Render
+  // En Render agregá: WHATSAPP_TOKEN y WHATSAPP_PHONE_ID
+  // Si no lo tenes, no pasa nada, te llega por mail igual
+  try {
+    if (process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_PHONE_ID) {
+      await fetch(`https://graph.facebook.com/v18.0/${process.env.WHATSAPP_PHONE_ID}/messages`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${process.env.WHATSAPP_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messaging_product: 'whatsapp', to: ADMIN_WHATSAPP, type: 'text', text: { body: texto } })
+      });
+      console.log('✅ [NIVEL 1 PRO] WhatsApp enviado');
+    }
+  } catch(e) { console.error('❌ [NIVEL 1 PRO] No se pudo enviar WhatsApp:', e.message); }
+}
+
+// Endpoint que llama app.js - NO requiere login, para que reporte aunque falle el login
+app.post('/api/report-error', (req, res) => {
+  try {
+    const { tipo, detalle, cantidad, usuarios } = req.body || {};
+    if (!tipo || !detalle) return res.json({ ok: true, ignorado: true });
+    if (esErrorDeUsuarioBackend(detalle)) return res.json({ ok: true, ignorado: true, motivo: 'error de usuario' });
+
+    const ahora = Date.now();
+    // Guardar este reporte
+    erroresRecibidos.push({ tipo, detalle: String(detalle).slice(0,300), usuario: (usuarios && usuarios[0]) || 'anonimo', usuarios: usuarios || [], fecha: ahora, cantidad: cantidad || 1 });
+    // Limpiar viejos de mas de 10 min
+    while (erroresRecibidos.length > 200) erroresRecibidos.shift();
+    const recientes = erroresRecibidos.filter(e => e.tipo === tipo && ahora - e.fecha < 10*60*1000);
+
+    // Contar usuarios unicos
+    const usuariosUnicos = [...new Set(recentes.flatMap(e => e.usuarios || [e.usuario]))];
+    const totalReportes = recientes.reduce((acc, e) => acc + (e.cantidad || 1), 0);
+
+    // Solo avisar si son 3+ reportes en 10 min y no avisamos hace 15 min
+    if (totalReportes >= 3) {
+      if (ultimoAvisoEnviado[tipo] && ahora - ultimoAvisoEnviado[tipo] < 15*60*1000) {
+        return res.json({ ok: true, ya_avisado: true });
+      }
+      ultimoAvisoEnviado[tipo] = ahora;
+      avisarAdminCritico({ tipo, detalle, cantidad: totalReportes, usuarios: usuariosUnicos });
+      // Limpiar para no repetir
+      for (let i = erroresRecibidos.length - 1; i >= 0; i--) {
+        if (erroresRecibidos[i].tipo === tipo) erroresRecibidos.splice(i, 1);
+      }
+      return res.json({ ok: true, alerta_enviada: true });
+    }
+    return res.json({ ok: true, guardado: true, recientes: totalReportes });
+  } catch(e) {
+    console.error('Error en /api/report-error:', e.message);
+    return res.json({ ok: true });
+  }
+});
+
+// Para que veas los errores que estan llegando, abri en tu navegador:
+// https://rutaflex-app.onrender.com/api/errores
+app.get('/api/errores', (req, res) => {
+  // Simple proteccion: solo si pasas ?key=rutaflex2026
+  if (req.query.key !== 'rutaflex2026') return res.status(401).json({ error: 'No autorizado' });
+  res.json({ ok: true, total: erroresRecibidos.length, errores: erroresRecibidos.slice(-50), ultimoAviso: ultimoAvisoEnviado });
+});
+
 // 💳 MERCADO PAGO
 app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
   try {
