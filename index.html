@@ -91,7 +91,6 @@
       </div>
       <div id="alertaProximoVencimiento" class="hidden bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 p-3 text-center font-bold mt-4 rounded-xl">⚠️ ¡TU PLAN VENCE MAÑANA!</div>
       <div id="bannerVencido" class="hidden bg-red-600/20 text-red-400 border border-red-600/30 p-3 text-center font-bold mt-4 rounded-xl">🔒 PLAN VENCIDO</div>
-      <!-- PARCHE 1: BOTON CONTINUAR RUTA GUARDADA - aparece solo si hay ruta en curso -->
       <div id="bannerContinuarRuta" class="hidden mt-6 bg-[#00E5FF] rounded-[18px] p-4 text-center">
         <p class="text-[#0A1220] font-black text-[15px]">⏸️ Tenés una ruta en curso</p>
         <p id="textoContinuarRuta" class="text-[#0A1220]/70 text-xs font-bold mt-1">Tramo 2 de 11 • Te falta continuar</p>
@@ -128,16 +127,24 @@
             <button id="btnCerrarCamara" class="flex-1 bg-[#1E324F] text-white font-bold py-3 rounded-xl active:scale-95">✕ Cerrar</button>
          </div>
       </div>
-      <h3 class="mt-9 text-[18px] font-bold">Recientes</h3>
-      <div id="cardReciente" class="mt-4 bg-[#111C31]/80 backdrop-blur-xl border border-white/10 rounded-[18px] p-4 flex items-center justify-between cursor-pointer">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-[#00E5FF]/15 flex items-center justify-center text-[#00E5FF]">📍</div>
-          <div>
-            <p class="text-[14px] font-bold" id="recienteTitulo">Sin rutas recientes</p>
+
+      <!-- RECIENTES - CON BORRAR -->
+      <div class="flex items-center justify-between mt-9">
+        <h3 class="text-[18px] font-bold">Recientes</h3>
+        <button id="btnBorrarTodoHistorial" class="text-[12px] font-bold text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-full active:scale-95">🗑️ Borrar todo</button>
+      </div>
+      <div id="cardReciente" class="mt-4 bg-[#111C31]/80 backdrop-blur-xl border border-white/10 rounded-[18px] p-4 flex items-center justify-between cursor-pointer active:scale-[0.98] transition">
+        <div class="flex items-center gap-3 flex-1 min-w-0" id="zonaClickReciente">
+          <div class="w-10 h-10 rounded-full bg-[#00E5FF]/15 flex items-center justify-center text-[#00E5FF] shrink-0">📍</div>
+          <div class="min-w-0">
+            <p class="text-[14px] font-bold truncate" id="recienteTitulo">Sin rutas recientes</p>
             <p class="text-[12px] text-white/50" id="recienteSub">Creá tu primera ruta</p>
           </div>
         </div>
-        <span class="text-white/20 text-xl">›</span>
+        <div class="flex items-center gap-1 shrink-0">
+          <button id="btnBorrarReciente" class="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-[16px] active:scale-90" title="Eliminar esta ruta">🗑️</button>
+          <span class="text-white/20 text-xl px-1">›</span>
+        </div>
       </div>
     </div>
     <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-30 bg-[#0A1220]/90 backdrop-blur-xl border-t border-white/10 flex justify-around py-3 px-2">
@@ -180,7 +187,6 @@
            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-[#00E5FF] mx-auto mb-4"></div>
            <p class="text-[#00E5FF] font-bold text-lg" id="loadingMensaje">Analizando direcciones...</p>
            <p class="text-white/60 text-sm mt-2" id="loadingDetalle">Esto puede tardar unos segundos</p>
-           <!-- PARCHE 2: BARRA DE PROGRESO PARA 100 DIRECCIONES -->
            <div class="w-full max-w-xs mx-auto mt-6 bg-white/10 rounded-full h-3 overflow-hidden">
              <div id="barraProgreso" class="bg-[#00E5FF] h-3 rounded-full transition-all" style="width: 0%"></div>
            </div>
@@ -325,7 +331,6 @@
 </div>
 <script src="app.js"></script>
 <script>
-// PARCHE 3: Registro + Boton Continuar + Click en Recientes - sin tocar diseño
 document.getElementById('formRegistro')?.addEventListener('submit', async (e) => {
   e.preventDefault();
   const nombre = document.getElementById('regNombre').value;
@@ -351,10 +356,10 @@ document.getElementById('btnContinuarRutaGuardada')?.addEventListener('click', (
   const data = JSON.parse(g);
   if (data.ordenadas) { rutaOptimizada = data.ordenadas; tramoActual = data.tramo || 0; mostrarPantallaTramos(data.gps); }
 });
-document.getElementById('cardReciente')?.addEventListener('click', () => {
-  if (destinos.length > 0) comenzarViaje();
-});
-// Mostrar banner si hay ruta en curso al entrar a Home
+// NUEVO: Click en Recientes ahora abre instantáneo, no re-geocodifica
+document.getElementById('zonaClickReciente')?.addEventListener('click', () => { if (typeof abrirRecienteRapido === 'function') abrirRecienteRapido(); });
+document.getElementById('btnBorrarReciente')?.addEventListener('click', (e) => { e.stopPropagation(); if (typeof eliminarReciente === 'function') eliminarReciente(); });
+document.getElementById('btnBorrarTodoHistorial')?.addEventListener('click', () => { if (typeof borrarTodoHistorial === 'function') borrarTodoHistorial(); });
 setInterval(() => {
   try {
     const g = localStorage.getItem('rutaflex_ruta');
