@@ -127,8 +127,7 @@
             <button id="btnCerrarCamara" class="flex-1 bg-[#1E324F] text-white font-bold py-3 rounded-xl active:scale-95">✕ Cerrar</button>
          </div>
       </div>
-
-      <!-- RECIENTES - CON BORRAR -->
+      <!-- RECIENTES - CON BORRAR TODO + BORRAR UNA -->
       <div class="flex items-center justify-between mt-9">
         <h3 class="text-[18px] font-bold">Recientes</h3>
         <button id="btnBorrarTodoHistorial" class="text-[12px] font-bold text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-full active:scale-95">🗑️ Borrar todo</button>
@@ -331,6 +330,7 @@
 </div>
 <script src="app.js"></script>
 <script>
+// PARCHE FINAL - Registro + Continuar + Recientes INSTANTANEO + Borrar
 document.getElementById('formRegistro')?.addEventListener('submit', async (e) => {
   e.preventDefault();
   const nombre = document.getElementById('regNombre').value;
@@ -356,7 +356,7 @@ document.getElementById('btnContinuarRutaGuardada')?.addEventListener('click', (
   const data = JSON.parse(g);
   if (data.ordenadas) { rutaOptimizada = data.ordenadas; tramoActual = data.tramo || 0; mostrarPantallaTramos(data.gps); }
 });
-// NUEVO: Click en Recientes ahora abre instantáneo, no re-geocodifica
+// FIX: Recientes ahora abre INSTANTANEO, no re-geocodifica
 document.getElementById('zonaClickReciente')?.addEventListener('click', () => { if (typeof abrirRecienteRapido === 'function') abrirRecienteRapido(); });
 document.getElementById('btnBorrarReciente')?.addEventListener('click', (e) => { e.stopPropagation(); if (typeof eliminarReciente === 'function') eliminarReciente(); });
 document.getElementById('btnBorrarTodoHistorial')?.addEventListener('click', () => { if (typeof borrarTodoHistorial === 'function') borrarTodoHistorial(); });
