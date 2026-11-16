@@ -1,4 +1,4 @@
-const CONFIG_RUTAFLEX = { whatsapp:"5491123793596", alias:"RUTAFLEX.MP", linkSemanal:"https://mpago.la/2DjaHdB", linkMensual:"https://mpago.la/2aNpJ1B" };
+const CONFIG_RUTAFLEX = { whatsapp:"5491135933984", alias:"RUTAFLEX.MP", linkSemanal:"https://mpago.la/2DjaHdB", linkMensual:"https://mpago.la/2aNpJ1B" };
 let destinos=[], destinosDetectados=[], estaVencido=false, camaraStream=null, mapaLeaflet=null;
 let ubicacionActual = null;
 let rutaOptimizada = [];
