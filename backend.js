@@ -30,6 +30,22 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// ✅ PWA - RUTAS EXPLICITAS PARA QUE RENDER NO FALLE
+app.get('/manifest.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/manifest+json');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
+});
+app.get('/service-worker.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Service-Worker-Allowed', '/');
+  res.sendFile(path.join(__dirname, 'public', 'service-worker.js'));
+});
+app.get('/sw.js', (req, res) => {
+  res.redirect('/service-worker.js');
+});
+
 // ✅ 1. SERVIR ARCHIVOS ESTÁTICOS DE LA RAÍZ (app.js, style.css, index.html)
 app.use(express.static(path.join(__dirname)));
 
@@ -63,13 +79,8 @@ function suscripcionVigente(req, res, next) {
   next();
 }
 
-// ============================================================
-// NIVEL 1 PRO - REPORTE DE ERRORES CRITICOS (SOLO SISTEMA)
-// Recibe lo que manda app.js. NO avisa por errores de usuario.
-// Solo avisa cuando el mismo error pasa 3+ veces en 10 min.
-// ============================================================
-const erroresRecibidos = []; // { tipo, detalle, usuario, fecha }
-const ultimoAvisoEnviado = {}; // tipo -> timestamp
+const erroresRecibidos = [];
+const ultimoAvisoEnviado = {};
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'rutaflex.soporte@gmail.com';
 const ADMIN_WHATSAPP = '5491123793596';
 
@@ -82,8 +93,6 @@ function esErrorDeUsuarioBackend(detalle = '') {
 async function avisarAdminCritico({ tipo, detalle, cantidad, usuarios }) {
   const texto = `🚨 ALERTA RutaFlex - ERROR CRITICO\n\nTipo: ${tipo}\nDetalle: ${detalle}\nUsuarios afectados: ${cantidad} (en 10 min)\nUsuarios: ${usuarios.slice(0,5).join(', ')}\nFecha: ${new Date().toLocaleString('es-AR')}\n\nRevisar backend.js / Nominatim / Maps.`;
   console.log('🚨 [NIVEL 1 PRO] ' + texto);
-
-  // 1) MAIL - siempre funciona con tu Resend que ya tenes
   try {
     if (process.env.RESEND_API_KEY) {
       await resend.emails.send({
@@ -95,10 +104,6 @@ async function avisarAdminCritico({ tipo, detalle, cantidad, usuarios }) {
       console.log('✅ [NIVEL 1 PRO] Mail de alerta enviado a', ADMIN_EMAIL);
     }
   } catch(e) { console.error('❌ [NIVEL 1 PRO] No se pudo enviar mail:', e.message); }
-
-  // 2) WHATSAPP - solo si configuraste WhatsApp Cloud API en Render
-  // En Render agregá: WHATSAPP_TOKEN y WHATSAPP_PHONE_ID
-  // Si no lo tenes, no pasa nada, te llega por mail igual
   try {
     if (process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_PHONE_ID) {
       await fetch(`https://graph.facebook.com/v18.0/${process.env.WHATSAPP_PHONE_ID}/messages`, {
@@ -111,32 +116,23 @@ async function avisarAdminCritico({ tipo, detalle, cantidad, usuarios }) {
   } catch(e) { console.error('❌ [NIVEL 1 PRO] No se pudo enviar WhatsApp:', e.message); }
 }
 
-// Endpoint que llama app.js - NO requiere login, para que reporte aunque falle el login
 app.post('/api/report-error', (req, res) => {
   try {
     const { tipo, detalle, cantidad, usuarios } = req.body || {};
     if (!tipo || !detalle) return res.json({ ok: true, ignorado: true });
     if (esErrorDeUsuarioBackend(detalle)) return res.json({ ok: true, ignorado: true, motivo: 'error de usuario' });
-
     const ahora = Date.now();
-    // Guardar este reporte
     erroresRecibidos.push({ tipo, detalle: String(detalle).slice(0,300), usuario: (usuarios && usuarios[0]) || 'anonimo', usuarios: usuarios || [], fecha: ahora, cantidad: cantidad || 1 });
-    // Limpiar viejos de mas de 10 min
     while (erroresRecibidos.length > 200) erroresRecibidos.shift();
     const recientes = erroresRecibidos.filter(e => e.tipo === tipo && ahora - e.fecha < 10*60*1000);
-
-    // Contar usuarios unicos
     const usuariosUnicos = [...new Set(recentes.flatMap(e => e.usuarios || [e.usuario]))];
     const totalReportes = recientes.reduce((acc, e) => acc + (e.cantidad || 1), 0);
-
-    // Solo avisar si son 3+ reportes en 10 min y no avisamos hace 15 min
     if (totalReportes >= 3) {
       if (ultimoAvisoEnviado[tipo] && ahora - ultimoAvisoEnviado[tipo] < 15*60*1000) {
         return res.json({ ok: true, ya_avisado: true });
       }
       ultimoAvisoEnviado[tipo] = ahora;
       avisarAdminCritico({ tipo, detalle, cantidad: totalReportes, usuarios: usuariosUnicos });
-      // Limpiar para no repetir
       for (let i = erroresRecibidos.length - 1; i >= 0; i--) {
         if (erroresRecibidos[i].tipo === tipo) erroresRecibidos.splice(i, 1);
       }
@@ -149,22 +145,17 @@ app.post('/api/report-error', (req, res) => {
   }
 });
 
-// Para que veas los errores que estan llegando, abri en tu navegador:
-// https://rutaflex-app.onrender.com/api/errores
 app.get('/api/errores', (req, res) => {
-  // Simple proteccion: solo si pasas ?key=rutaflex2026
   if (req.query.key !== 'rutaflex2026') return res.status(401).json({ error: 'No autorizado' });
   res.json({ ok: true, total: erroresRecibidos.length, errores: erroresRecibidos.slice(-50), ultimoAviso: ultimoAvisoEnviado });
 });
 
-// 💳 MERCADO PAGO
 app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
   try {
     const { plan } = req.body;
     let precio, titulo, diasExtra;
     if (plan === 'mensual') { precio = 14990; titulo = 'RUTAFLEX - Plan Mensual'; diasExtra = 30; } 
     else { precio = 4990; titulo = 'RUTAFLEX - Plan Semanal'; diasExtra = 7; }
-
     const preference = new Preference(mpClient);
     const result = await preference.create({
       body: {
@@ -212,7 +203,6 @@ app.post('/api/webhook-mp', async (req, res) => {
   res.status(200).send('OK');
 });
 
-// 👤 AUTENTICACIÓN
 app.post('/api/enviar-codigo-recuperacion', async (req, res) => {
   try {
     const { email } = req.body;
@@ -287,7 +277,6 @@ app.post('/api/validar-promo', usuarioLogueado, (req, res) => {
   res.status(400).json({ valido: false, mensaje: 'Código inválido.' });
 });
 
-// 📍 DESTINOS
 app.post('/api/destinos', usuarioLogueado, suscripcionVigente, async (req, res) => {
   try {
     if (!req.body.direccion) return res.status(400).json({ error: 'Falta dirección' });
@@ -312,7 +301,6 @@ app.delete('/api/destinos', usuarioLogueado, suscripcionVigente, async (req, res
   } catch (err) { res.status(500).json({ error: 'Error al eliminar' }); }
 });
 
-// Ruta por defecto para el frontend
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'index.html')); });
 
 app.listen(PORT, () => { console.log(`✅ Backend RUTAFLEX corriendo en puerto ${PORT}`); });
