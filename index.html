@@ -24,6 +24,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="RutaFlex">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
@@ -41,6 +43,18 @@
   <div class="absolute inset-0 bg-gradient-to-b from-[#050A14]/50 via-transparent to-[#050A14]/90"></div>
 </div>
 <div class="app-container relative z-10 min-h-screen flex flex-col pb-[80px]">
+  <!-- CARTEL INSTALAR APP RUTAFLEX -->
+  <div id="cartel-instalar" class="hidden mx-4 mt-4 mb-2 bg-[#00E5FF] rounded-[18px] p-4 items-center gap-3 shadow-[0_8px_24px_rgba(0,229,255,0.4)]">
+    <div class="w-11 h-11 rounded-full overflow-hidden bg-[#0F2E57] shrink-0">
+      <img src="/logo.svg" alt="RutaFlex" class="w-full h-full object-cover">
+    </div>
+    <div class="flex-1 min-w-0">
+      <p class="text-[#0A1220] font-black text-[14px] leading-tight">¿Usar RutaFlex como App?</p>
+      <p class="text-[#0A1220]/70 text-[12px] font-bold">Más rápido, sin entrar al navegador</p>
+    </div>
+    <button id="btn-instalar" class="bg-[#0A1220] text-white font-black text-[13px] px-4 py-2.5 rounded-xl shrink-0 active:scale-95">INSTALAR</button>
+    <button id="btn-cerrar-instalar" class="text-[#0A1220] font-black text-xl px-1 shrink-0">×</button>
+  </div>
   <div id="authScreen" class="min-h-screen flex flex-col justify-center items-center p-6">
      <div class="mb-10 w-full max-w-sm mx-auto text-center">
         <div class="w-40 h-40 rounded-full overflow-hidden bg-[#0F2E57] shadow-[0_0_35px_rgba(0,229,255,0.35)] mx-auto mb-6">
@@ -127,7 +141,6 @@
             <button id="btnCerrarCamara" class="flex-1 bg-[#1E324F] text-white font-bold py-3 rounded-xl active:scale-95">✕ Cerrar</button>
          </div>
       </div>
-      <!-- RECIENTES - CON BORRAR TODO + BORRAR UNA -->
       <div class="flex items-center justify-between mt-9">
         <h3 class="text-[18px] font-bold">Recientes</h3>
         <button id="btnBorrarTodoHistorial" class="text-[12px] font-bold text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-full active:scale-95">🗑️ Borrar todo</button>
@@ -356,7 +369,6 @@ document.getElementById('btnContinuarRutaGuardada')?.addEventListener('click', (
   const data = JSON.parse(g);
   if (data.ordenadas) { rutaOptimizada = data.ordenadas; tramoActual = data.tramo || 0; mostrarPantallaTramos(data.gps); }
 });
-// FIX: Recientes ahora abre INSTANTANEO, no re-geocodifica
 document.getElementById('zonaClickReciente')?.addEventListener('click', () => { if (typeof abrirRecienteRapido === 'function') abrirRecienteRapido(); });
 document.getElementById('btnBorrarReciente')?.addEventListener('click', (e) => { e.stopPropagation(); if (typeof eliminarReciente === 'function') eliminarReciente(); });
 document.getElementById('btnBorrarTodoHistorial')?.addEventListener('click', () => { if (typeof borrarTodoHistorial === 'function') borrarTodoHistorial(); });
@@ -374,6 +386,43 @@ setInterval(() => {
     }
   } catch(e) {}
 }, 2000);
+</script>
+<script>
+// === INSTALAR PWA RUTAFLEX - COMPLETO ===
+let deferredPrompt = null;
+const cartelInstalar = document.getElementById('cartel-instalar');
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js').catch(err => console.log('SW error', err));
+  });
+}
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (!localStorage.getItem('rutaflex_instalado') && !sessionStorage.getItem('rutaflex_cerro_instalar')) {
+    cartelInstalar?.classList.remove('hidden');
+    cartelInstalar?.classList.add('flex');
+  }
+});
+document.getElementById('btn-instalar')?.addEventListener('click', async () => {
+  if (!deferredPrompt) {
+    alert('En iPhone: tocá Compartir y después "Agregar a pantalla de inicio"');
+    return;
+  }
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') localStorage.setItem('rutaflex_instalado', '1');
+  deferredPrompt = null;
+  cartelInstalar?.classList.add('hidden');
+});
+document.getElementById('btn-cerrar-instalar')?.addEventListener('click', () => {
+  cartelInstalar?.classList.add('hidden');
+  sessionStorage.setItem('rutaflex_cerro_instalar', '1');
+});
+window.addEventListener('appinstalled', () => {
+  localStorage.setItem('rutaflex_instalado', '1');
+  cartelInstalar?.classList.add('hidden');
+});
 </script>
 </body>
 </html>
