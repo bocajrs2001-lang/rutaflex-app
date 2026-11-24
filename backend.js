@@ -46,13 +46,9 @@ app.get('/sw.js', (req, res) => {
   res.redirect('/service-worker.js');
 });
 
-// ✅ 1. SERVIR ARCHIVOS ESTÁTICOS DE LA RAÍZ (app.js, style.css, index.html)
 app.use(express.static(path.join(__dirname)));
-
-// ✅ 2. SERVIR ARCHIVOS ESTÁTICOS DE LA CARPETA PUBLIC (favicon, manifest, etc.)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ✅ 3. ENDPOINT ESPECÍFICO PARA FAVICON (por si acaso)
 app.get('/favicon.ico', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'favicon.ico'), (err) => {
     if (err) res.sendFile(path.join(__dirname, 'public', 'android-chrome-192x192.png'));
@@ -77,6 +73,41 @@ function suscripcionVigente(req, res, next) {
     return res.status(403).json({ error: 'Suscripción vencida. Renová tu plan.', vencido: true });
   }
   next();
+}
+
+// ============================================================
+// FIX RUTAFLEX - ANTI-DUPLICADOS + CORRECCIÓN AUTOMÁTICA
+// Misma lógica que en app.js para que frontend y backend coincidan
+// ============================================================
+function normalizarDireccionBackend(d) {
+  let s = (d||'').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[.,#\-]/g," ").replace(/\s+/g," ").trim();
+  s = s.replace(/^(palermo|belgrano|nunez|caballito|recoleta|la boca|centro|san telmo|villa crespo|almagro|flores|barracas|san nicolas|retiro)\s+/g, "");
+  s = s.replace(/\s+av$/,"").replace(/\s+avenida$/,"");
+  s = s.replace(/\b(av|avenida|avda)\b/g,"av").replace(/\b(calle)\b/g,"").replace(/\s+/g," ").trim();
+  s = s.replace(/\b(arribenos|arribennos)\b/g,"");
+  return s.replace(/\s+/g," ").trim();
+}
+function claveDuplicadoBackend(d){
+  const n = normalizarDireccionBackend(d);
+  const m = n.match(/([a-z\s]+?)\s+(\d{1,5})/);
+  if(m) return m[1].trim().replace(/\s+/g," ") + " " + m[2];
+  return n;
+}
+function limpiarListaBackend(lista){
+  const vistos = new Set(); const out = [];
+  (lista||[]).forEach(raw=>{
+    const dir = typeof raw === 'string' ? raw.trim() : (raw.direccion || raw.texto || '').trim();
+    if(!dir || dir.length < 4) return;
+    const k = claveDuplicadoBackend(dir);
+    if(!vistos.has(k)){ vistos.add(k); out.push(dir); }
+  });
+  return out;
+}
+function corregirDireccionBackend(dir){
+  let d = (dir||'').trim();
+  d = d.replace(/^(Palermo|Belgrano|Núñez|Nunez|La Boca|Centro|Recoleta|Caballito)\s+/i,'').replace(/\s+(Av|Av\.|Avenida)\s*$/i,'').trim();
+  d = d.replace(/Arribenos|Arribennos/gi,'').replace(/\s{2,}/g,' ').replace(/,\s*,/g,',').trim();
+  return d;
 }
 
 const erroresRecibidos = [];
@@ -277,15 +308,45 @@ app.post('/api/validar-promo', usuarioLogueado, (req, res) => {
   res.status(400).json({ valido: false, mensaje: 'Código inválido.' });
 });
 
+// FIX: POST individual ahora también anti-duplicado y auto-corrige
 app.post('/api/destinos', usuarioLogueado, suscripcionVigente, async (req, res) => {
   try {
     if (!req.body.direccion) return res.status(400).json({ error: 'Falta dirección' });
-    res.json(await agregarDestino(req.session.userId, req.body.direccion));
+    const dirLimpia = corregirDireccionBackend(req.body.direccion);
+    const existentes = await obtenerDestinosDeUsuario(req.session.userId);
+    const yaExiste = (existentes||[]).some(e => claveDuplicadoBackend(e.direccion || e.texto || '') === claveDuplicadoBackend(dirLimpia));
+    if (yaExiste) return res.json({ ok: true, duplicado: true, mensaje: 'Ya existe, no se duplicó' });
+    res.json(await agregarDestino(req.session.userId, dirLimpia));
   } catch (err) { res.status(500).json({ error: 'Error al guardar' }); }
 });
 
+// NUEVO: Reemplazar toda la ruta de una vez - borra viejas, guarda nuevas limpias sin duplicados
+// Esto es lo que usa ahora app.js, así nunca se acumulan 50+50+50
+app.post('/api/destinos/reemplazar', usuarioLogueado, suscripcionVigente, async (req, res) => {
+  try {
+    const lista = req.body.direcciones || req.body.destinos || [];
+    if (!Array.isArray(lista) || lista.length === 0) return res.status(400).json({ error: 'Falta lista de direcciones' });
+    const limpias = limpiarListaBackend(lista.map(d => corregirDireccionBackend(typeof d === 'string' ? d : (d.direccion || d.texto || ''))));
+    await borrarDestinosDeUsuario(req.session.userId);
+    const guardadas = [];
+    for (const dir of limpias) {
+      try { const g = await agregarDestino(req.session.userId, dir); guardadas.push(g); } catch(e){}
+    }
+    res.json({ ok: true, cantidad: guardadas.length, direcciones: limpias });
+  } catch (err) { console.error('Error reemplazar destinos:', err); res.status(500).json({ error: 'Error al guardar ruta' }); }
+});
+
 app.get('/api/destinos', usuarioLogueado, suscripcionVigente, async (req, res) => {
-  try { res.json(await obtenerDestinosDeUsuario(req.session.userId)); } 
+  try { 
+    const lista = await obtenerDestinosDeUsuario(req.session.userId);
+    // Seguridad: devolver sin duplicados aunque en DB haya viejos triplicados
+    const vistos = new Set(); const sinDup = [];
+    (lista||[]).forEach(d=>{
+      const k = claveDuplicadoBackend(d.direccion || d.texto || '');
+      if(!vistos.has(k)){ vistos.add(k); sinDup.push(d); }
+    });
+    res.json(sinDup); 
+  } 
   catch (err) { res.status(500).json({ error: 'Error al cargar' }); }
 });
 
