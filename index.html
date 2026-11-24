@@ -64,6 +64,7 @@
     <div class="relative text-center mt-[120px]">
       <h1 class="text-[34px] font-black leading-tight">Bienvenido a <span class="text-[#00E5FF]">RutaFlex</span></h1>
       <p class="text-white/90 text-[16px] leading-snug mt-3">Che, optimizá tu reparto en <b class="text-[#00E5FF]">CABA y GBA.</b><br>Del más cercano al más lejano, <b class="text-[#00E5FF]">ahorrá nafta y tiempo.</b></p>
+      <div class="inline-flex items-center gap-2 bg-[#00E5FF]/15 border border-[#00E5FF]/40 rounded-full px-4 py-2 mt-4 text-[13px] font-bold text-[#00E5FF]">🎁 7 DÍAS GRATIS al crear tu cuenta</div>
       <div class="w-[70%] h-[2px] mx-auto mt-4 rounded-full" style="background:linear-gradient(to right,transparent,#00E5FF,transparent);"></div>
     </div>
 
@@ -83,7 +84,8 @@
       <input id="regNombre" type="text" placeholder="Tu nombre" class="w-full bg-[#0A1220]/90 border border-white/15 rounded-2xl px-4 py-4 text-[16px]">
       <input id="regEmail" type="email" placeholder="Email" class="w-full bg-[#0A1220]/90 border border-white/15 rounded-2xl px-4 py-4 text-[16px]">
       <input id="regPassword" type="password" placeholder="Contraseña (Mín. 8, 1 mayúscula, 1 número y 1 símbolo)" class="w-full bg-[#0A1220]/90 border border-white/15 rounded-2xl px-4 py-4 text-[16px]">
-      <button type="button" id="btnRegistroSubmit" class="w-full bg-[#00E5FF] text-[#0A1220] font-black py-4 rounded-2xl text-[17px]">CREAR CUENTA GRATIS</button>
+      <button type="button" id="btnRegistroSubmit" class="w-full bg-[#00E5FF] text-[#0A1220] font-black py-4 rounded-2xl text-[17px]">CREAR CUENTA GRATIS • 7 DÍAS</button>
+      <p class="text-center text-white/50 text-xs">Sin tarjeta. Después de los 7 días pagás por Mercado Pago.</p>
     </form>
 
     <p id="authMessage" class="relative text-center text-sm mt-3 font-bold text-[#00E5FF] min-h-[20px]"></p>
@@ -93,7 +95,7 @@
     <div class="absolute bottom-[18px] left-6 text-[28px]">☀️</div>
   </div>
 
-  <!-- ============ APP / HOME - DISEÑO NUEVO ============ -->
+  <!-- ============ APP / HOME ============ -->
   <div id="appScreen" class="hidden max-w-md mx-auto min-h-screen relative bg-[#040B1E] px-4 pt-4 pb-28 overflow-hidden">
     <div class="absolute inset-0 pointer-events-none opacity-40" style="background-image:radial-gradient(circle at 85% 15%,rgba(0,229,255,.25) 0%,transparent 40%),linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:auto,40px 40px,40px 40px;"></div>
 
@@ -102,21 +104,19 @@
         <img src="/icon-192x192.png" class="w-[52px] h-[52px] rounded-full glow" alt="RutaFlex">
         <p class="font-black text-[32px] tracking-tight">RutaFlex</p>
       </div>
-      <div class="flex gap-2">
-        <button id="btnNotificaciones" class="w-11 h-11 bg-[#0A1220]/80 border border-white/10 rounded-full flex items-center justify-center text-xl relative">🔔<span class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full"></span></button>
-        <button id="btnMenu" class="w-11 h-11 bg-[#0A1220]/80 border border-white/10 rounded-full flex items-center justify-center text-xl">☰</button>
-      </div>
+      <button id="btnNotificaciones" class="w-11 h-11 bg-[#0A1220]/80 border border-white/10 rounded-full flex items-center justify-center text-xl relative">🔔<span id="puntoNoti" class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full"></span></button>
     </div>
 
-    <div class="relative mt-6 flex justify-between items-start">
+    <div class="relative mt-6">
       <div class="border-l-4 border-[#00E5FF] pl-3">
         <h1 id="userName" class="text-[34px] font-black leading-[1.05]">¡Hola!</h1>
         <p class="text-white/60 text-[18px] mt-1">Que tengas un gran día 👋</p>
         <p id="fechaHoy" class="text-white/60 text-sm">Hoy</p>
         <span id="contadorDias" class="mt-2 inline-flex items-center gap-1.5 bg-[#00C950]/15 border border-[#00C950]/30 text-[#00D084] px-3 py-1 rounded-full text-[12px] font-bold">✅ Activo</span>
-        <div id="bannerVencido" class="hidden mt-2 bg-red-500/20 border border-red-500/40 rounded-xl p-2 text-xs font-bold text-red-300">⚠️ Plan vencido. Renová para seguir.</div>
+        <span id="badgePrueba" class="hidden mt-2 ml-1 inline-flex items-center gap-1.5 bg-[#00E5FF]/15 border border-[#00E5FF]/40 text-[#00E5FF] px-3 py-1 rounded-full text-[12px] font-bold">🎁 PRUEBA GRATIS</span>
+        <div id="bannerVencido" class="hidden mt-3 bg-red-500/20 border border-red-500/40 rounded-xl p-3 text-sm font-bold text-red-300">⛔ Se terminó tu prueba gratis. Para seguir usando RutaFlex, pagá tu plan por Mercado Pago.<button onclick="abrirModalPagos('Semanal', 4990)" class="w-full bg-[#00E5FF] text-[#0A1220] font-black py-3 rounded-xl mt-3 text-sm">PAGAR AHORA CON MERCADO PAGO</button></div>
+        <div id="bannerPorVencer" class="hidden mt-3 bg-yellow-500/15 border border-yellow-500/40 rounded-xl p-3 text-sm font-bold text-yellow-200">⚠️ <span id="textoPorVencer">Te queda poco de prueba</span><button onclick="abrirModalPagos('Semanal', 4990)" class="w-full bg-yellow-400 text-black font-black py-3 rounded-xl mt-2 text-sm">RENOVAR AHORA</button></div>
       </div>
-      <div class="text-[54px] leading-none -mt-2">📍</div>
     </div>
 
     <div class="relative grid grid-cols-3 gap-2.5 mt-6">
@@ -125,7 +125,7 @@
       <div class="card rounded-3xl p-3.5 text-center"><p class="text-[22px]">🍃</p><p class="font-black text-[20px] leading-none mt-1">8.7 <span class="text-[15px]">L</span></p><p class="text-white/50 text-[12px] mt-1">Nafta ahorrada</p></div>
     </div>
 
-    <button id="btnPegarTexto" class="relative w-full bg-[#00E5FF] text-[#0A1220] font-black text-[19px] py-4 rounded-full mt-5 flex items-center justify-center gap-2 glow">✈️ Planificar nueva ruta <span class="text-2xl">›</span></button>
+    <button id="btnPegarTexto" class="relative w-full bg-[#00E5FF] text-[#0A1220] font-black text-[19px] py-4 rounded-full mt-5 flex items-center justify-center gap-2 glow">🚗 Planificar nueva ruta <span class="text-2xl">›</span></button>
 
     <div class="relative flex justify-between items-center mt-6"><h2 class="font-black text-[19px]">Herramientas rápidas</h2><button class="text-[#00E5FF] text-[14px] font-bold">Ver todas →</button></div>
     <div class="relative grid grid-cols-4 gap-2.5 mt-3">
@@ -153,7 +153,7 @@
     <div class="relative card rounded-3xl p-3.5 mt-3 flex items-center gap-3"><span class="w-11 h-11 bg-green-500 rounded-full flex items-center justify-center text-xl shrink-0">✅</span><div class="flex-1"><p class="font-bold">Ruta completada</p><p class="text-white/50 text-[13px]">Hoy • 17:45</p></div><span class="bg-[#00E5FF]/20 text-[#00E5FF] font-black text-[13px] px-3 py-1.5 rounded-full">+ 245 pts</span></div>
 
     <div class="relative card rounded-3xl p-4 mt-4">
-      <h2 class="font-bold">💳 Mi plan</h2><p class="text-white/60 text-sm mt-1">Plan activo • Pagás en pesos 🇦🇷</p>
+      <h2 class="font-bold">💳 Mi plan</h2><p id="textoPlan" class="text-white/60 text-sm mt-1">Plan activo • Pagás en pesos 🇦🇷</p>
       <div class="grid grid-cols-2 gap-2 mt-3"><button onclick="abrirModalPagos('Semanal', 4990)" class="bg-[#00E5FF] text-[#0A1220] font-black py-3 rounded-xl text-sm">Semanal - $4.990</button><button onclick="abrirModalPagos('Mensual', 14990)" class="bg-white/10 font-bold py-3 rounded-xl text-sm">Mensual - $14.990</button></div>
       <div class="flex gap-2 mt-2"><input id="promo" placeholder="Código promo" class="flex-1 bg-[#040B1E] border border-white/10 rounded-xl px-3 py-3 text-sm"><button id="btnPromo" class="bg-white text-black font-black px-4 rounded-xl text-sm">🎁</button></div>
     </div>
@@ -191,8 +191,9 @@
     <div class="bg-[#132F55] rounded-3xl p-5 mt-4">
       <p id="perfilNombre" class="font-black text-xl">Usuario</p>
       <p id="perfilEmail" class="text-white/60 text-sm">usuario@rutaflex.com</p>
-      <p class="text-xs text-white/50 mt-2">🇦🇷 Cuenta Argentina • Buenos Aires</p>
-      <button id="btnLogoutPerfil" class="w-full bg-red-500 font-black py-3 rounded-xl mt-4 text-sm">CERRAR SESIÓN</button>
+      <p id="perfilPlan" class="text-xs text-white/50 mt-2">🇦🇷 Cuenta Argentina • Buenos Aires</p>
+      <button onclick="abrirModalPagos('Semanal', 4990)" class="w-full bg-[#00E5FF] text-[#0A1220] font-black py-3 rounded-xl mt-4 text-sm">💳 PAGAR / RENOVAR PLAN</button>
+      <button id="btnLogoutPerfil" class="w-full bg-red-500 font-black py-3 rounded-xl mt-2 text-sm">CERRAR SESIÓN</button>
     </div>
   </div>
 
@@ -232,6 +233,34 @@
       <button onclick="copiarAlias()" class="w-full bg-white/10 font-bold py-3 rounded-xl mt-3 text-sm">📋 COPIAR ALIAS</button>
       <a id="btn-mp-pago" href="#" target="_blank" class="block text-center bg-[#00E5FF] text-[#0A1220] font-black py-3 rounded-xl mt-3 text-sm">PAGAR CON MERCADO PAGO</a>
       <a id="btn-wsp-pago" href="#" target="_blank" class="block text-center bg-green-500 font-black py-3 rounded-xl mt-2 text-sm">ENVIAR COMPROBANTE POR WHATSAPP</a>
+    </div>
+  </div>
+
+  <!-- ============ MODAL NOTIFICACIONES - 7 DIAS GRATIS ============ -->
+  <div id="modalNoti" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4">
+    <div class="bg-[#132F55] w-full max-w-md rounded-3xl p-5 max-h-[85vh] overflow-y-auto">
+      <div class="flex justify-between items-center"><h2 class="font-black text-lg">🔔 Notificaciones</h2><button onclick="document.getElementById('modalNoti').classList.add('hidden'); document.getElementById('puntoNoti')?.classList.add('hidden')" class="text-xl">✕</button></div>
+      <div class="bg-[#0A1220] rounded-2xl p-4 mt-4 border border-[#00E5FF]/30">
+        <p id="notiBienvenida" class="font-black text-[16px]">👋 ¡Bienvenido a RutaFlex!</p>
+        <p id="notiDias" class="text-white/70 text-sm mt-1">Te quedan 7 días gratis.</p>
+        <p id="notiVence" class="text-white/50 text-xs mt-1"></p>
+      </div>
+      <div id="notiVencidoBox" class="hidden bg-red-500/15 border border-red-500/40 rounded-2xl p-4 mt-3">
+        <p class="font-black text-red-300">⛔ Se terminó tu prueba gratis</p>
+        <p class="text-white/70 text-sm mt-1">Para seguir usando RutaFlex, pagá tu plan por Mercado Pago.</p>
+        <button onclick="document.getElementById('modalNoti').classList.add('hidden'); abrirModalPagos('Semanal', 4990)" class="w-full bg-[#00E5FF] text-[#0A1220] font-black py-3 rounded-xl mt-3 text-sm">PAGAR AHORA - $4.990 / SEMANA</button>
+        <button onclick="document.getElementById('modalNoti').classList.add('hidden'); abrirModalPagos('Mensual', 14990)" class="w-full bg-white/10 font-bold py-3 rounded-xl mt-2 text-sm">PAGAR MENSUAL - $14.990</button>
+      </div>
+      <div id="notiPorVencerBox" class="hidden bg-yellow-500/15 border border-yellow-500/40 rounded-2xl p-4 mt-3">
+        <p class="font-black text-yellow-200">⚠️ Se te está por terminar la prueba</p>
+        <p id="notiPorVencerTexto" class="text-white/70 text-sm mt-1">Renová ahora para no quedarte sin ruta.</p>
+        <button onclick="document.getElementById('modalNoti').classList.add('hidden'); abrirModalPagos('Semanal', 4990)" class="w-full bg-yellow-400 text-black font-black py-3 rounded-xl mt-3 text-sm">RENOVAR AHORA</button>
+      </div>
+      <div class="bg-[#0A1220] rounded-2xl p-4 mt-3">
+        <p class="font-bold">🇦🇷 RutaFlex Argentina</p>
+        <p class="text-white/60 text-sm mt-1">Optimizá en CABA y GBA. Del más cercano al más lejano, ahorrá nafta y tiempo.</p>
+      </div>
+      <button onclick="document.getElementById('modalNoti').classList.add('hidden'); document.getElementById('puntoNoti')?.classList.add('hidden')" class="w-full bg-[#00E5FF] text-[#0A1220] font-black py-3 rounded-xl mt-4 text-sm">ENTENDIDO</button>
     </div>
   </div>
 
