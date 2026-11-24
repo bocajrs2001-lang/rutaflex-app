@@ -7,10 +7,8 @@
   <meta name="description" content="RutaFlex optimiza tus rutas de entrega. Del más cercano al más lejano. Ahorra nafta y tiempo.">
   <link rel="canonical" href="https://rutaflex-app.onrender.com/">
   <meta name="robots" content="index, follow">
-
-  <!-- PWA -->
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#0A2342">
+  <meta name="theme-color" content="#0A1220">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -18,226 +16,207 @@
   <link rel="apple-touch-icon" href="/icon-192x192.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/icon-192x192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="/icon-512x512.png">
-
-  <!-- Para que Google muestre RutaFlex y no Render -->
   <meta property="og:site_name" content="RutaFlex - El camino inteligente">
   <meta property="og:title" content="RutaFlex - El camino inteligente">
-  <meta property="og:description" content="RutaFlex optimiza tus rutas de entrega. Del más cercano al más lejano. Ahorra nafta y tiempo.">
+  <meta property="og:description" content="RutaFlex optimiza tus rutas de entrega.">
   <meta property="og:url" content="https://rutaflex-app.onrender.com/">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://rutaflex-app.onrender.com/icon-512x512.png">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="RutaFlex - El camino inteligente">
-  <meta name="twitter:description" content="RutaFlex optimiza tus rutas de entrega. Del más cercano al más lejano.">
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "RutaFlex - El camino inteligente",
-    "alternateName": "RutaFlex",
-    "url": "https://rutaflex-app.onrender.com/"
-  }
-  </script>
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "RutaFlex - El camino inteligente",
-    "url": "https://rutaflex-app.onrender.com/",
-    "logo": "https://rutaflex-app.onrender.com/icon-512x512.png"
-  }
-  </script>
-
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
   <link rel="stylesheet" href="/style.css">
   <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#0A2342;color:#fff;min-height:100vh}
-    .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px}
-    .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px}
-    .logo img{width:42px;height:42px;border-radius:10px}
-    .logo small{display:block;font-size:11px;font-weight:400;opacity:.8;letter-spacing:.5px}
-    .icon-btn{background:#132F55;border:0;color:#fff;width:42px;height:42px;border-radius:12px;font-size:18px;cursor:pointer}
-    .container{padding:0 16px 30px;max-width:520px;margin:0 auto}
-    .card{background:#132F55;border-radius:20px;padding:18px;margin-top:14px}
-    .card h1{font-size:24px}
-    .card h1 span{color:#5BA9E0}
-    .card p{opacity:.85;margin-top:4px;font-size:14px}
-    .status{margin-top:14px;background:#0A2342;border:1px solid #1E4A7A;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:14px}
-    .dot{width:10px;height:10px;background:#22c55e;border-radius:50%;box-shadow:0 0 0 4px rgba(34,197,94,.2)}
-    .badge{background:#22c55e;color:#062a12;font-weight:700;font-size:12px;padding:4px 8px;border-radius:999px;margin-left:auto}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
-    .btn{border:0;border-radius:14px;padding:14px;font-weight:700;font-size:15px;cursor:pointer;width:100%}
-    .btn-primary{background:#5BA9E0;color:#062a3a}
-    .btn-dark{background:#0A2342;color:#fff;border:1px solid #2A5A8A}
-    .btn-green{background:#22c55e;color:#062a12}
-    .btn-outline{background:transparent;color:#fff;border:1px solid #2A5A8A}
-    .list{margin-top:14px}
-    .list-item{background:#0A2342;border:1px solid #1E4A7A;border-radius:14px;padding:14px;display:flex;gap:10px;align-items:center;margin-bottom:10px}
-    .list-item b{font-size:14px}
-    .list-item small{display:block;opacity:.7;font-size:12px}
-    .muted{opacity:.7;font-size:13px;text-align:center;padding:18px}
-    input,textarea{width:100%;background:#0A2342;border:1px solid #2A5A8A;color:#fff;border-radius:12px;padding:13px;font-size:15px;outline:none}
-    input::placeholder,textarea::placeholder{color:#7AA0C4}
-    .hidden{display:none!important}
-    #installBanner{background:#5BA9E0;color:#062a3a;border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px;margin-top:14px}
-    #installBanner b{font-size:15px}
-    #installBanner small{display:block;font-size:12px;opacity:.8}
-    #installBanner button{background:#0A2342;color:#fff;border:0;padding:10px 14px;border-radius:10px;font-weight:700;white-space:nowrap;cursor:pointer}
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
-    .modal-box{background:#132F55;width:100%;max-width:420px;border-radius:20px;padding:20px}
-    .modal-box h2{margin-bottom:12px}
-    .modal-box label{display:block;font-size:13px;margin:12px 0 6px;opacity:.85}
-    .row{display:flex;gap:10px;margin-top:12px}
-    .close{float:right;background:transparent;border:0;color:#fff;font-size:20px;cursor:pointer}
+    *{box-sizing:border-box} body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#0A1220;color:#fff;min-height:100vh}
+    .hidden{display:none!important} #mapaLeaflet{height:300px;width:100%;border-radius:12px}
+    input,textarea{outline:none} .nav-btn{transition:.2s}
   </style>
 </head>
-<body>
+<body class="bg-[#0A1220] pb-24">
 
-  <header class="topbar">
-    <div class="logo">
-      <img src="/icon-192x192.png" alt="RutaFlex">
-      <div>RutaFlex<small>EL CAMINO INTELIGENTE</small></div>
+  <div id="notificaciones" class="fixed top-3 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 w-[92%] max-w-md"></div>
+
+  <!-- ============ AUTH ============ -->
+  <div id="authScreen" class="max-w-md mx-auto px-4 pt-6">
+    <div class="flex items-center gap-3 mb-6">
+      <img src="/icon-192x192.png" class="w-11 h-11 rounded-xl" alt="RutaFlex">
+      <div><p class="font-black text-2xl leading-none">RutaFlex</p><p class="text-[11px] tracking-widest text-white/60">EL CAMINO INTELIGENTE</p></div>
     </div>
-    <div style="display:flex;gap:8px">
-      <button class="icon-btn" id="btnNotificaciones" title="Notificaciones">🔔</button>
-      <button class="icon-btn" id="btnMenu" title="Menú">☰</button>
+    <div id="installBanner" class="hidden bg-[#00E5FF] text-[#0A1220] rounded-2xl p-3 flex items-center gap-3 mb-4">
+      <div class="text-2xl">📱</div><div class="flex-1"><b class="text-sm">¿Usar RutaFlex como App?</b><small class="block text-xs opacity-80">Instalala y usala sin el navegador</small></div>
+      <button id="btnInstalar" class="bg-[#0A1220] text-white px-3 py-2 rounded-lg text-sm font-bold">INSTALAR</button>
+      <button id="btnCerrarBanner" class="text-xl px-1">✕</button>
     </div>
-  </header>
-
-  <main class="container">
-
-    <!-- Banner Instalar PWA -->
-    <div id="installBanner" class="hidden">
-      <div style="font-size:26px">📱</div>
-      <div style="flex:1">
-        <b>¿Usar RutaFlex como App?</b>
-        <small>Instalala y usala sin el navegador</small>
+    <div class="bg-[#132F55] rounded-3xl p-5">
+      <h1 class="text-2xl font-black">Bienvenido a <span class="text-[#00E5FF]">RutaFlex</span></h1>
+      <p class="text-white/70 text-sm mt-1">Optimizá tu ruta de entrega. Del más cercano al más lejano.</p>
+      <div class="grid grid-cols-2 gap-2 mt-4">
+        <button id="tabLogin" class="bg-[#00E5FF] text-[#0A1220] font-black py-3 rounded-xl text-sm">Iniciar sesión</button>
+        <button id="tabRegistro" class="bg-[#0A1220] border border-white/20 font-bold py-3 rounded-xl text-sm">Crear cuenta</button>
       </div>
-      <button id="btnInstalar">INSTALAR</button>
-      <button id="btnCerrarBanner" style="background:transparent;color:#062a3a;font-size:18px;padding:4px 8px">✕</button>
+      <form id="formLogin" class="mt-4">
+        <label class="text-xs text-white/70">Email</label>
+        <input id="loginEmail" type="email" required class="w-full bg-[#0A1220] border border-white/10 rounded-xl px-3 py-3 text-sm mt-1 mb-3" placeholder="tu@email.com">
+        <label class="text-xs text-white/70">Contraseña</label>
+        <div class="relative">
+          <input id="loginPassword" type="password" required class="w-full bg-[#0A1220] border border-white/10 rounded-xl px-3 py-3 text-sm mt-1 pr-11" placeholder="Tu contraseña">
+          <button type="button" onclick="togglePass('loginPassword', this)" class="absolute right-2 top-[14px] text-lg">👁️</button>
+        </div>
+        <button class="w-full bg-[#00E5FF] text-[#0A1220] font-black py-3 rounded-xl mt-4 text-sm">ENTRAR</button>
+      </form>
+      <form id="formRegistro" class="mt-4 hidden">
+        <label class="text-xs text-white/70">Nombre</label>
+        <input id="regNombre" type="text" class="w-full bg-[#0A1220] border border-white/10 rounded-xl px-3 py-3 text-sm mt-1 mb-3" placeholder="Tu nombre">
+        <label class="text-xs text-white/70">Email</label>
+        <input id="regEmail" type="email" class="w-full bg-[#0A1220] border border-white/10 rounded-xl px-3 py-3 text-sm mt-1 mb-3" placeholder="tu@email.com">
+        <label class="text-xs text-white/70">Contraseña</label>
+        <input id="regPassword" type="password" class="w-full bg-[#0A1220] border border-white/10 rounded-xl px-3 py-3 text-sm mt-1" placeholder="Mín. 8, 1 mayúscula, 1 número y 1 símbolo">
+        <button type="button" id="btnRegistroSubmit" class="w-full bg-[#00E5FF] text-[#0A1220] font-black py-3 rounded-xl mt-4 text-sm">CREAR CUENTA GRATIS</button>
+      </form>
+      <p id="authMessage" class="text-center text-sm mt-4 font-bold text-[#00E5FF] min-h-[20px]"></p>
     </div>
+    <p class="text-center text-white/40 text-xs mt-4">RutaFlex - El camino inteligente © 2026</p>
+  </div>
 
-    <!-- LOGIN / REGISTRO -->
-    <section id="seccionAuth" class="card">
-      <h1>Bienvenido a <span>RutaFlex</span></h1>
-      <p>Optimizá tu ruta de entrega. Del más cercano al más lejano.</p>
-      <div class="row">
-        <button class="btn btn-primary" id="btnMostrarLogin">Iniciar sesión</button>
-        <button class="btn btn-dark" id="btnMostrarRegistro">Crear cuenta</button>
+  <!-- ============ APP / HOME ============ -->
+  <div id="appScreen" class="hidden max-w-md mx-auto px-4 pt-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <img src="/icon-192x192.png" class="w-10 h-10 rounded-xl" alt="RutaFlex">
+        <div><p class="font-black text-xl leading-none">RutaFlex</p><p class="text-[10px] tracking-widest text-white/50">EL CAMINO INTELIGENTE</p></div>
       </div>
-      <p class="muted" style="padding-bottom:0">Al crear tu cuenta aceptás los términos de RutaFlex.</p>
-    </section>
-
-    <!-- APP PRINCIPAL -->
-    <section id="seccionApp" class="hidden">
-      <div class="card">
-        <h1>¡Hola, <span id="nombreUsuario">RutaFlex</span>!</h1>
-        <p>¿Listo para optimizar tu día?</p>
-        <div class="status">
-          <span class="dot"></span>
-          <span id="textoSuscripcion">Cargando suscripción...</span>
-          <span class="badge" id="badgeSuscripcion">ACTIVO</span>
-        </div>
+      <div class="flex gap-2"><button id="btnNotificaciones" class="w-10 h-10 bg-[#132F55] rounded-xl">🔔</button><button id="btnMenu" class="w-10 h-10 bg-[#132F55] rounded-xl">☰</button></div>
+    </div>
+    <div class="bg-[#132F55] rounded-3xl p-5 mt-4">
+      <h1 id="userName" class="text-2xl font-black">¡Hola!</h1>
+      <p id="fechaHoy" class="text-white/60 text-sm">Hoy</p>
+      <span id="contadorDias" class="mt-4 inline-flex items-center gap-1.5 bg-[#00C950]/15 border border-[#00C950]/30 text-[#00D084] px-3.5 py-1.5 rounded-full text-[13px] font-bold">✅ Activo</span>
+      <div id="bannerVencido" class="hidden mt-3 bg-red-500/20 border border-red-500/40 rounded-xl p-3 text-sm font-bold text-red-300">⚠️ Plan vencido. Renová para seguir usando RutaFlex.</div>
+    </div>
+    <div id="bannerContinuarRuta" class="bg-[#00E5FF] rounded-2xl p-4 mt-4">
+      <p id="recienteTitulo" class="text-[#0A1220] font-black text-sm">Sin rutas recientes</p>
+      <p id="recienteSub" class="text-[#0A1220]/70 text-xs font-bold">Creá tu primera ruta</p>
+      <button onclick="abrirRecienteRapido()" class="w-full bg-[#0A1220] text-white font-black py-3 rounded-xl mt-3 text-sm">CONTINUAR RUTA ▶️</button>
+      <button onclick="eliminarReciente()" class="w-full text-[#0A1220] text-xs font-bold mt-2">🗑️ Eliminar ruta reciente</button>
+    </div>
+    <div class="bg-[#132F55] rounded-3xl p-5 mt-4">
+      <h2 class="font-bold">📍 Tus direcciones</h2>
+      <div class="grid grid-cols-2 gap-2 mt-3">
+        <button id="btnPegarTexto" class="bg-[#00E5FF] text-[#0A1220] font-black py-3 rounded-xl text-sm">📋 PEGAR TEXTO</button>
+        <button id="btnMapa" class="bg-[#0A1220] border border-white/20 font-bold py-3 rounded-xl text-sm">🗺️ MAPA</button>
       </div>
-
-      <div class="card">
-        <h2 style="font-size:17px;margin-bottom:10px">📍 Tus direcciones</h2>
-        <textarea id="inputDirecciones" rows="3" placeholder="Pegá tus direcciones acá, una por línea...&#10;Ej: Av. Corrientes 1234, CABA"></textarea>
-        <div class="grid" style="margin-top:12px">
-          <button class="btn btn-primary" id="btnPegarTexto">📋 PEGAR TEXTO</button>
-          <button class="btn btn-dark" id="btnEscanear">📷 ESCANEAR</button>
-        </div>
-        <div class="grid">
-          <button class="btn btn-green" id="btnOptimizar">⚡ OPTIMIZAR RUTA</button>
-          <button class="btn btn-outline" id="btnLimpiar">🗑️ LIMPIAR</button>
-        </div>
-        <div id="listaDestinos" class="list"></div>
-        <p id="mensajeVacio" class="muted">Todavía no tenés direcciones. Pegá tu lista para empezar.</p>
+      <div class="grid grid-cols-2 gap-2 mt-2">
+        <label class="bg-[#0A1220] border border-white/20 font-bold py-3 rounded-xl text-sm text-center cursor-pointer">📷 FOTO<input id="fileImg" type="file" accept="image/*" class="hidden"></label>
+        <label class="bg-[#0A1220] border border-white/20 font-bold py-3 rounded-xl text-sm text-center cursor-pointer">📄 PDF<input id="filePdf" type="file" accept="application/pdf" class="hidden"></label>
       </div>
-
-      <div class="card">
-        <h2 style="font-size:17px;margin-bottom:10px">💳 Mi plan</h2>
-        <p id="textoPlan" style="margin-bottom:12px">Plan activo</p>
-        <div class="grid">
-          <button class="btn btn-primary" id="btnPlanSemanal">Plan Semanal - $4.990</button>
-          <button class="btn btn-dark" id="btnPlanMensual">Plan Mensual - $14.990</button>
-        </div>
-        <div class="row">
-          <button class="btn btn-outline" id="btnPromo">🎁 Tengo un código promo</button>
-          <button class="btn btn-outline" id="btnLogout">Cerrar sesión</button>
-        </div>
+      <button id="btnCamara" class="w-full bg-white text-black font-black py-3 rounded-xl mt-2 text-sm">📸 SACAR FOTO</button>
+      <div id="panelCamara" class="hidden mt-3">
+        <video id="camara" autoplay playsinline class="w-full rounded-xl bg-black"></video>
+        <div class="grid grid-cols-2 gap-2 mt-2"><button id="btnCapturar" class="bg-[#00E5FF] text-[#0A1220] font-black py-3 rounded-xl text-sm">CAPTURAR</button><button id="btnCerrarCamara" class="bg-red-500 font-bold py-3 rounded-xl text-sm">CERRAR</button></div>
       </div>
-    </section>
-
-    <p class="muted">RutaFlex - El camino inteligente © 2026</p>
-  </main>
-
-  <!-- MODAL LOGIN -->
-  <div id="modalLogin" class="modal hidden">
-    <div class="modal-box">
-      <button class="close" data-cerrar="modalLogin">✕</button>
-      <h2>Iniciar sesión</h2>
-      <label>Email</label>
-      <input id="loginEmail" type="email" placeholder="tu@email.com">
-      <label>Contraseña</label>
-      <input id="loginPassword" type="password" placeholder="Tu contraseña">
-      <div class="row">
-        <button class="btn btn-primary" id="btnLogin">Entrar</button>
+      <button onclick="borrarTodoHistorial()" class="w-full text-white/50 text-xs mt-4">🗑️ Borrar todo el historial</button>
+    </div>
+    <div class="bg-[#132F55] rounded-3xl p-5 mt-4">
+      <h2 class="font-bold">💳 Mi plan</h2>
+      <p class="text-white/60 text-sm mt-1">Plan activo</p>
+      <div class="grid grid-cols-2 gap-2 mt-3">
+        <button onclick="abrirModalPagos('Semanal', 4990)" class="bg-[#00E5FF] text-[#0A1220] font-black py-3 rounded-xl text-sm">Semanal - $4.990</button>
+        <button onclick="abrirModalPagos('Mensual', 14990)" class="bg-[#0A1220] border border-white/20 font-bold py-3 rounded-xl text-sm">Mensual - $14.990</button>
       </div>
-      <p class="muted" id="linkRecuperar" style="cursor:pointer;text-decoration:underline">¿Olvidaste tu contraseña?</p>
-      <p id="errorLogin" class="muted" style="color:#ff8a8a"></p>
+      <div class="flex gap-2 mt-2">
+        <input id="promo" placeholder="Código promo" class="flex-1 bg-[#0A1220] border border-white/10 rounded-xl px-3 py-3 text-sm">
+        <button id="btnPromo" class="bg-white text-black font-black px-4 rounded-xl text-sm">🎁</button>
+      </div>
     </div>
   </div>
 
-  <!-- MODAL REGISTRO -->
-  <div id="modalRegistro" class="modal hidden">
-    <div class="modal-box">
-      <button class="close" data-cerrar="modalRegistro">✕</button>
-      <h2>Crear cuenta</h2>
-      <label>Nombre</label>
-      <input id="regNombre" type="text" placeholder="Tu nombre">
-      <label>Email</label>
-      <input id="regEmail" type="email" placeholder="tu@email.com">
-      <label>Contraseña</label>
-      <input id="regPassword" type="password" placeholder="Mín. 8, 1 mayúscula, 1 número y 1 símbolo">
-      <div class="row">
-        <button class="btn btn-primary" id="btnRegistro">Crear cuenta gratis</button>
+  <!-- ============ PEGAR TEXTO ============ -->
+  <div id="pegarTextoScreen" class="hidden max-w-md mx-auto px-4 pt-4">
+    <button onclick="mostrarTab('home')" class="text-[#00E5FF] font-bold text-sm">← Volver</button>
+    <h1 class="text-2xl font-black mt-2">Pegar direcciones</h1>
+    <div id="pegarTextoStep1" class="bg-[#132F55] rounded-3xl p-4 mt-4">
+      <textarea id="textoDirecciones" rows="8" class="w-full bg-[#0A1220] border border-white/10 rounded-xl p-3 text-sm" placeholder="Pegá tus direcciones acá, una por línea...&#10;Ej: Av. Corrientes 1234, CABA"></textarea>
+      <button id="btnProcesarTexto" class="w-full bg-[#00E5FF] text-[#0A1220] font-black py-4 rounded-xl mt-3 text-sm">⚡ EXTRAER Y REVISAR</button>
+    </div>
+    <div id="pegarTextoLoading" class="hidden bg-[#132F55] rounded-3xl p-5 mt-4 text-center">
+      <p id="loadingMensaje" class="font-bold">Extrayendo direcciones...</p>
+      <div class="w-full bg-[#0A1220] rounded-full h-3 mt-3 overflow-hidden"><div id="barraProgreso" class="bg-[#00E5FF] h-3" style="width:0%"></div></div>
+      <p id="textoProgreso" class="text-xs text-white/60 mt-2"></p>
+    </div>
+    <div id="pegarTextoResult" class="hidden mt-4">
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="bg-[#132F55] rounded-2xl p-3"><p id="resumenValidas" class="font-black text-xl">0</p><p class="text-[11px] text-white/60">Paradas</p></div>
+        <div class="bg-[#132F55] rounded-2xl p-3"><p id="statDistanciaPegadas" class="font-black text-xl">~0 km</p><p class="text-[11px] text-white/60">Distancia</p></div>
+        <div class="bg-[#132F55] rounded-2xl p-3"><p id="statTiempoPegadas" class="font-black text-xl">~0 min</p><p class="text-[11px] text-white/60">Tiempo</p></div>
       </div>
-      <p id="errorRegistro" class="muted" style="color:#ff8a8a"></p>
+      <p class="hidden"><span id="resumenDescartadas">0</span><span id="statParadasPegadas">0</span></p>
+      <div id="tramosContainer" class="mt-3"></div>
+      <div id="listaPegadas" class="flex flex-col gap-2 mt-3"></div>
+      <button id="btnReiniciarPegar" class="w-full bg-[#132F55] border border-white/10 font-bold py-3 rounded-xl mt-4 text-sm">🔄 EMPEZAR DE NUEVO</button>
+    </div>
+  </div>
+
+  <!-- ============ PERFIL ============ -->
+  <div id="perfilScreen" class="hidden max-w-md mx-auto px-4 pt-4">
+    <h1 class="text-2xl font-black">Mi perfil</h1>
+    <div class="bg-[#132F55] rounded-3xl p-5 mt-4">
+      <p id="perfilNombre" class="font-black text-xl">Usuario</p>
+      <p id="perfilEmail" class="text-white/60 text-sm">usuario@rutaflex.com</p>
+      <button id="btnLogoutPerfil" class="w-full bg-red-500 font-black py-3 rounded-xl mt-4 text-sm">CERRAR SESIÓN</button>
+    </div>
+  </div>
+
+  <!-- ============ BOTTOM NAV ============ -->
+  <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-[#0A1220]/95 backdrop-blur border-t border-white/10 flex justify-around py-3 z-40">
+    <button class="nav-btn text-[#00E5FF] font-bold text-xs" data-tab="home" onclick="mostrarTab('home')">🏠<br>Inicio</button>
+    <button class="nav-btn text-white/30 font-bold text-xs" data-tab="pegar" onclick="document.getElementById('btnPegarTexto')?.click()">📋<br>Pegar</button>
+    <button class="nav-btn text-white/30 font-bold text-xs" data-tab="perfil" onclick="mostrarTab('perfil')">👤<br>Perfil</button>
+  </nav>
+
+  <!-- ============ MODAL EDICION ============ -->
+  <div id="modalEdicion" class="hidden fixed inset-0 bg-black/70 z-50 flex items-end sm:items-center justify-center p-3">
+    <div class="bg-[#132F55] w-full max-w-md rounded-3xl p-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center"><h2 class="font-black text-lg">Revisá tus direcciones</h2><button id="btnCerrarModal" class="text-xl">✕</button></div>
+      <div id="contenedorInputs" class="flex flex-col gap-2 mt-3"></div>
+      <button id="btnAgregarLinea" class="w-full bg-[#0A1220] border border-white/10 font-bold py-3 rounded-xl mt-3 text-sm">+ AGREGAR LÍNEA</button>
+      <div class="grid grid-cols-2 gap-2 mt-3"><button id="btnCancelarEdicion" class="bg-white/10 font-bold py-3 rounded-xl text-sm">CANCELAR</button><button id="btnGuardarEdicion" class="bg-[#00E5FF] text-[#0A1220] font-black py-3 rounded-xl text-sm">✅ Guardar</button></div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL MAPA ============ -->
+  <div id="modalMapa" class="hidden fixed inset-0 bg-black/70 z-50 flex items-end sm:items-center justify-center p-3">
+    <div class="bg-[#132F55] w-full max-w-md rounded-3xl p-4">
+      <div class="flex justify-between items-center"><h2 class="font-black">Tocá en el mapa</h2><button id="btnCerrarMapa" class="text-xl">✕</button></div>
+      <div id="mapaLeaflet" class="mt-3"></div>
+      <div class="grid grid-cols-2 gap-2 mt-3"><button id="btnMiUbicacion" class="bg-white/10 font-bold py-3 rounded-xl text-sm">📍 Mi ubicación</button><button id="btnListoMapa" class="bg-[#00E5FF] text-[#0A1220] font-black py-3 rounded-xl text-sm">✅ LISTO</button></div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL PAGOS ============ -->
+  <div id="payment-modal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+    <div class="bg-[#132F55] w-full max-w-md rounded-3xl p-5">
+      <div class="flex justify-between"><h2 class="font-black">Pagar plan</h2><button onclick="cerrarModalPagos()" class="text-xl">✕</button></div>
+      <p id="modal-plan-texto" class="font-bold mt-3">Plan - $0</p>
+      <p class="text-sm text-white/60 mt-1">Alias: <b id="modal-alias-texto" class="text-white">RUTAFLEX.MP</b></p>
+      <button onclick="copiarAlias()" class="w-full bg-white/10 font-bold py-3 rounded-xl mt-3 text-sm">📋 COPIAR ALIAS</button>
+      <a id="btn-mp-pago" href="#" target="_blank" class="block text-center bg-[#00E5FF] text-[#0A1220] font-black py-3 rounded-xl mt-3 text-sm">PAGAR CON MERCADO PAGO</a>
+      <a id="btn-wsp-pago" href="#" target="_blank" class="block text-center bg-green-500 font-black py-3 rounded-xl mt-2 text-sm">ENVIAR COMPROBANTE POR WHATSAPP</a>
     </div>
   </div>
 
   <script src="/app.js"></script>
   <script>
-    // PWA: Registrar Service Worker + Banner Instalar
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js').catch(()=>{});
-      });
+      window.addEventListener('load', () => { navigator.serviceWorker.register('/service-worker.js').catch(()=>{}); });
     }
     let deferredPrompt = null;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById('installBanner')?.classList.remove('hidden');
-    });
-    document.getElementById('btnInstalar')?.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      document.getElementById('installBanner')?.classList.add('hidden');
-    });
-    document.getElementById('btnCerrarBanner')?.addEventListener('click', () => {
-      document.getElementById('installBanner')?.classList.add('hidden');
-    });
-    // Modales simples (si app.js ya los maneja, no molesta)
-    document.getElementById('btnMostrarLogin')?.addEventListener('click', ()=> document.getElementById('modalLogin')?.classList.remove('hidden'));
-    document.getElementById('btnMostrarRegistro')?.addEventListener('click', ()=> document.getElementById('modalRegistro')?.classList.remove('hidden'));
-    document.querySelectorAll('[data-cerrar]')?.forEach(b=>{
-      b.addEventListener('click', ()=> document.getElementById(b.dataset.cerrar)?.classList.add('hidden'));
-    });
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBanner')?.classList.remove('hidden'); });
+    document.getElementById('btnInstalar')?.addEventListener('click', async () => { if (!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; document.getElementById('installBanner')?.classList.add('hidden'); });
+    document.getElementById('btnCerrarBanner')?.addEventListener('click', () => { document.getElementById('installBanner')?.classList.add('hidden'); });
+    // FIX BOTON ATRAS: si app.js ya lo maneja, esto es respaldo para no cerrar la PWA
+    window.addEventListener('load', () => { setTimeout(()=>{ try{ history.pushState({tab:'home'}, '', '#home'); }catch{} }, 500); });
   </script>
 </body>
 </html>
