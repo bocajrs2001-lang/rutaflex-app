@@ -68,10 +68,13 @@ function ocultarTodasLasPantallasExcepto(id){
   ['authScreen','appScreen','pegarTextoScreen','perfilScreen','payment-modal','modalEdicion','modalMapa'].forEach(s=>{ const el=document.getElementById(s); if(el) el.classList.add('hidden'); });
   document.getElementById(id)?.classList.remove('hidden'); window.scrollTo(0,0);
 }
+// FIX NUEVO DISEÑO: nav usa text-white/40, no text-white/30
 function actualizarNav(tabActivo) {
   document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.classList.toggle('text-[#00E5FF]', btn.dataset.tab === tabActivo);
-    btn.classList.toggle('text-white/30', btn.dataset.tab !== tabActivo);
+    const activo = btn.dataset.tab === tabActivo;
+    btn.classList.toggle('text-[#00E5FF]', activo);
+    btn.classList.toggle('text-white/40', !activo);
+    btn.classList.remove('text-white/30');
   });
 }
 function mostrarTab(tab, pushState = true) {
@@ -466,7 +469,6 @@ async function validarDireccionesEnModal() {
     await new Promise(r=>setTimeout(r,100));
   }
 }
-// FIX FINAL: Guardar con REEMPLAZAR, no con for + POST individual (eso triplicaba)
 document.getElementById('btnGuardarEdicion')?.addEventListener('click', async () => {
   const dirs = document.querySelectorAll('.input-direccion'); const finales = [...dirs].map(d => d.value.trim()).filter(d => d.length > 3);
   if (finales.length === 0) return mostrarNotificacion("Ingresá al menos una", "error");
@@ -509,18 +511,60 @@ document.getElementById('btnProcesarTexto')?.addEventListener('click', async () 
   try { const direcciones = extraerDirecciones(limpiarTextoSucio(texto)); if (direcciones.length === 0) throw new Error('No se detectaron direcciones'); destinosDetectados = quitarDuplicadosDeLista(direcciones); document.getElementById('pegarTextoLoading').classList.add('hidden'); mostrarModalEdicionConGPS(); }
   catch(err) { if (!esErrorDeUsuario(err.message)) reportarErrorCritico('EXTRAER_DIRECCIONES_FALLO', err.message); mostrarNotificacion(`❌ ${err.message}`, "error"); document.getElementById('pegarTextoStep1').classList.remove('hidden'); document.getElementById('pegarTextoLoading').classList.add('hidden'); }
 });
-document.getElementById('tabLogin')?.addEventListener('click', () => { document.getElementById('formLogin').classList.remove('hidden'); document.getElementById('formRegistro').classList.add('hidden'); });
-document.getElementById('tabRegistro')?.addEventListener('click', () => { document.getElementById('formRegistro').classList.remove('hidden'); document.getElementById('formLogin').classList.add('hidden'); });
+// FIX NUEVO DISEÑO - TABS CON ESTILO ACTIVO
+function pintarTabsAuth(activo) {
+  const l = document.getElementById('tabLogin'); const r = document.getElementById('tabRegistro');
+  if (!l || !r) return;
+  const clasesActivo = ['bg-white/10','text-[#00E5FF]','font-black'];
+  const clasesInactivo = ['text-white/70','font-bold'];
+  [l, r].forEach(b => { b.classList.remove('bg-white/10','text-[#00E5FF]','font-black','text-white/70','font-bold'); });
+  const btnActivo = activo === 'login' ? l : r;
+  const btnInactivo = activo === 'login' ? r : l;
+  btnActivo.classList.add(...clasesActivo);
+  btnInactivo.classList.add(...clasesInactivo);
+}
+document.getElementById('tabLogin')?.addEventListener('click', () => {
+  const fL = document.getElementById('formLogin'); const fR = document.getElementById('formRegistro');
+  if (fL) { fL.classList.remove('hidden'); fL.classList.add('flex'); }
+  if (fR) { fR.classList.add('hidden'); fR.classList.remove('flex'); }
+  pintarTabsAuth('login');
+});
+document.getElementById('tabRegistro')?.addEventListener('click', () => {
+  const fL = document.getElementById('formLogin'); const fR = document.getElementById('formRegistro');
+  if (fR) { fR.classList.remove('hidden'); fR.classList.add('flex'); }
+  if (fL) { fL.classList.add('hidden'); fL.classList.remove('flex'); }
+  pintarTabsAuth('registro');
+});
+// FIX NUEVO DISEÑO - REGISTRO QUE FALTABA EN TU ARCHIVO
+document.getElementById('btnRegistroSubmit')?.addEventListener('click', async () => {
+  const nombre = document.getElementById('regNombre')?.value?.trim();
+  const email = document.getElementById('regEmail')?.value?.trim();
+  const password = document.getElementById('regPassword')?.value || '';
+  const msg = document.getElementById('authMessage');
+  if (!nombre || !email || !password) { if (msg) { msg.innerText = "Completá nombre, email y contraseña"; msg.className = "relative text-center text-sm mt-3 font-bold text-red-400 min-h-[20px]"; } return; }
+  if (msg) { msg.innerText = "Creando cuenta..."; msg.className = "relative text-center text-sm mt-3 font-bold text-[#00E5FF] min-h-[20px]"; }
+  try {
+    const r = await fetch('/api/registro', { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({nombre, email, password}) });
+    const d = await r.json().catch(()=>({}));
+    if (r.ok && d.ok) {
+      localStorage.setItem('rutaflex_email', email);
+      if (msg) { msg.innerText = "✅ Cuenta creada"; msg.className = "relative text-center text-sm mt-3 font-bold text-green-400 min-h-[20px]"; }
+      mostrarApp(d.usuario?.nombre || nombre, d.usuario?.fecha_vencimiento);
+    } else {
+      if (msg) { msg.innerText = d.error || "No se pudo crear la cuenta"; msg.className = "relative text-center text-sm mt-3 font-bold text-red-400 min-h-[20px]"; }
+    }
+  } catch(e) { if (msg) { msg.innerText = "Error de conexión"; msg.className = "relative text-center text-sm mt-3 font-bold text-red-400 min-h-[20px]"; } }
+});
 document.getElementById('formLogin')?.addEventListener('submit', async (e) => {
   e.preventDefault(); const email = document.getElementById('loginEmail').value; const password = document.getElementById('loginPassword').value; const msg = document.getElementById('authMessage');
-  msg.innerText = "Conectando..."; msg.className = "text-center text-sm mt-4 font-bold text-[#00E5FF] min-h-[20px]";
+  msg.innerText = "Conectando..."; msg.className = "relative text-center text-sm mt-3 font-bold text-[#00E5FF] min-h-[20px]";
   try {
     const r = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, credentials: 'include', body: JSON.stringify({email, password}) });
     if (!r.ok && r.status >= 500) reportarErrorCritico('API_LOGIN_CAIDO', 'POST /api/login status ' + r.status);
     const d = await r.json();
     if (r.ok && d.ok) { localStorage.setItem('rutaflex_email', email); mostrarApp(d.usuario.nombre, d.usuario.fecha_vencimiento); }
-    else { msg.innerText = d.error || "Email o contraseña incorrectos"; msg.className = "text-center text-sm mt-4 font-bold text-red-400 min-h-[20px]"; }
-  } catch(err) { if (err.message && err.message.includes('fetch')) reportarErrorCritico('API_LOGIN_CAIDO', err.message); msg.innerText = "Error de conexión"; msg.className = "text-center text-sm mt-4 font-bold text-red-400 min-h-[20px]"; }
+    else { msg.innerText = d.error || "Email o contraseña incorrectos"; msg.className = "relative text-center text-sm mt-3 font-bold text-red-400 min-h-[20px]"; }
+  } catch(err) { if (err.message && err.message.includes('fetch')) reportarErrorCritico('API_LOGIN_CAIDO', err.message); msg.innerText = "Error de conexión"; msg.className = "relative text-center text-sm mt-3 font-bold text-red-400 min-h-[20px]"; }
 });
 document.getElementById('btnLogoutPerfil')?.addEventListener('click', hacerLogout);
 document.getElementById('btnPromo')?.addEventListener('click', async () => {
@@ -544,8 +588,8 @@ function mostrarApp(nombre, fechaVencimiento) {
   const diff = Math.ceil((new Date(fechaVencimiento) - new Date()) / (1000*60*60*24)); estaVencido = diff <= 0;
   const contadorEl = document.getElementById('contadorDias');
   if (contadorEl) {
-    if (estaVencido) { contadorEl.innerHTML = "⚠️ VENCIDO"; contadorEl.className = "mt-4 inline-flex items-center gap-1.5 bg-red-500/15 border border-red-500/30 text-red-400 px-3.5 py-1.5 rounded-full text-[13px] font-bold"; const banner = document.getElementById('bannerVencido'); if (banner) banner.classList.remove('hidden'); }
-    else { contadorEl.innerHTML = `✅ Activo (${diff} días)`; contadorEl.className = "mt-4 inline-flex items-center gap-1.5 bg-[#00C950]/15 border border-[#00C950]/30 text-[#00D084] px-3.5 py-1.5 rounded-full text-[13px] font-bold"; }
+    if (estaVencido) { contadorEl.innerHTML = "⚠️ VENCIDO"; contadorEl.className = "mt-2 inline-flex items-center gap-1.5 bg-red-500/15 border border-red-500/30 text-red-400 px-3 py-1 rounded-full text-[12px] font-bold"; const banner = document.getElementById('bannerVencido'); if (banner) banner.classList.remove('hidden'); }
+    else { contadorEl.innerHTML = `✅ Activo (${diff} días)`; contadorEl.className = "mt-2 inline-flex items-center gap-1.5 bg-[#00C950]/15 border border-[#00C950]/30 text-[#00D084] px-3 py-1 rounded-full text-[12px] font-bold"; }
   }
   cargarDestinos();
 }
