@@ -6,6 +6,11 @@ let tramoActual = 0;
 let duplicadosDetectados = [];
 let direccionesInvalidas = new Set();
 let abriendoReciente = false;
+// NUEVO - SUSCRIPCION / 7 DIAS GRATIS
+let diasRestantes = 0;
+let esPruebaGratis = false;
+let nombreUsuarioActual = "";
+let fechaVencimientoActual = null;
 
 // ============================================================
 // NIVEL 1 PRO - REPORTE DE ERRORES CRITICOS (SOLO SISTEMA)
@@ -65,10 +70,9 @@ function mostrarNotificacion(m,t='info'){
   n.innerText=m; c.appendChild(n); setTimeout(()=>n.remove(),3500);
 }
 function ocultarTodasLasPantallasExcepto(id){
-  ['authScreen','appScreen','pegarTextoScreen','perfilScreen','payment-modal','modalEdicion','modalMapa'].forEach(s=>{ const el=document.getElementById(s); if(el) el.classList.add('hidden'); });
+  ['authScreen','appScreen','pegarTextoScreen','perfilScreen','payment-modal','modalEdicion','modalMapa','modalNoti'].forEach(s=>{ const el=document.getElementById(s); if(el) el.classList.add('hidden'); });
   document.getElementById(id)?.classList.remove('hidden'); window.scrollTo(0,0);
 }
-// FIX NUEVO DISEÑO: nav usa text-white/40, no text-white/30
 function actualizarNav(tabActivo) {
   document.querySelectorAll('.nav-btn').forEach(btn => {
     const activo = btn.dataset.tab === tabActivo;
@@ -83,6 +87,56 @@ function mostrarTab(tab, pushState = true) {
   if(tab === 'historial') mostrarNotificacion("🚧 Sección en desarrollo", "info");
 }
 window.addEventListener('popstate', (e) => { if (e.state && e.state.tab) mostrarTab(e.state.tab, false); else mostrarTab('home', false); });
+
+// ============ SUSCRIPCION - 7 DIAS GRATIS + CAMPANITA ============
+function formatearFechaVence(fecha){
+  try{ const d=new Date(fecha); return d.toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'}); }catch{ return ''; }
+}
+function actualizarNotificaciones(){
+  const bien = document.getElementById('notiBienvenida');
+  const diasEl = document.getElementById('notiDias');
+  const venceEl = document.getElementById('notiVence');
+  const boxVencido = document.getElementById('notiVencidoBox');
+  const boxPorVencer = document.getElementById('notiPorVencerBox');
+  const textoPorVencer = document.getElementById('notiPorVencerTexto');
+  if(bien) bien.innerText = `👋 ¡Bienvenido${nombreUsuarioActual ? ', '+nombreUsuarioActual : ''} a RutaFlex!`;
+  if(estaVencido){
+    if(diasEl) diasEl.innerText = `Se terminó tu prueba gratis.`;
+    if(venceEl) venceEl.innerText = `Venció el ${fechaVencimientoActual ? formatearFechaVence(fechaVencimientoActual) : ''}. Pagá para seguir usando la app.`;
+    if(boxVencido) boxVencido.classList.remove('hidden');
+    if(boxPorVencer) boxPorVencer.classList.add('hidden');
+  } else if(esPruebaGratis){
+    if(diasEl) diasEl.innerText = diasRestantes === 1 ? `Te queda 1 día gratis de prueba.` : `Te quedan ${diasRestantes} días gratis de prueba.`;
+    if(venceEl) venceEl.innerText = fechaVencimientoActual ? `Tu prueba termina el ${formatearFechaVence(fechaVencimientoActual)}. Después pagás por Mercado Pago.` : `Después de los 7 días pagás por Mercado Pago.`;
+    if(boxVencido) boxVencido.classList.add('hidden');
+    if(diasRestantes <= 2){
+      if(boxPorVencer) boxPorVencer.classList.remove('hidden');
+      if(textoPorVencer) textoPorVencer.innerText = diasRestantes === 1 ? `Te queda 1 día. Renová ahora para no quedarte sin ruta mañana.` : `Te quedan ${diasRestantes} días. Renová ahora para no quedarte sin ruta.`;
+    } else {
+      if(boxPorVencer) boxPorVencer.classList.add('hidden');
+    }
+  } else {
+    if(diasEl) diasEl.innerText = `Tu plan está activo. Te quedan ${diasRestantes} días.`;
+    if(venceEl) venceEl.innerText = fechaVencimientoActual ? `Vence el ${formatearFechaVence(fechaVencimientoActual)}.` : ``;
+    if(boxVencido) boxVencido.classList.add('hidden');
+    if(boxPorVencer) boxPorVencer.classList.add('hidden');
+  }
+}
+function mostrarModalVencido(){
+  document.getElementById('modalNoti')?.classList.remove('hidden');
+  actualizarNotificaciones();
+  mostrarNotificacion("⛔ Se terminó tu prueba gratis. Pagá para seguir.", "error");
+}
+function bloquearSiVencido(){
+  if(!estaVencido) return false;
+  mostrarModalVencido();
+  return true;
+}
+document.getElementById('btnNotificaciones')?.addEventListener('click', () => {
+  actualizarNotificaciones();
+  document.getElementById('modalNoti')?.classList.remove('hidden');
+  document.getElementById('puntoNoti')?.classList.add('hidden');
+});
 
 // ============ CACHE ============
 function getCacheCoords(){ try { return JSON.parse(localStorage.getItem('rutaflex_coords_cache') || '{}'); } catch { return {}; } }
@@ -243,6 +297,7 @@ function mejorarRuta(ruta) {
   return ruta;
 }
 window.abrirRecienteRapido = function(){
+  if (bloquearSiVencido()) return;
   if (abriendoReciente) return;
   abriendoReciente = true; setTimeout(()=>{ abriendoReciente = false; }, 800);
   try {
@@ -267,6 +322,7 @@ window.borrarTodoHistorial = function(){
   document.getElementById('bannerContinuarRuta')?.classList.add('hidden'); mostrarNotificacion("🗑️ Historial borrado", "exito");
 };
 async function comenzarViaje() {
+  if (bloquearSiVencido()) return;
   if (destinos.length === 0) return mostrarNotificacion("⚠️ No hay direcciones cargadas", "error");
   try {
     destinos = quitarDuplicadosDeLista(destinos);
@@ -358,6 +414,7 @@ function mostrarPantallaTramos(gps) {
   } catch(e) { reportarErrorCritico('MOSTRAR_TRAMOS_FALLO', e.message); }
 }
 window.abrirTramoActual = function() {
+  if (bloquearSiVencido()) return;
   try {
     const i = tramoActual * 9; const tramo = rutaOptimizada.slice(i, i+9);
     if (tramo.length === 0) return mostrarNotificacion("✅ ¡Recorrido terminado!", "exito");
@@ -378,6 +435,7 @@ window.abrirTramoActual = function() {
   } catch(e) { reportarErrorCritico('MAPS_NO_ABRE', e.message); mostrarNotificacion("❌ No se pudo abrir Google Maps", "error"); }
 };
 window.reoptimizarDesdeAqui = async function() {
+  if (bloquearSiVencido()) return;
   if (rutaOptimizada.length === 0) return mostrarNotificacion("⚠️ No hay ruta activa", "error");
   try {
     mostrarNotificacion("📍 Obteniendo tu ubicación actual...", "info"); ubicacionActual = null;
@@ -402,7 +460,7 @@ window.quitarDuplicados = function() {
   mostrarNotificacion(`✅ Se quitaron ${quitados} duplicados`, "exito"); document.getElementById('alertaDuplicados')?.remove();
 };
 document.getElementById('fileImg')?.addEventListener('change', async (e) => {
-  if (estaVencido) return mostrarNotificacion("⚠️ Plan vencido", "error");
+  if (bloquearSiVencido()) { e.target.value=''; return; }
   const file = e.target.files[0]; if (!file) return;
   if (!file.type.startsWith('image/')) return mostrarNotificacion("⚠️ Archivo inválido", "error");
   if (file.size > 10*1024*1024) return mostrarNotificacion("⚠️ Imagen muy grande (máx 10MB)", "error");
@@ -411,24 +469,27 @@ document.getElementById('fileImg')?.addEventListener('change', async (e) => {
   catch(err) { if (!esErrorDeUsuario(err.message)) reportarErrorCritico('OCR_FALLO', err.message); mostrarNotificacion(`❌ ${err.message}`, "error"); } finally { e.target.value = ''; }
 });
 document.getElementById('filePdf')?.addEventListener('change', async (e) => {
-  if (estaVencido) return mostrarNotificacion("⚠️ Plan vencido", "error");
+  if (bloquearSiVencido()) { e.target.value=''; return; }
   const file = e.target.files[0]; if (!file) return; mostrarNotificacion("📄 Leyendo PDF...", "info");
   try { const texto = await procesarPDF(file); const direcciones = extraerDirecciones(limpiarTextoSucio(texto)); if (direcciones.length === 0) throw new Error('No se detectaron direcciones'); destinosDetectados = quitarDuplicadosDeLista(direcciones); mostrarModalEdicionConGPS(); }
   catch(err) { if (!esErrorDeUsuario(err.message)) reportarErrorCritico('PDF_FALLO', err.message); mostrarNotificacion(`❌ ${err.message}`, "error"); } finally { e.target.value = ''; }
 });
 document.getElementById('btnCamara')?.addEventListener('click', async () => {
+  if (bloquearSiVencido()) return;
   const panel = document.getElementById('panelCamara'); const v = document.getElementById('camara'); panel.classList.remove('hidden');
   try { camaraStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment", width:{ideal:1920}}}); v.srcObject = camaraStream; }
   catch { panel.classList.add('hidden'); mostrarNotificacion("❌ No se pudo abrir la cámara", "error"); }
 });
 document.getElementById('btnCerrarCamara')?.addEventListener('click', () => { if (camaraStream) camaraStream.getTracks().forEach(t => t.stop()); document.getElementById('panelCamara').classList.add('hidden'); });
 document.getElementById('btnCapturar')?.addEventListener('click', async () => {
+  if (bloquearSiVencido()) return;
   const v = document.getElementById('camara'); const canvas = document.createElement('canvas'); canvas.width = v.videoWidth; canvas.height = v.videoHeight; canvas.getContext('2d').drawImage(v, 0, 0);
   if (camaraStream) camaraStream.getTracks().forEach(t => t.stop()); document.getElementById('panelCamara').classList.add('hidden'); mostrarNotificacion("🤖 Procesando foto...", "info");
   try { const texto = await procesarImagenOCR(canvas.toDataURL('image/png')); const direcciones = extraerDirecciones(limpiarTextoSucio(texto)); if (direcciones.length === 0) throw new Error('No se detectaron direcciones'); destinosDetectados = quitarDuplicadosDeLista(direcciones); mostrarModalEdicionConGPS(); }
   catch(err) { if (!esErrorDeUsuario(err.message)) reportarErrorCritico('OCR_FALLO', err.message); mostrarNotificacion(`❌ ${err.message}`, "error"); }
 });
 document.getElementById('btnMapa')?.addEventListener('click', async () => {
+  if (bloquearSiVencido()) return;
   document.getElementById('modalMapa').classList.remove('hidden'); await new Promise(r => setTimeout(r, 100));
   if (!mapaLeaflet) {
     try {
@@ -470,6 +531,7 @@ async function validarDireccionesEnModal() {
   }
 }
 document.getElementById('btnGuardarEdicion')?.addEventListener('click', async () => {
+  if (bloquearSiVencido()) return;
   const dirs = document.querySelectorAll('.input-direccion'); const finales = [...dirs].map(d => d.value.trim()).filter(d => d.length > 3);
   if (finales.length === 0) return mostrarNotificacion("Ingresá al menos una", "error");
   const check = detectarDuplicados(finales); let aGuardar = quitarDuplicadosDeLista(finales);
@@ -497,6 +559,7 @@ document.getElementById('btnAgregarLinea')?.addEventListener('click', () => {
 document.getElementById('btnCancelarEdicion')?.addEventListener('click', () => { document.getElementById('modalEdicion').classList.add('hidden'); destinosDetectados = []; });
 document.getElementById('btnCerrarModal')?.addEventListener('click', () => { document.getElementById('modalEdicion').classList.add('hidden'); });
 document.getElementById('btnPegarTexto')?.addEventListener('click', () => {
+  if (bloquearSiVencido()) return;
   ocultarTodasLasPantallasExcepto('pegarTextoScreen'); history.pushState({tab:'pegar'}, '', '#pegar');
   document.getElementById('pegarTextoStep1').classList.remove('hidden'); document.getElementById('pegarTextoLoading').classList.add('hidden'); document.getElementById('pegarTextoResult').classList.add('hidden'); document.getElementById('textoDirecciones').value = '';
 });
@@ -505,13 +568,13 @@ document.getElementById('btnReiniciarPegar')?.addEventListener('click', () => {
   localStorage.removeItem('rutaflex_ruta'); rutaOptimizada = []; tramoActual = 0;
 });
 document.getElementById('btnProcesarTexto')?.addEventListener('click', async () => {
+  if (bloquearSiVencido()) return;
   const texto = document.getElementById('textoDirecciones').value;
   if (!texto.trim()) return mostrarNotificacion("⚠️ Pegá algún texto primero", "error");
   document.getElementById('pegarTextoStep1').classList.add('hidden'); document.getElementById('pegarTextoLoading').classList.remove('hidden'); document.getElementById('loadingMensaje').innerText = 'Extrayendo direcciones...';
   try { const direcciones = extraerDirecciones(limpiarTextoSucio(texto)); if (direcciones.length === 0) throw new Error('No se detectaron direcciones'); destinosDetectados = quitarDuplicadosDeLista(direcciones); document.getElementById('pegarTextoLoading').classList.add('hidden'); mostrarModalEdicionConGPS(); }
   catch(err) { if (!esErrorDeUsuario(err.message)) reportarErrorCritico('EXTRAER_DIRECCIONES_FALLO', err.message); mostrarNotificacion(`❌ ${err.message}`, "error"); document.getElementById('pegarTextoStep1').classList.remove('hidden'); document.getElementById('pegarTextoLoading').classList.add('hidden'); }
 });
-// FIX NUEVO DISEÑO - TABS CON ESTILO ACTIVO
 function pintarTabsAuth(activo) {
   const l = document.getElementById('tabLogin'); const r = document.getElementById('tabRegistro');
   if (!l || !r) return;
@@ -535,7 +598,6 @@ document.getElementById('tabRegistro')?.addEventListener('click', () => {
   if (fL) { fL.classList.add('hidden'); fL.classList.remove('flex'); }
   pintarTabsAuth('registro');
 });
-// FIX NUEVO DISEÑO - REGISTRO QUE FALTABA EN TU ARCHIVO
 document.getElementById('btnRegistroSubmit')?.addEventListener('click', async () => {
   const nombre = document.getElementById('regNombre')?.value?.trim();
   const email = document.getElementById('regEmail')?.value?.trim();
@@ -548,7 +610,8 @@ document.getElementById('btnRegistroSubmit')?.addEventListener('click', async ()
     const d = await r.json().catch(()=>({}));
     if (r.ok && d.ok) {
       localStorage.setItem('rutaflex_email', email);
-      if (msg) { msg.innerText = "✅ Cuenta creada"; msg.className = "relative text-center text-sm mt-3 font-bold text-green-400 min-h-[20px]"; }
+      try{ localStorage.setItem('rutaflex_fecha_registro', Date.now().toString()); }catch{}
+      if (msg) { msg.innerText = "✅ Cuenta creada - ¡Tenés 7 días gratis!"; msg.className = "relative text-center text-sm mt-3 font-bold text-green-400 min-h-[20px]"; }
       mostrarApp(d.usuario?.nombre || nombre, d.usuario?.fecha_vencimiento);
     } else {
       if (msg) { msg.innerText = d.error || "No se pudo crear la cuenta"; msg.className = "relative text-center text-sm mt-3 font-bold text-red-400 min-h-[20px]"; }
@@ -584,13 +647,36 @@ window.copiarAlias = () => { navigator.clipboard.writeText(CONFIG_RUTAFLEX.alias
 async function hacerLogout() { try { await fetch('/api/logout', {method: 'POST', credentials: 'include'}); } catch(e) {} localStorage.removeItem('rutaflex_email'); location.reload(); }
 function mostrarApp(nombre, fechaVencimiento) {
   ocultarTodasLasPantallasExcepto('appScreen'); actualizarNav('home'); history.replaceState({tab: 'home'}, '', '#home');
+  nombreUsuarioActual = nombre || "";
+  fechaVencimientoActual = fechaVencimiento;
   const userNameEl = document.getElementById('userName'); if (userNameEl) userNameEl.innerText = `¡Hola, ${nombre}!`;
-  const diff = Math.ceil((new Date(fechaVencimiento) - new Date()) / (1000*60*60*24)); estaVencido = diff <= 0;
+  const diff = Math.ceil((new Date(fechaVencimiento) - new Date()) / (1000*60*60*24)); diasRestantes = diff; estaVencido = diff <= 0;
+  // Si le quedan 7 o menos, es prueba gratis (salvo que ya haya pagado antes, tu backend lo maneja con fecha_vencimiento)
+  esPruebaGratis = !estaVencido && diff <= 7;
   const contadorEl = document.getElementById('contadorDias');
+  const badgePrueba = document.getElementById('badgePrueba');
+  const bannerVencido = document.getElementById('bannerVencido');
+  const bannerPorVencer = document.getElementById('bannerPorVencer');
+  const textoPorVencer = document.getElementById('textoPorVencer');
+  const textoPlan = document.getElementById('textoPlan');
+  const perfilPlan = document.getElementById('perfilPlan');
   if (contadorEl) {
-    if (estaVencido) { contadorEl.innerHTML = "⚠️ VENCIDO"; contadorEl.className = "mt-2 inline-flex items-center gap-1.5 bg-red-500/15 border border-red-500/30 text-red-400 px-3 py-1 rounded-full text-[12px] font-bold"; const banner = document.getElementById('bannerVencido'); if (banner) banner.classList.remove('hidden'); }
-    else { contadorEl.innerHTML = `✅ Activo (${diff} días)`; contadorEl.className = "mt-2 inline-flex items-center gap-1.5 bg-[#00C950]/15 border border-[#00C950]/30 text-[#00D084] px-3 py-1 rounded-full text-[12px] font-bold"; }
+    if (estaVencido) { contadorEl.innerHTML = "⛔ VENCIDO"; contadorEl.className = "mt-2 inline-flex items-center gap-1.5 bg-red-500/15 border border-red-500/30 text-red-400 px-3 py-1 rounded-full text-[12px] font-bold"; if (bannerVencido) bannerVencido.classList.remove('hidden'); if (bannerPorVencer) bannerPorVencer.classList.add('hidden'); }
+    else if (esPruebaGratis) { contadorEl.innerHTML = `🎁 Prueba gratis (${diff} días)`; contadorEl.className = "mt-2 inline-flex items-center gap-1.5 bg-[#00E5FF]/15 border border-[#00E5FF]/40 text-[#00E5FF] px-3 py-1 rounded-full text-[12px] font-bold"; if (bannerVencido) bannerVencido.classList.add('hidden'); if (diff <= 2) { if (bannerPorVencer) bannerPorVencer.classList.remove('hidden'); if (textoPorVencer) textoPorVencer.innerText = diff === 1 ? `Te queda 1 día gratis. Renová ahora para no quedarte sin ruta mañana.` : `Te quedan ${diff} días gratis. Renová ahora.`; } else { if (bannerPorVencer) bannerPorVencer.classList.add('hidden'); } }
+    else { contadorEl.innerHTML = `✅ Activo (${diff} días)`; contadorEl.className = "mt-2 inline-flex items-center gap-1.5 bg-[#00C950]/15 border border-[#00C950]/30 text-[#00D084] px-3 py-1 rounded-full text-[12px] font-bold"; if (bannerVencido) bannerVencido.classList.add('hidden'); if (bannerPorVencer) bannerPorVencer.classList.add('hidden'); }
   }
+  if (badgePrueba) { if (esPruebaGratis && !estaVencido) badgePrueba.classList.remove('hidden'); else badgePrueba.classList.add('hidden'); }
+  if (textoPlan) { if (estaVencido) textoPlan.innerText = `⛔ Plan vencido • Pagá por Mercado Pago 🇦🇷`; else if (esPruebaGratis) textoPlan.innerText = `🎁 Prueba gratis • Te quedan ${diff} días • Después pagás en pesos 🇦🇷`; else textoPlan.innerText = `Plan activo • Te quedan ${diff} días • Pagás en pesos 🇦🇷`; }
+  if (perfilPlan) { if (estaVencido) perfilPlan.innerText = `⛔ Plan vencido • Pagá por Mercado Pago`; else if (esPruebaGratis) perfilPlan.innerText = `🎁 Prueba gratis • Te quedan ${diff} días • 🇦🇷 Buenos Aires`; else perfilPlan.innerText = `✅ Plan activo • Te quedan ${diff} días • 🇦🇷 Buenos Aires`; }
+  actualizarNotificaciones();
+  // Si es primer login del día y está por vencer o vencido, mostramos campanita automáticamente
+  try{
+    const key = 'rutaflex_noti_'+new Date().toDateString();
+    if(!localStorage.getItem(key) && (estaVencido || (esPruebaGratis && diff <= 2))){
+      localStorage.setItem(key,'1');
+      setTimeout(()=>{ document.getElementById('modalNoti')?.classList.remove('hidden'); }, 800);
+    }
+  }catch{}
   cargarDestinos();
 }
 async function cargarDestinos() {
