@@ -2,7 +2,7 @@
 
 body { 
   font-family: 'Inter', system-ui, -apple-system, sans-serif; 
-  background: #050A14; 
+  background: #040B1E; 
   min-height: 100vh; 
   color: #ffffff; 
   overflow-x: hidden; 
@@ -21,6 +21,7 @@ body {
 input[type="email"], input[type="password"], input[type="text"], textarea {
   color: white !important;
   -webkit-text-fill-color: white !important;
+  background: transparent;
 }
 input::placeholder, textarea::placeholder {
   color: rgba(255,255,255,0.4) !important;
@@ -42,3 +43,59 @@ html { scroll-behavior: smooth; }
 button:focus, input:focus, textarea:focus { outline: 2px solid #00E5FF; outline-offset: 2px; }
 
 @media (hover: none) { button:active, label:active { transform: scale(0.98); } }
+
+/* ============ RUTAFLEX - DISEÑO ARGENTINO NUEVO ============ */
+
+/* Fondo inicio con ciudad - degradado, sin imagen pesada */
+.fondo-ciudad {
+  background: radial-gradient(600px 300px at 50% 0%, #0A2A6B 0%, #040B1E 60%), linear-gradient(to bottom, #040B1E 0%, #071A3E 42%, #040B1E 100%);
+}
+
+/* Bandera Argentina - solo código, no es imagen */
+.bandera-arg {
+  background: linear-gradient(180deg, #75AADB 0%, #75AADB 33%, #ffffff 33%, #ffffff 66%, #75AADB 66%, #75AADB 100%);
+}
+
+/* Franjita celeste-blanca-celeste de arriba si la querés usar */
+.franja-argentina {
+  height: 6px;
+  background: linear-gradient(90deg, #75AADB 0%, #75AADB 33%, #ffffff 33%, #ffffff 66%, #75AADB 66%, #75AADB 100%);
+  border-radius: 999px;
+}
+
+/* Glow azul para logo y botones principales */
+.glow {
+  box-shadow: 0 0 30px rgba(0,229,255,.55);
+}
+
+/* Cards de adentro - como en la foto */
+.card {
+  background: rgba(10,18,32,.92);
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+/* Badge ARGENTINA */
+.badge-argentina {
+  background: rgba(7,26,62,.8);
+  border: 1px solid rgba(0,229,255,.6);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* Inputs del login nuevo */
+.input-login {
+  background: rgba(10,18,32,.90);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 16px;
+}
+
+/* Nav activo */
+.nav-btn {
+  transition: .2s;
+}
+.nav-btn.text-\[\#00E5FF\] {
+  color: #00E5FF !important;
+}
