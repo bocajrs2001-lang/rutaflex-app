@@ -10,7 +10,9 @@ const { MercadoPagoConfig, Preference } = require('mercadopago');
 const { 
   registrarUsuario, loginUsuario, obtenerDestinosDeUsuario, agregarDestino, 
   borrarDestino, borrarDestinosDeUsuario, actualizarContrasena, 
-  buscarUsuarioPorEmail, cancelarSuscripcionUsuario, actualizarVencimiento
+  buscarUsuarioPorEmail, cancelarSuscripcionUsuario, actualizarVencimiento,
+  buscarUsuarioPorCodigoReferido, obtenerReferidoPor, contarReferidosTotales,
+  sumarDescuentoReferido, obtenerDatosReferido
 } = require('./database');
 
 const app = express();
@@ -73,6 +75,49 @@ function suscripcionVigente(req, res, next) {
     return res.status(403).json({ error: 'Suscripción vencida. Renová tu plan.', vencido: true });
   }
   next();
+}
+
+// ============================================================
+// REFERIDOS - 5% POR AMIGO QUE PAGA, TOPE 30%, TOPE 500 SISTEMA
+// ============================================================
+const TOPE_DESCUENTO_REFERIDO = 30;
+const TOPE_REFERIDOS_SISTEMA = 500;
+const PORCENTAJE_POR_REFERIDO = 5;
+
+async function aplicarRecompensaReferido(userIdPagador) {
+  try {
+    if (!userIdPagador) return { ok: false };
+    // ¿Quién invitó a este que pagó?
+    const referidoPor = await obtenerReferidoPor(userIdPagador);
+    if (!referidoPor) return { ok: false, motivo: 'sin referidor' };
+
+    // ¿Ya se le dio premio por este pagador? Para no duplicar si paga 2 veces
+    // Lo controlamos en database.js con referidosPremiados
+    const yaPremiado = await obtenerDatosReferido(userIdPagador).then(d => d && d.premioReferidoEntregado).catch(()=>false);
+    if (yaPremiado) return { ok: false, motivo: 'ya premiado' };
+
+    // Tope 500 en todo el sistema
+    const totalSistema = await contarReferidosTotales();
+    if (totalSistema >= TOPE_REFERIDOS_SISTEMA) {
+      console.log('⛔ Referidos: tope 500 alcanzado, no se suma más');
+      return { ok: false, motivo: 'tope 500' };
+    }
+
+    // Buscar al que invitó por su código
+    const invitador = await buscarUsuarioPorCodigoReferido(referidoPor);
+    if (!invitador) return { ok: false, motivo: 'invitador no existe' };
+
+    // No auto-referido
+    if (String(invitador.id || invitador._id) === String(userIdPagador)) return { ok: false, motivo: 'auto-referido' };
+
+    // Sumar 5% con tope 30%
+    const resultado = await sumarDescuentoReferido(invitador.id || invitador._id, PORCENTAJE_POR_REFERIDO, TOPE_DESCUENTO_REFERIDO, userIdPagador);
+    console.log(`🎁 Referido: ${invitador.email} +${PORCENTAJE_POR_REFERIDO}% por ${userIdPagador} - Total ahora: ${resultado?.descuentoReferido}%`);
+    return { ok: true, ...resultado };
+  } catch(e) {
+    console.error('❌ Error recompensa referido:', e.message);
+    return { ok: false, error: e.message };
+  }
 }
 
 // ============================================================
@@ -187,6 +232,13 @@ app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
     let precio, titulo, diasExtra;
     if (plan === 'mensual') { precio = 14990; titulo = 'RUTAFLEX - Plan Mensual'; diasExtra = 30; } 
     else { precio = 4990; titulo = 'RUTAFLEX - Plan Semanal'; diasExtra = 7; }
+    // NUEVO - Aplicar descuento de referidos si tiene
+    const datosRef = await obtenerDatosReferido(req.session.userId).catch(()=>null);
+    const descuento = Math.min(datosRef?.descuentoReferido || 0, 30);
+    if (descuento > 0) {
+      precio = Math.round(precio * (1 - descuento / 100));
+      titulo += ` (-${descuento}% referidos)`;
+    }
     const preference = new Preference(mpClient);
     const result = await preference.create({
       body: {
@@ -198,7 +250,7 @@ app.post('/api/crear-preferencia-pago', usuarioLogueado, async (req, res) => {
         external_reference: req.session.userId.toString()
       }
     });
-    res.json({ ok: true, init_point: result.init_point });
+    res.json({ ok: true, init_point: result.init_point, descuentoAplicado: descuento, precioFinal: precio });
   } catch (err) { res.status(500).json({ error: 'Error al generar link de pago' }); }
 });
 
@@ -212,6 +264,8 @@ app.post('/api/verificar-pago-directo', usuarioLogueado, async (req, res) => {
         const itemTitle = pagoAprobado.additional_info?.items?.[0]?.title || '';
         const diasExtra = itemTitle.includes('Mensual') ? 30 : 7;
         await actualizarVencimiento(userId, diasExtra);
+        // NUEVO - Si este usuario fue invitado, premiar al invitador
+        await aplicarRecompensaReferido(userId);
         req.session.user.fecha_vencimiento = new Date(Date.now() + diasExtra * 24 * 60 * 60 * 1000);
         return res.json({ ok: true, activado: true, dias: diasExtra });
       }
@@ -228,6 +282,8 @@ app.post('/api/webhook-mp', async (req, res) => {
       if (mpPayment.status === 'approved' && mpPayment.external_reference) {
         const itemTitle = mpPayment.additional_info?.items?.[0]?.title || '';
         await actualizarVencimiento(mpPayment.external_reference, itemTitle.includes('Mensual') ? 30 : 7);
+        // NUEVO - Premiar al que invitó a este que pagó
+        await aplicarRecompensaReferido(mpPayment.external_reference);
       }
     } catch (err) { console.error('❌ ERROR EN WEBHOOK:', err.message); }
   }
@@ -274,11 +330,17 @@ app.post('/api/cambiar-contrasena-final', async (req, res) => {
 
 app.post('/api/registro', async (req, res) => {
   try {
-    const { nombre, email, password } = req.body;
-    if (password.length < 8 || !/[A-Z]/.test(password) || !/[0-9]/.test(password) || !/[!@#$%^&*]/.test(password)) {
+    const { nombre, email, password, codigoReferido } = req.body;
+    if (!password || password.length < 8 || !/[A-Z]/.test(password) || !/[0-9]/.test(password) || !/[!@#$%^&*]/.test(password)) {
       return res.status(400).json({ error: 'Contraseña insegura' });
     }
-    const usuario = await registrarUsuario(nombre, email, password);
+    // NUEVO - Validar que el código de referido exista, si no existe se ignora y se crea igual
+    let codigoValido = null;
+    if (codigoReferido) {
+      const invitador = await buscarUsuarioPorCodigoReferido(String(codigoReferido).trim().toUpperCase()).catch(()=>null);
+      if (invitador) codigoValido = String(codigoReferido).trim().toUpperCase();
+    }
+    const usuario = await registrarUsuario(nombre, email, password, codigoValido);
     req.session.userId = usuario.id; req.session.nombre = usuario.nombre; req.session.user = usuario;
     res.json({ ok: true, usuario });
   } catch (err) { res.status(400).json({ error: err.message }); }
@@ -293,8 +355,23 @@ app.post('/api/login', async (req, res) => {
   } catch (err) { res.status(401).json({ error: err.message }); }
 });
 
-app.get('/api/yo', (req, res) => {
-  if (req.session && req.session.user) res.json({ ok: true, nombre: req.session.nombre, fecha_vencimiento: req.session.user.fecha_vencimiento });
+app.get('/api/yo', async (req, res) => {
+  if (req.session && req.session.user) {
+    // NUEVO - Devolver datos de referidos para Perfil y campanita
+    let datosRef = null;
+    try { datosRef = await obtenerDatosReferido(req.session.userId); } catch {}
+    const totalSistema = await contarReferidosTotales().catch(()=>0);
+    res.json({ 
+      ok: true, 
+      nombre: req.session.nombre, 
+      fecha_vencimiento: req.session.user.fecha_vencimiento,
+      codigoReferido: datosRef?.codigoReferido || req.session.user.codigoReferido || '',
+      descuentoReferido: datosRef?.descuentoReferido || 0,
+      referidosQuePagaron: datosRef?.referidosQuePagaron || 0,
+      referidosRestantes: Math.max(0, 500 - totalSistema),
+      referidosTotalesSistema: totalSistema
+    });
+  }
   else res.json({ ok: false });
 });
 
