@@ -11,6 +11,13 @@ let diasRestantes = 0;
 let esPruebaGratis = false;
 let nombreUsuarioActual = "";
 let fechaVencimientoActual = null;
+// NUEVO - REFERIDOS (SOLO PARA USUARIOS, NO PARA EL DUEÑO)
+// 5% por amigo que paga, tope 30% por usuario, solo primeros 500 referidos del sistema
+let miCodigoReferido = "";
+let miDescuentoReferido = 0;
+let misReferidosQuePagaron = 0;
+let codigoReferidoInvitacion = "";
+let referidosRestantesSistema = 500;
 
 // ============================================================
 // NIVEL 1 PRO - REPORTE DE ERRORES CRITICOS (SOLO SISTEMA)
@@ -88,6 +95,61 @@ function mostrarTab(tab, pushState = true) {
 }
 window.addEventListener('popstate', (e) => { if (e.state && e.state.tab) mostrarTab(e.state.tab, false); else mostrarTab('home', false); });
 
+// ============ REFERIDOS - CAPTURAR ?ref= Y MOSTRAR MI CODIGO ============
+function capturarCodigoReferidoDeURL(){
+  try{
+    const params = new URLSearchParams(window.location.search);
+    const ref = (params.get('ref') || params.get('codigo') || '').trim().toUpperCase();
+    if(ref){
+      codigoReferidoInvitacion = ref;
+      try{ localStorage.setItem('rutaflex_ref_invitacion', ref); }catch{}
+      const inputRef = document.getElementById('regCodigoReferido');
+      if(inputRef) inputRef.value = ref;
+      const avisoRef = document.getElementById('avisoReferidoInvitacion');
+      if(avisoRef){ avisoRef.classList.remove('hidden'); avisoRef.innerText = `🎁 Venís con código de un amigo: ${ref} - Tu amigo gana 5% si pagás.`; }
+    } else {
+      codigoReferidoInvitacion = localStorage.getItem('rutaflex_ref_invitacion') || '';
+      const inputRef = document.getElementById('regCodigoReferido');
+      if(inputRef && codigoReferidoInvitacion) inputRef.value = codigoReferidoInvitacion;
+    }
+  }catch{}
+}
+function generarCodigoLocal(nombre, email){
+  const base = (nombre || email || 'USER').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6) || 'USER';
+  const num = Math.floor(1000 + Math.random()*9000);
+  return base + num;
+}
+function actualizarVistaReferidos(){
+  const codigoEl = document.getElementById('miCodigoReferidoTexto');
+  const descEl = document.getElementById('miDescuentoReferidoTexto');
+  const amigosEl = document.getElementById('misReferidosTexto');
+  const cuposEl = document.getElementById('cuposReferidosTexto');
+  if(codigoEl) codigoEl.innerText = miCodigoReferido || '---';
+  if(descEl) descEl.innerText = miDescuentoReferido > 0 ? `🎁 Tenés ${miDescuentoReferido}% de descuento acumulado` : `🎁 Invitá y ganá 5% por cada amigo que pague (tope 30%)`;
+  if(amigosEl) amigosEl.innerText = `${misReferidosQuePagaron} amigo(s) pagaron con tu código`;
+  if(cuposEl) cuposEl.innerText = referidosRestantesSistema > 0 ? `Quedan ${referidosRestantesSistema} cupos de 500 para ganar descuento` : `Los 500 cupos de referidos ya se completaron`;
+}
+function compartirReferido(){
+  if(!miCodigoReferido){
+    miCodigoReferido = generarCodigoLocal(nombreUsuarioActual, localStorage.getItem('rutaflex_email')||'');
+    try{ localStorage.setItem('rutaflex_mi_codigo', miCodigoReferido); }catch{}
+    actualizarVistaReferidos();
+  }
+  const link = `${window.location.origin}/?ref=${miCodigoReferido}`;
+  const texto = `Che, bajate RutaFlex, es la que uso para repartir y ordenar mis rutas. Tenés 7 días gratis acá: ${link} - Si pagás con mi código, yo gano 5% y vos también.`;
+  if(navigator.share){
+    navigator.share({ title:'RutaFlex', text:texto, url:link }).catch(()=>{});
+  } else {
+    const urlWsp = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+    window.open(urlWsp, '_blank');
+  }
+}
+document.getElementById('btnCompartirReferido')?.addEventListener('click', compartirReferido);
+document.getElementById('btnCopiarCodigoReferido')?.addEventListener('click', () => {
+  if(!miCodigoReferido) return mostrarNotificacion("⚠️ Todavía no tenés código", "error");
+  navigator.clipboard.writeText(miCodigoReferido).then(()=> mostrarNotificacion("✅ Código copiado: "+miCodigoReferido, "exito"));
+});
+
 // ============ SUSCRIPCION - 7 DIAS GRATIS + CAMPANITA ============
 function formatearFechaVence(fecha){
   try{ const d=new Date(fecha); return d.toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'}); }catch{ return ''; }
@@ -99,7 +161,20 @@ function actualizarNotificaciones(){
   const boxVencido = document.getElementById('notiVencidoBox');
   const boxPorVencer = document.getElementById('notiPorVencerBox');
   const textoPorVencer = document.getElementById('notiPorVencerTexto');
+  const boxRef = document.getElementById('notiReferidoBox');
+  const textoRef = document.getElementById('notiReferidoTexto');
   if(bien) bien.innerText = `👋 ¡Bienvenido${nombreUsuarioActual ? ', '+nombreUsuarioActual : ''} a RutaFlex!`;
+  if(boxRef && textoRef){
+    if(miDescuentoReferido > 0){
+      boxRef.classList.remove('hidden');
+      textoRef.innerText = `🎁 Tenés ${miDescuentoReferido}% de descuento acumulado por referidos (${misReferidosQuePagaron} amigo(s) pagaron). Tope 30%.`;
+    } else if(miCodigoReferido){
+      boxRef.classList.remove('hidden');
+      textoRef.innerText = `🎁 Tu código es ${miCodigoReferido}. Compartilo y ganá 5% por cada amigo que pague. Quedan ${referidosRestantesSistema} cupos de 500.`;
+    } else {
+      boxRef.classList.add('hidden');
+    }
+  }
   if(estaVencido){
     if(diasEl) diasEl.innerText = `Se terminó tu prueba gratis.`;
     if(venceEl) venceEl.innerText = `Venció el ${fechaVencimientoActual ? formatearFechaVence(fechaVencimientoActual) : ''}. Pagá para seguir usando la app.`;
@@ -602,17 +677,21 @@ document.getElementById('btnRegistroSubmit')?.addEventListener('click', async ()
   const nombre = document.getElementById('regNombre')?.value?.trim();
   const email = document.getElementById('regEmail')?.value?.trim();
   const password = document.getElementById('regPassword')?.value || '';
+  const codigoReferido = document.getElementById('regCodigoReferido')?.value?.trim().toUpperCase() || codigoReferidoInvitacion || '';
   const msg = document.getElementById('authMessage');
   if (!nombre || !email || !password) { if (msg) { msg.innerText = "Completá nombre, email y contraseña"; msg.className = "relative text-center text-sm mt-3 font-bold text-red-400 min-h-[20px]"; } return; }
   if (msg) { msg.innerText = "Creando cuenta..."; msg.className = "relative text-center text-sm mt-3 font-bold text-[#00E5FF] min-h-[20px]"; }
   try {
-    const r = await fetch('/api/registro', { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({nombre, email, password}) });
+    const r = await fetch('/api/registro', { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({nombre, email, password, codigoReferido}) });
     const d = await r.json().catch(()=>({}));
     if (r.ok && d.ok) {
       localStorage.setItem('rutaflex_email', email);
       try{ localStorage.setItem('rutaflex_fecha_registro', Date.now().toString()); }catch{}
       if (msg) { msg.innerText = "✅ Cuenta creada - ¡Tenés 7 días gratis!"; msg.className = "relative text-center text-sm mt-3 font-bold text-green-400 min-h-[20px]"; }
-      mostrarApp(d.usuario?.nombre || nombre, d.usuario?.fecha_vencimiento);
+      if(d.usuario?.codigoReferido){ miCodigoReferido = d.usuario.codigoReferido; try{ localStorage.setItem('rutaflex_mi_codigo', miCodigoReferido); }catch{} }
+      if(d.usuario?.descuentoReferido != null) miDescuentoReferido = d.usuario.descuentoReferido;
+      if(d.usuario?.referidosQuePagaron != null) misReferidosQuePagaron = d.usuario.referidosQuePagaron;
+      mostrarApp(d.usuario?.nombre || nombre, d.usuario?.fecha_vencimiento, d.usuario);
     } else {
       if (msg) { msg.innerText = d.error || "No se pudo crear la cuenta"; msg.className = "relative text-center text-sm mt-3 font-bold text-red-400 min-h-[20px]"; }
     }
@@ -625,7 +704,7 @@ document.getElementById('formLogin')?.addEventListener('submit', async (e) => {
     const r = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, credentials: 'include', body: JSON.stringify({email, password}) });
     if (!r.ok && r.status >= 500) reportarErrorCritico('API_LOGIN_CAIDO', 'POST /api/login status ' + r.status);
     const d = await r.json();
-    if (r.ok && d.ok) { localStorage.setItem('rutaflex_email', email); mostrarApp(d.usuario.nombre, d.usuario.fecha_vencimiento); }
+    if (r.ok && d.ok) { localStorage.setItem('rutaflex_email', email); mostrarApp(d.usuario.nombre, d.usuario.fecha_vencimiento, d.usuario); }
     else { msg.innerText = d.error || "Email o contraseña incorrectos"; msg.className = "relative text-center text-sm mt-3 font-bold text-red-400 min-h-[20px]"; }
   } catch(err) { if (err.message && err.message.includes('fetch')) reportarErrorCritico('API_LOGIN_CAIDO', err.message); msg.innerText = "Error de conexión"; msg.className = "relative text-center text-sm mt-3 font-bold text-red-400 min-h-[20px]"; }
 });
@@ -645,13 +724,22 @@ window.abrirModalPagos = (plan, precio) => {
 window.cerrarModalPagos = () => document.getElementById('payment-modal').classList.add('hidden');
 window.copiarAlias = () => { navigator.clipboard.writeText(CONFIG_RUTAFLEX.alias).then(() => mostrarNotificacion("✅ Alias copiado", "exito")); };
 async function hacerLogout() { try { await fetch('/api/logout', {method: 'POST', credentials: 'include'}); } catch(e) {} localStorage.removeItem('rutaflex_email'); location.reload(); }
-function mostrarApp(nombre, fechaVencimiento) {
+function mostrarApp(nombre, fechaVencimiento, usuarioData) {
   ocultarTodasLasPantallasExcepto('appScreen'); actualizarNav('home'); history.replaceState({tab: 'home'}, '', '#home');
   nombreUsuarioActual = nombre || "";
   fechaVencimientoActual = fechaVencimiento;
+  if(usuarioData){
+    if(usuarioData.codigoReferido) { miCodigoReferido = usuarioData.codigoReferido; try{ localStorage.setItem('rutaflex_mi_codigo', miCodigoReferido); }catch{} }
+    if(usuarioData.descuentoReferido != null) miDescuentoReferido = usuarioData.descuentoReferido;
+    if(usuarioData.referidosQuePagaron != null) misReferidosQuePagaron = usuarioData.referidosQuePagaron;
+    if(usuarioData.referidosRestantes != null) referidosRestantesSistema = usuarioData.referidosRestantes;
+  }
+  if(!miCodigoReferido){
+    miCodigoReferido = localStorage.getItem('rutaflex_mi_codigo') || generarCodigoLocal(nombre, localStorage.getItem('rutaflex_email')||'');
+    try{ localStorage.setItem('rutaflex_mi_codigo', miCodigoReferido); }catch{}
+  }
   const userNameEl = document.getElementById('userName'); if (userNameEl) userNameEl.innerText = `¡Hola, ${nombre}!`;
   const diff = Math.ceil((new Date(fechaVencimiento) - new Date()) / (1000*60*60*24)); diasRestantes = diff; estaVencido = diff <= 0;
-  // Si le quedan 7 o menos, es prueba gratis (salvo que ya haya pagado antes, tu backend lo maneja con fecha_vencimiento)
   esPruebaGratis = !estaVencido && diff <= 7;
   const contadorEl = document.getElementById('contadorDias');
   const badgePrueba = document.getElementById('badgePrueba');
@@ -668,8 +756,8 @@ function mostrarApp(nombre, fechaVencimiento) {
   if (badgePrueba) { if (esPruebaGratis && !estaVencido) badgePrueba.classList.remove('hidden'); else badgePrueba.classList.add('hidden'); }
   if (textoPlan) { if (estaVencido) textoPlan.innerText = `⛔ Plan vencido • Pagá por Mercado Pago 🇦🇷`; else if (esPruebaGratis) textoPlan.innerText = `🎁 Prueba gratis • Te quedan ${diff} días • Después pagás en pesos 🇦🇷`; else textoPlan.innerText = `Plan activo • Te quedan ${diff} días • Pagás en pesos 🇦🇷`; }
   if (perfilPlan) { if (estaVencido) perfilPlan.innerText = `⛔ Plan vencido • Pagá por Mercado Pago`; else if (esPruebaGratis) perfilPlan.innerText = `🎁 Prueba gratis • Te quedan ${diff} días • 🇦🇷 Buenos Aires`; else perfilPlan.innerText = `✅ Plan activo • Te quedan ${diff} días • 🇦🇷 Buenos Aires`; }
+  actualizarVistaReferidos();
   actualizarNotificaciones();
-  // Si es primer login del día y está por vencer o vencido, mostramos campanita automáticamente
   try{
     const key = 'rutaflex_noti_'+new Date().toDateString();
     if(!localStorage.getItem(key) && (estaVencido || (esPruebaGratis && diff <= 2))){
@@ -695,12 +783,28 @@ function mostrarPerfil() {
   const nombreEl = document.getElementById('perfilNombre'); const emailEl = document.getElementById('perfilEmail');
   if (nombreEl) nombreEl.innerText = email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1);
   if (emailEl) emailEl.innerText = email;
+  actualizarVistaReferidos();
 }
 window.addEventListener('load', async () => {
+  capturarCodigoReferidoDeURL();
   const hoy = new Date(); const fechaEl = document.getElementById('fechaHoy');
   if (fechaEl) fechaEl.innerText = `Hoy, ${hoy.getDate()} ${hoy.toLocaleDateString('es-AR', {month: 'short'}).replace('.','')}`;
-  try { const r = await fetch('/api/yo', {credentials: 'include'}); if (!r.ok && r.status >= 500) reportarErrorCritico('API_YO_CAIDO', 'GET /api/yo status ' + r.status); const d = await r.json(); if (d.ok) mostrarApp(d.nombre, d.fecha_vencimiento); }
+  try { const r = await fetch('/api/yo', {credentials: 'include'}); if (!r.ok && r.status >= 500) reportarErrorCritico('API_YO_CAIDO', 'GET /api/yo status ' + r.status); const d = await r.json(); if (d.ok) mostrarApp(d.nombre, d.fecha_vencimiento, d); }
   catch(err) { if (err.message && err.message.includes('fetch')) reportarErrorCritico('API_YO_CAIDO', err.message); console.error('Error al verificar sesión:', err); }
   try { const g = localStorage.getItem('rutaflex_ruta'); if (g) { const data = JSON.parse(g); if (data.ordenadas && Date.now() - data.fecha < 12*60*60*1000) { rutaOptimizada = quitarDuplicadosDeLista(data.ordenadas); tramoActual = data.tramo || 0; if (tramoActual > 0 && tramoActual < Math.ceil(rutaOptimizada.length/9)) { setTimeout(() => mostrarPantallaTramos(data.gps), 800); } } } } catch(e) { reportarErrorCritico('RECIENTE_CORRUPTO', e.message); }
 });
-if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/service-worker.js', {scope: '/'}).catch(() => {}); }); }
+// ============ ACTUALIZACION AL TOQUE - AVISO NUEVA VERSION ============
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js', {scope: '/'}).catch(() => {});
+  });
+  navigator.serviceWorker.addEventListener('message', (e) => {
+    if (e.data && e.data.type === 'NUEVA_VERSION') {
+      mostrarNotificacion("🔄 Hay una actualización, recargando...", "info");
+      setTimeout(() => window.location.reload(), 1500);
+    }
+  });
+  navigator.serviceWorker.ready.then(reg => {
+    if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+  }).catch(()=>{});
+}
