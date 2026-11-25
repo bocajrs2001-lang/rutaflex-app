@@ -84,6 +84,9 @@
       <input id="regNombre" type="text" placeholder="Tu nombre" class="w-full bg-[#0A1220]/90 border border-white/15 rounded-2xl px-4 py-4 text-[16px]">
       <input id="regEmail" type="email" placeholder="Email" class="w-full bg-[#0A1220]/90 border border-white/15 rounded-2xl px-4 py-4 text-[16px]">
       <input id="regPassword" type="password" placeholder="Contraseña (Mín. 8, 1 mayúscula, 1 número y 1 símbolo)" class="w-full bg-[#0A1220]/90 border border-white/15 rounded-2xl px-4 py-4 text-[16px]">
+      <!-- NUEVO - REFERIDOS: campo opcional -->
+      <input id="regCodigoReferido" type="text" placeholder="¿Tenés código de referido? (opcional)" class="w-full bg-[#0A1220]/90 border border-[#00E5FF]/30 rounded-2xl px-4 py-4 text-[16px] uppercase">
+      <p id="avisoReferidoInvitacion" class="hidden text-center text-xs text-green-400 font-bold"></p>
       <button type="button" id="btnRegistroSubmit" class="w-full bg-[#00E5FF] text-[#0A1220] font-black py-4 rounded-2xl text-[17px]">CREAR CUENTA GRATIS • 7 DÍAS</button>
       <p class="text-center text-white/50 text-xs">Sin tarjeta. Después de los 7 días pagás por Mercado Pago.</p>
     </form>
@@ -195,6 +198,20 @@
       <button onclick="abrirModalPagos('Semanal', 4990)" class="w-full bg-[#00E5FF] text-[#0A1220] font-black py-3 rounded-xl mt-4 text-sm">💳 PAGAR / RENOVAR PLAN</button>
       <button id="btnLogoutPerfil" class="w-full bg-red-500 font-black py-3 rounded-xl mt-2 text-sm">CERRAR SESIÓN</button>
     </div>
+    <!-- NUEVO - REFERIDOS EN PERFIL -->
+    <div class="bg-[#132F55] rounded-3xl p-5 mt-4 border border-[#00E5FF]/30">
+      <p class="font-black text-[16px]">🎁 Invitá y ganá descuento</p>
+      <p class="text-white/60 text-xs mt-1">Compartí tu código. Por cada amigo que pague, ganás 5%. Tope 30% por usuario. Solo primeros 500 referidos.</p>
+      <div class="bg-[#0A1220] rounded-2xl p-3 mt-3 text-center">
+        <p class="text-[11px] text-white/50">TU CÓDIGO</p>
+        <p id="miCodigoReferidoTexto" class="text-[#00E5FF] font-black text-[22px] tracking-widest">---</p>
+      </div>
+      <p id="miDescuentoReferidoTexto" class="text-sm font-bold text-green-400 mt-3">🎁 Invitá y ganá 5% por cada amigo que pague (tope 30%)</p>
+      <p id="misReferidosTexto" class="text-xs text-white/60 mt-1">0 amigo(s) pagaron con tu código</p>
+      <p id="cuposReferidosTexto" class="text-xs text-yellow-300 font-bold mt-1">Quedan 500 cupos de 500 para ganar descuento</p>
+      <button id="btnCompartirReferido" class="w-full bg-[#00E5FF] text-[#0A1220] font-black py-3 rounded-xl mt-3 text-sm">📤 COMPARTIR MI LINK</button>
+      <button id="btnCopiarCodigoReferido" class="w-full bg-white/10 font-bold py-3 rounded-xl mt-2 text-sm">📋 COPIAR MI CÓDIGO</button>
+    </div>
   </div>
 
   <!-- ============ BOTTOM NAV ============ -->
@@ -244,6 +261,11 @@
         <p id="notiBienvenida" class="font-black text-[16px]">👋 ¡Bienvenido a RutaFlex!</p>
         <p id="notiDias" class="text-white/70 text-sm mt-1">Te quedan 7 días gratis.</p>
         <p id="notiVence" class="text-white/50 text-xs mt-1"></p>
+      </div>
+      <!-- NUEVO - REFERIDOS EN CAMPANITA -->
+      <div id="notiReferidoBox" class="hidden bg-[#00E5FF]/10 border border-[#00E5FF]/30 rounded-2xl p-4 mt-3">
+        <p class="font-black text-[14px]">🎁 Invitá y ganá descuento</p>
+        <p id="notiReferidoTexto" class="text-white/70 text-sm mt-1"></p>
       </div>
       <div id="notiVencidoBox" class="hidden bg-red-500/15 border border-red-500/40 rounded-2xl p-4 mt-3">
         <p class="font-black text-red-300">⛔ Se terminó tu prueba gratis</p>
