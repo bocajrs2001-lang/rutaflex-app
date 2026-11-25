@@ -1,4 +1,4 @@
-const CACHE = 'rutaflex-v3';
+const CACHE = 'rutaflex-v4.0';
 // 👉 CADA VEZ QUE SUBAS UN CAMBIO, CAMBIÁ SOLO ESTO: v3 -> v4 -> v5...
 // Así el celu borra la vieja y baja la nueva solo.
 const FILES_TO_CACHE = [
